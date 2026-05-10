@@ -52,6 +52,8 @@ WEBHOOK_URL="Optional: Discord webhook URL for error reports"
 
 ## Development
 
+VSCode では `.vscode/extensions.json` の推奨拡張と `.devcontainer/devcontainer.json` を使えます。
+
 ```sh
 bun generate:local
 bun migrate:local
