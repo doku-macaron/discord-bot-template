@@ -38,6 +38,8 @@ profileCommand.register(
                 return;
             }
 
+            await interaction.deferReply();
+
             await getOrCreateGuild({
                 guildId: interaction.guildId,
                 name: interaction.guild.name,
@@ -78,7 +80,7 @@ profileCommand.register(
                 .addSeparatorComponents(new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true))
                 .addSectionComponents(editSection);
 
-            await interaction.reply({
+            await interaction.editReply({
                 flags: MessageFlags.IsComponentsV2,
                 components: [container],
             });

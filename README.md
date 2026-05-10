@@ -128,18 +128,25 @@ interaction は種類ごとに handler/register を分けています。
 
 `/showcase` ([src/events/interactionCreate/commands/chatInput/items/showcase.ts](src/events/interactionCreate/commands/chatInput/items/showcase.ts)) と `/profile view` ([items/profile.ts](src/events/interactionCreate/commands/chatInput/items/profile.ts)) が Components v2 のリファレンス実装です。
 
-- `flags: MessageFlags.IsComponentsV2` を立てる必要があります。`content` / `embeds` とは併用できません
+- 送信時に `flags: MessageFlags.IsComponentsV2` を立てる必要があります。`content` / `embeds` とは併用できません
 - root は `ContainerBuilder` を使うと accent color + 子コンポーネントをまとめられます
 - `SectionBuilder.setThumbnailAccessory(...)` で右側にサムネイル、`SectionBuilder.setButtonAccessory(...)` で interactive button を置けます。button の customId は通常通り `buttonRegister.ts` の handler でルーティングされます
 - `MediaGalleryBuilder.addItems(...)` で URL ベースの画像 gallery、`SeparatorBuilder` で divider と spacing を制御します
 - file component (`FileBuilder`) は attachment を伴うため、必要な場合は `interaction.reply({ files: [...], components: [container] })` の形で送ります (サンプルでは省略)
 
-**defer との組み合わせ**: discord.js 14.26 の `InteractionDeferReplyOptions.flags` は `Ephemeral` のみを受け付け、`IsComponentsV2` を含められません。また `InteractionEditReplyOptions` には `flags` プロパティ自体がないため、`deferReply()` してから `editReply` で v2 メッセージを送ることはできません。
+**flag を渡す場所**: `IsComponentsV2` は **メッセージ送信側のオプション** (`reply` / `editReply` / `followUp`) に渡します。`deferReply` 側の `flags` は `Ephemeral` のみ受け付けるため、defer 段階では渡せません。
 
-このため Components v2 のサンプルは `deferReply` を使わず、最初の reply を直接送る形にしています:
+```ts
+// パターン 1: 重い前処理なしで一発返信 — /showcase が採用
+await interaction.reply({ flags: MessageFlags.IsComponentsV2, components: [container] });
 
-- `/profile view` は DB 操作 (`getOrCreateGuild` / `getOrCreateMember` / `incrementMemberCommandCount`) を完了してから `interaction.reply({ flags: MessageFlags.IsComponentsV2, components: [...] })` で送ります。Discord の interaction 応答期限は 3 秒なので、重い前処理は避ける必要があります
-- 既存の `runAsAsyncGenerator` (`commandExecutor.ts`) はデフォルトの `deferReply()` を呼ぶため、Components v2 と組み合わせる場合は generator パスを使わず `Promise<void>` ベースの executor で reply を直送してください
+// パターン 2: DB 等で 3 秒の応答期限を超えそうなら defer → editReply で v2 を送る — /profile view が採用
+await interaction.deferReply();
+// ... DB 操作など ...
+await interaction.editReply({ flags: MessageFlags.IsComponentsV2, components: [container] });
+```
+
+`commandExecutor.ts` の `runAsAsyncGenerator` も同じ仕組みで使えます。`yield { flags: MessageFlags.IsComponentsV2, components: [container] }` のように `InteractionEditReplyOptions` を yield すれば v2 メッセージとして送られます。
 
 ### Select menus
 
