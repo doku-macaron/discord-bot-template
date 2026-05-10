@@ -67,6 +67,9 @@ interaction は種類ごとに handler/register を分けています。
 `src/lib/interactionContext.ts` と `src/lib/logger.ts` で、エラー時に command/customId/user/guild/channel/interactionId/ageMs をログへ出します。
 `WEBHOOK_URL` を設定している場合だけ、同じ内容を Discord webhook にも通知します。
 
+`customId` は `feature:action` または `feature:action:id` の形式を推奨します。
+固定IDは `CUSTOM_ID`、動的IDに対応する正規表現は `CUSTOM_ID_PATTERN` にまとめます。
+
 ## Database
 
 スキーマは `src/db/schema` にあります。
