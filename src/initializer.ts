@@ -2,6 +2,8 @@ import { Events } from "discord.js";
 import { client } from "@/client";
 import { closeDatabase } from "@/db";
 import { clientReadyEvent } from "@/events/clientReady";
+import { guildCreateEvent } from "@/events/guildCreate";
+import { guildDeleteEvent } from "@/events/guildDelete";
 import { interactionCreateEvent } from "@/events/interactionCreate";
 import { logger } from "@/lib/logger";
 import { registerShutdownTask, runShutdown, SHUTDOWN_PRIORITY } from "@/lib/shutdown";
@@ -49,4 +51,6 @@ export function setupProcessHandlers() {
 export function initialize() {
     client.once(Events.ClientReady, clientReadyEvent);
     client.on(Events.InteractionCreate, interactionCreateEvent);
+    client.on(Events.GuildCreate, guildCreateEvent);
+    client.on(Events.GuildDelete, guildDeleteEvent);
 }

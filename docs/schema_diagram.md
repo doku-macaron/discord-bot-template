@@ -5,6 +5,8 @@ erDiagram
     timestamp created_at "not null"
     timestamp updated_at "not null"
     text name "not null"
+    timestamp joined_at "not null"
+    timestamp left_at
   }
 
   members {

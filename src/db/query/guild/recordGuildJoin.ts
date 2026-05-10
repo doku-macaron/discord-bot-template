@@ -3,21 +3,24 @@ import { db } from "@/db";
 import { guilds, type InsertGuild, type SelectGuild } from "@/db/schema/guilds";
 
 /**
- * Lazy populate / refresh `guilds.name`. Does NOT touch `joinedAt` / `leftAt`:
- * lifecycle tracking belongs to the GuildCreate / GuildDelete event handlers
- * (`recordGuildJoin` / `markGuildLeft`). If a command runs before the
- * GuildCreate event has fired for a brand-new guild, the INSERT path here
- * still picks up the default `joinedAt = now()`.
+ * Called from the GuildCreate event when the bot joins (or re-joins) a guild.
+ * Resets `joinedAt` to now and clears `leftAt`, so a re-invited guild looks
+ * fresh while existing rows for currently-present guilds keep their original
+ * `joinedAt` only via the lazy `getOrCreateGuild` path (which doesn't touch
+ * either column).
  */
-export async function getOrCreateGuild(input: InsertGuild): Promise<SelectGuild> {
+export async function recordGuildJoin(input: InsertGuild): Promise<SelectGuild> {
+    const now = new Date();
     const [created] = await db
         .insert(guilds)
-        .values(input)
+        .values({ ...input, joinedAt: input.joinedAt ?? now, leftAt: input.leftAt ?? null })
         .onConflictDoUpdate({
             target: guilds.guildId,
             set: {
                 name: input.name ?? "",
-                updatedAt: new Date(),
+                updatedAt: now,
+                joinedAt: now,
+                leftAt: null,
             },
         })
         .returning();
