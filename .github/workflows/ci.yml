@@ -36,3 +36,21 @@ jobs:
 
       - name: Test
         run: bun test
+
+  docker:
+    runs-on: ubuntu-latest
+    name: Docker
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Compose config
+        env:
+          TOKEN: dummy
+          CLIENT_ID: dummy
+        run: |
+          docker compose config
+          docker compose --profile tools config
+
+      - name: Docker build
+        run: docker build -t discord-bot-template:ci .

@@ -25,6 +25,10 @@ bun install
 - `LICENSE` の `Copyright` 行（Apache-2.0 のままにする場合）
 - `.github/CODEOWNERS` のオーナー
 - 不要なサンプル (`src/events/interactionCreate/commands/chatInput/items/`, `src/events/interactionCreate/commands/contextMenu/items/`, `src/events/interactionCreate/components/*/items/`)
+- `.github/workflows/ci.yml` / `compose.yml` の image 名や repository 名（必要な場合）
+- `.env.example` のコメントや既定値（本番DB、webhook、運用方針に合わせる）
+
+開発フローは [CONTRIBUTING.md](CONTRIBUTING.md) にまとめています。このテンプレート自体への変更も、利用先プロジェクトでの変更も、PR 経由にすると CI と review の流れを揃えやすくなります。
 
 ## Requirements
 
@@ -42,13 +46,36 @@ cp .env.example .env
 `.env` に Discord Bot の値を設定してください。
 
 ```env
+# Discord bot token from the Developer Portal.
 TOKEN="Discord bot token"
+
+# Discord application/client ID. Used for command registration and invite URLs.
 CLIENT_ID="Discord application client ID"
+
+# Optional development guild ID. When empty, bun register broadcasts to all bot guilds.
 GUILD_ID="Optional: development guild ID"
+
+# Production PostgreSQL connection URL. Required for NODE_ENV=production and Docker.
 DATABASE_URL="Production PostgreSQL URL"
+
+# Local PGlite database path for NODE_ENV=development.
 DATABASE_URL_DEV="./.pglite"
+
+# Optional Discord webhook URL for error reports.
 WEBHOOK_URL="Optional: Discord webhook URL for error reports"
 ```
+
+## Invite
+
+Discord Developer Portal で bot を作成し、`CLIENT_ID` を使って invite URL を作ります。
+
+```text
+https://discord.com/oauth2/authorize?client_id=<CLIENT_ID>&scope=bot%20applications.commands&permissions=0
+```
+
+このテンプレートは slash command / context menu / component interaction を中心にしているため、最小構成では `applications.commands` scope が重要です。通常のメッセージ送信や管理操作を追加する場合は、その機能に必要な bot permissions を Developer Portal で加えてください。
+
+`src/client.ts` は `Guilds` と `GuildMembers` intent を要求します。Discord Developer Portal の Bot settings で **Server Members Intent** を有効にしてください。メンバー情報を使わない bot にする場合は、`GuildMembers` intent と `interaction.member.displayName` に依存しているサンプル処理を削っても構いません。
 
 ## Development
 
@@ -81,6 +108,14 @@ docker compose logs -f bot
 ```
 
 `compose.yml` の PostgreSQL はテンプレート用の固定ユーザー/パスワードです。本番ではマネージドDBや secret 管理に置き換えてください。
+
+本番運用では、Bot 起動前に migration を完了させます。
+
+- Docker image は `Dockerfile` から build し、`DATABASE_URL` / `TOKEN` / `CLIENT_ID` は secret として渡す
+- deploy 前に同じ image で `bun migrate` を実行する
+- `NODE_ENV=production` のログは JSON line 形式なので、コンテナログ基盤へそのまま流せる
+- `docker stop` / rolling deploy では `SIGTERM` を受けて graceful shutdown が走る
+- `compose.yml` はローカル検証用。production では DB password、volume、restart policy、network を環境に合わせて調整する
 
 ## Environment
 
@@ -262,6 +297,8 @@ setErrorReporter({
 ```
 
 reporter が throw / reject しても呼び出し元には伝搬しません（webhook 通知やログ出力との二重失敗を避けるため）。
+
+実プロジェクトでは `src/index.ts` から import される初期化ファイルを作り、その中で `Sentry.init(...)` と `setErrorReporter(...)` を呼ぶと、Bot 起動時に一度だけ reporter を差し替えられます。テンプレート本体には `SENTRY_DSN` を env schema に含めていないため、採用する tracker に合わせて `src/env.ts` へ追加してください。
 
 ## Graceful shutdown
 
