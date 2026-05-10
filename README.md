@@ -134,6 +134,26 @@ rollback 方針は **forward-only** を推奨します。
 
 PM2 reload や Docker stop のときに、処理中の interaction や DB transaction を取りこぼさないための仕組みです。
 
+## Tests
+
+`bun test` で `*.test.ts` を実行します。Discord interaction を受け取る handler のテストは、`src/lib/testing/interactions.ts` の mock ヘルパで interaction を組み立てます。
+
+```ts
+import { createCommandInteractionMock, type MockReplyPayload } from "@/lib/testing/interactions";
+
+const replies: Array<MockReplyPayload> = [];
+const interaction = createCommandInteractionMock("ping", replies);
+
+await handler.execute(interaction);
+
+expect(replies).toEqual([]);
+```
+
+- `createCommandInteractionMock(name, replies, options?)`: slash command interaction
+- `createCustomIdInteractionMock(customId, replies, options?)`: button / modal / select menu interaction
+
+実例は `src/events/interactionCreate/command/commandHandler.test.ts` および `src/events/interactionCreate/interactions/customIdHandler.test.ts` を参照してください。
+
 ## Scripts
 
 - `bun dev`: 開発起動

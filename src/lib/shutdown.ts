@@ -18,7 +18,11 @@ export function isShuttingDown(): boolean {
     return shuttingDown;
 }
 
-export function trackInflight<T>(work: () => Promise<T>): Promise<T> {
+export function trackInflight(work: () => Promise<void>): Promise<void> {
+    if (shuttingDown) {
+        logger.warn("Core", "Rejecting new interaction during shutdown");
+        return Promise.resolve();
+    }
     inflight += 1;
     return work().finally(() => {
         inflight -= 1;
@@ -52,15 +56,22 @@ function waitForInflight(timeoutMs: number): Promise<void> {
 }
 
 async function runWithTimeout(task: ShutdownTask, timeoutMs: number): Promise<void> {
-    await Promise.race([
-        Promise.resolve().then(() => task.run()),
-        new Promise<void>((resolve) =>
-            setTimeout(() => {
-                logger.warn("Core", `Shutdown task "${task.name}" timed out after ${timeoutMs}ms`);
-                resolve();
-            }, timeoutMs)
-        ),
-    ]);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+        await Promise.race([
+            Promise.resolve().then(() => task.run()),
+            new Promise<void>((resolve) => {
+                timer = setTimeout(() => {
+                    logger.warn("Core", `Shutdown task "${task.name}" timed out after ${timeoutMs}ms`);
+                    resolve();
+                }, timeoutMs);
+            }),
+        ]);
+    } finally {
+        if (timer !== undefined) {
+            clearTimeout(timer);
+        }
+    }
 }
 
 export async function runShutdown(signal: string, options: { inflightTimeoutMs?: number; taskTimeoutMs?: number } = {}): Promise<void> {

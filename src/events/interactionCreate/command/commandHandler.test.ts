@@ -1,22 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { type ChatInputCommandInteraction, MessageFlags } from "discord.js";
+import { MessageFlags } from "discord.js";
 import { Command, CommandHandler } from "@/events/interactionCreate/command/commandHandler";
-
-type ReplyPayload = {
-    content?: string;
-    flags?: unknown;
-};
-
-function createCommandInteraction(commandName: string, replies: Array<ReplyPayload>): ChatInputCommandInteraction {
-    return {
-        commandName,
-        deferred: false,
-        replied: false,
-        reply: async (payload: ReplyPayload) => {
-            replies.push(payload);
-        },
-    } as unknown as ChatInputCommandInteraction;
-}
+import { createCommandInteractionMock, type MockReplyPayload } from "@/lib/testing/interactions";
 
 describe("CommandHandler", () => {
     test("routes to registered command by name", async () => {
@@ -32,8 +17,8 @@ describe("CommandHandler", () => {
             )
         );
 
-        const replies: Array<ReplyPayload> = [];
-        await handler.execute(createCommandInteraction("ping", replies));
+        const replies: Array<MockReplyPayload> = [];
+        await handler.execute(createCommandInteractionMock("ping", replies));
 
         expect(called).toEqual(["ping"]);
         expect(replies).toEqual([]);
@@ -41,9 +26,9 @@ describe("CommandHandler", () => {
 
     test("replies ephemerally for unregistered command", async () => {
         const handler = new CommandHandler();
-        const replies: Array<ReplyPayload> = [];
+        const replies: Array<MockReplyPayload> = [];
 
-        await handler.execute(createCommandInteraction("unknown", replies));
+        await handler.execute(createCommandInteractionMock("unknown", replies));
 
         expect(replies).toEqual([{ content: "未登録のコマンドです。", flags: MessageFlags.Ephemeral }]);
     });
@@ -61,8 +46,8 @@ describe("CommandHandler", () => {
             )
         );
 
-        const replies: Array<ReplyPayload> = [];
-        const run = handler.execute(createCommandInteraction("broken", replies));
+        const replies: Array<MockReplyPayload> = [];
+        const run = handler.execute(createCommandInteractionMock("broken", replies));
 
         await expect(run).rejects.toBe(failure);
     });
