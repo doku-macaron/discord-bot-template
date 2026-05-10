@@ -10,7 +10,8 @@ async function runJob(job: Job): Promise<void> {
     try {
         await job.run();
     } catch (error) {
-        logger.error("Core", error instanceof Error ? error : new Error(String(error)));
+        const jobError = error instanceof Error ? error : new Error(String(error));
+        logger.error("Core", new Error(`Job '${job.name}' failed`, { cause: jobError }));
     }
 }
 
