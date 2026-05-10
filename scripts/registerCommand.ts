@@ -2,18 +2,15 @@ import "@/env";
 import "@/events/interactionCreate/command/commandRegister";
 
 import { REST, type RESTPutAPIApplicationCommandsResult, Routes } from "discord.js";
+import { getEnv } from "@/env";
 import { commandHandler } from "@/events/interactionCreate/command/commandHandlerInstance";
 
-if (!process.env.TOKEN || !process.env.CLIENT_ID) {
-    throw new Error("TOKEN and CLIENT_ID are required to register commands.");
-}
+const env = getEnv("register");
 
-const rest = new REST().setToken(process.env.TOKEN);
+const rest = new REST().setToken(env.TOKEN);
 
 const commands = commandHandler.restrictedCommands;
-const route = process.env.GUILD_ID
-    ? Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID)
-    : Routes.applicationCommands(process.env.CLIENT_ID);
+const route = env.GUILD_ID ? Routes.applicationGuildCommands(env.CLIENT_ID, env.GUILD_ID) : Routes.applicationCommands(env.CLIENT_ID);
 
 console.log(`Started refreshing ${commands.length} application commands.`);
 console.log(commands.map((command) => command.name).join(", "));

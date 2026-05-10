@@ -1,15 +1,17 @@
 import { codeBlock, WebhookClient } from "discord.js";
+import { getEnv } from "@/env";
 import { formatInteractionContext, type InteractionContext } from "@/lib/interactionContext";
 
 let webhookClient: WebhookClient | undefined;
 
 function getWebhookClient(): WebhookClient | undefined {
-    if (!process.env.WEBHOOK_URL) {
+    const env = getEnv("webhook");
+    if (!env.WEBHOOK_URL) {
         return undefined;
     }
 
     webhookClient ??= new WebhookClient({
-        url: process.env.WEBHOOK_URL,
+        url: env.WEBHOOK_URL,
     });
 
     return webhookClient;

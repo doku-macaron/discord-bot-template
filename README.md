@@ -39,6 +39,16 @@ bun dev
 
 `GUILD_ID` を設定している場合、`bun register` はそのサーバーにだけコマンドを登録します。未設定の場合はグローバルコマンドとして登録します。
 
+## Environment
+
+環境変数は `src/env.ts` の `getEnv` で用途別に検証します。
+
+- `getEnv("bot")`: Bot起動に必要な `TOKEN`
+- `getEnv("register")`: コマンド登録に必要な `TOKEN` / `CLIENT_ID` / optional `GUILD_ID`
+- `getEnv("postgres")`: 本番DB接続に必要な `DATABASE_URL`
+- `getEnv("pglite")`: ローカルDB用の `DATABASE_URL_DEV`
+- `getEnv("webhook")`: optional `WEBHOOK_URL`
+
 ## Commands
 
 - `/ping`: Bot の応答確認
