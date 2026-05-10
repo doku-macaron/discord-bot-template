@@ -1,6 +1,7 @@
 import { LabelBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
 import { CUSTOM_ID } from "@/constants/customIds";
 import { Modal } from "@/events/interactionCreate/interactions/modalHandler";
+import { handleResult } from "@/lib/resultHandler";
 
 export function createProfileEditModal(displayName = ""): ModalBuilder {
     const displayNameInput = new TextInputBuilder()
@@ -26,18 +27,25 @@ export const profileEditModal = new Modal(
 
         const displayName = interaction.fields.getTextInputValue(CUSTOM_ID.INPUT.PROFILE_DISPLAY_NAME).trim();
 
-        const { getOrCreateGuild } = await import("@/db/query/guild/getOrCreateGuild");
-        const { getOrCreateMember } = await import("@/db/query/member/getOrCreateMember");
+        const { saveMemberProfile } = await import("@/db/query/member/saveMemberProfile");
 
-        await getOrCreateGuild({
-            guildId: interaction.guildId,
-            name: interaction.guild.name,
-        });
-        const member = await getOrCreateMember({
-            guildId: interaction.guildId,
-            userId: interaction.user.id,
-            displayName,
-        });
+        const member = await handleResult(
+            await saveMemberProfile({
+                guildId: interaction.guildId,
+                guildName: interaction.guild.name,
+                userId: interaction.user.id,
+                displayName,
+            }),
+            interaction,
+            {
+                category: "Database",
+                errorMessage: "プロフィールの保存に失敗しました。",
+            }
+        );
+
+        if (!member) {
+            return;
+        }
 
         await interaction.reply({
             content: `表示名を ${member.displayName} に更新しました。`,

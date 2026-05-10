@@ -1,0 +1,29 @@
+export type Result<T, E = Error> = { success: true; data: T } | { success: false; error: E };
+
+export function ok<T>(data: T): Result<T, never> {
+    return { success: true, data };
+}
+
+export function err<E>(error: E): Result<never, E> {
+    return { success: false, error };
+}
+
+export function isOk<T, E>(result: Result<T, E>): result is { success: true; data: T } {
+    return result.success;
+}
+
+export function isErr<T, E>(result: Result<T, E>): result is { success: false; error: E } {
+    return !result.success;
+}
+
+export function unwrapOr<T, E>(result: Result<T, E>, defaultValue: T): T {
+    return result.success ? result.data : defaultValue;
+}
+
+export function unwrapOrThrow<T, E>(result: Result<T, E>): T {
+    if (result.success) {
+        return result.data;
+    }
+
+    throw result.error instanceof Error ? result.error : new Error(String(result.error));
+}

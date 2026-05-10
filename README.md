@@ -60,6 +60,7 @@ interaction は種類ごとに handler/register を分けています。
 ## Database
 
 スキーマは `src/db/schema` にあります。
+DB query が失敗しうる処理では `src/lib/result.ts` の `Result` 型と `src/lib/resultHandler.ts` の `handleResult` を使うと、ログ出力・webhook通知・ユーザーへのエラー返信をまとめて扱えます。
 
 ```sh
 bun generate:local   # ローカル PGlite 用 migration 作成
