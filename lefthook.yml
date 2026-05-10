@@ -1,0 +1,19 @@
+pre-push:
+  commands:
+    01-check:
+      run: bun check:no-save
+    02-check-tsc:
+      run: bun check:tsc
+
+pre-commit:
+  commands:
+    01-create-env:
+      run: NODE_ENV=setup bun run scripts/createEnv.ts
+    02-generate-er-diagram:
+      run: bun run scripts/generateERdiagram.ts
+    03-check:
+      run: bun check
+    04-check-tsc:
+      run: bun check:tsc
+    05-apply:
+      run: git add .

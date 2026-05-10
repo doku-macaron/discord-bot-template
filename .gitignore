@@ -1,0 +1,36 @@
+# dependencies
+node_modules
+package-lock.json
+
+# output
+dist
+out
+*.tgz
+
+# coverage
+coverage
+*.lcov
+
+# logs
+logs
+*.log
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# dotenv
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# caches
+.cache
+*.tsbuildinfo
+
+# editors
+.idea
+.vscode
+.DS_Store
+
+# local database
+.pglite
