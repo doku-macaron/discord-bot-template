@@ -67,6 +67,21 @@ bun dev
 
 大規模 bot (数千 guild) では `/users/@me/guilds` のページングと rate limit に注意してください。テンプレートでは小〜中規模を想定した単純な直列 PUT のみ実装しています。
 
+## Docker
+
+Docker は optional です。ローカル開発は PGlite のままでも進められますが、PostgreSQL 付きで本番に近い起動を試したい場合は `compose.yml` を使えます。
+
+```sh
+cp .env.example .env
+docker compose build
+docker compose run --rm migrate
+docker compose run --rm register
+docker compose up -d bot
+docker compose logs -f bot
+```
+
+`compose.yml` の PostgreSQL はテンプレート用の固定ユーザー/パスワードです。本番ではマネージドDBや secret 管理に置き換えてください。
+
 ## Environment
 
 環境変数は `src/env.ts` の `getEnv` で用途別に検証します。

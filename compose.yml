@@ -1,0 +1,50 @@
+services:
+    postgres:
+        image: postgres:17-alpine
+        environment:
+            POSTGRES_DB: discord_bot
+            POSTGRES_USER: discord_bot
+            POSTGRES_PASSWORD: discord_bot
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U discord_bot -d discord_bot"]
+            interval: 5s
+            timeout: 5s
+            retries: 10
+        volumes:
+            - postgres-data:/var/lib/postgresql/data
+
+    bot:
+        build: .
+        environment:
+            TOKEN: ${TOKEN:?Set TOKEN in .env}
+            CLIENT_ID: ${CLIENT_ID:?Set CLIENT_ID in .env}
+            GUILD_ID: ${GUILD_ID:-}
+            DATABASE_URL: postgres://discord_bot:discord_bot@postgres:5432/discord_bot
+            WEBHOOK_URL: ${WEBHOOK_URL:-}
+        depends_on:
+            postgres:
+                condition: service_healthy
+        restart: unless-stopped
+
+    migrate:
+        build: .
+        command: ["bun", "migrate"]
+        profiles: ["tools"]
+        environment:
+            DATABASE_URL: postgres://discord_bot:discord_bot@postgres:5432/discord_bot
+        depends_on:
+            postgres:
+                condition: service_healthy
+
+    register:
+        build: .
+        command: ["bun", "register"]
+        profiles: ["tools"]
+        environment:
+            TOKEN: ${TOKEN:?Set TOKEN in .env}
+            CLIENT_ID: ${CLIENT_ID:?Set CLIENT_ID in .env}
+            GUILD_ID: ${GUILD_ID:-}
+            WEBHOOK_URL: ${WEBHOOK_URL:-}
+
+volumes:
+    postgres-data:
