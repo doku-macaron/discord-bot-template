@@ -155,13 +155,57 @@ rollback 方針は **forward-only** を推奨します。
 - 戻したい変更があれば、戻すための新しい migration を作って前進する
 - スキーマ変更とコード変更の互換性は段階的に進める（例: カラム追加 → コードで書き込み開始 → コードで読み取りに切替 → 旧カラム削除）
 
+## Scheduled jobs
+
+`src/jobs/jobsRegister.ts` で `Job` を配列に登録すると、`clientReady` 時に `startJobs` が `setInterval` で開始します。
+
+```ts
+import type { Job } from "@/jobs/job";
+
+export const myJob: Job = {
+    name: "my-job",
+    intervalMs: 60_000,
+    runOnStart: true, // optional: クライアント起動直後に一度実行
+    run: async () => {
+        // periodic work
+    },
+};
+```
+
+shutdown task として interval が clear されるため、`registerShutdownTask` を別途呼ぶ必要はありません。サンプルは `src/jobs/jobs/uptimeJob.ts`。
+
+- `intervalMs` は正の有限な数値である必要があります。0 / 負値 / `NaN` / `Infinity` の job は warn ログを出してスキップします
+- 同じ job の前回 tick がまだ走っている間は、新しい tick は skip されます（per-job overlap guard）。slow job が重複実行される事故を防ぐためです
+- 失敗時のログは `Job '<name>' failed` を message に、元のエラーを `cause` に含めます
+
+## Error reporting
+
+`src/lib/errorReporter.ts` に外部エラートラッカー (Sentry など) の差し込み口があります。`logger.error` が呼ばれるたびに `captureException` が走り、既定では何もしません。
+
+Sentry を使う場合は起動時に reporter を差し替えます。
+
+```ts
+import * as Sentry from "@sentry/bun";
+import { setErrorReporter } from "@/lib/errorReporter";
+
+Sentry.init({ dsn: process.env.SENTRY_DSN });
+setErrorReporter({
+    captureException: (error, context) => {
+        Sentry.captureException(error, { tags: { category: context?.category } });
+    },
+});
+```
+
+reporter が throw / reject しても呼び出し元には伝搬しません（webhook 通知やログ出力との二重失敗を避けるため）。
+
 ## Graceful shutdown
 
 `SIGINT` / `SIGTERM` を受けると `src/lib/shutdown.ts` の `runShutdown` が走り、進行中の interaction を待ってから Discord client と DB を順に close します。
 
 - 進行中 interaction の待機タイムアウト: 10 秒（既定）
 - 各タスクのタイムアウト: 5 秒（既定）
-- 追加の close 処理は `registerShutdownTask({ name, run })` で登録できます
+- 追加の close 処理は `registerShutdownTask({ name, priority?, run })` で登録できます
+- task は `priority` 昇順で実行されます（既定 100）。プリセットは `SHUTDOWN_PRIORITY.JOBS` (10) → `DISCORD_CLIENT` (100) → `DATABASE` (200)。jobs を最初に止めて新規 interaction や interval を抑え、その後 client / DB を閉じる順を保証するためです
 
 PM2 reload や Docker stop のときに、処理中の interaction や DB transaction を取りこぼさないための仕組みです。
 

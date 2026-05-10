@@ -2,8 +2,18 @@ import { logger } from "@/lib/logger";
 
 export type ShutdownTask = {
     name: string;
+    /** Lower values run first. Default 100. */
+    priority?: number;
     run: () => Promise<void> | void;
 };
+
+export const SHUTDOWN_PRIORITY = {
+    JOBS: 10,
+    DISCORD_CLIENT: 100,
+    DATABASE: 200,
+} as const;
+
+const DEFAULT_PRIORITY = 100;
 
 const tasks: Array<ShutdownTask> = [];
 let inflight = 0;
@@ -86,11 +96,20 @@ export async function runShutdown(signal: string, options: { inflightTimeoutMs?:
     logger.info("Core", `Received ${signal}, shutting down (in-flight=${inflight})`);
     await waitForInflight(inflightTimeoutMs);
 
-    for (const task of tasks) {
+    const ordered = [...tasks].sort((a, b) => (a.priority ?? DEFAULT_PRIORITY) - (b.priority ?? DEFAULT_PRIORITY));
+
+    for (const task of ordered) {
         try {
             await runWithTimeout(task, taskTimeoutMs);
         } catch (error) {
             logger.error("Core", error instanceof Error ? error : new Error(String(error)));
         }
     }
+}
+
+export function resetShutdownForTesting(): void {
+    tasks.length = 0;
+    inflight = 0;
+    waiters = [];
+    shuttingDown = false;
 }
