@@ -18,4 +18,16 @@ describe("Result", () => {
         expect(unwrapOr(result, "fallback")).toBe("fallback");
         expect(() => unwrapOrThrow(result)).toThrow(error);
     });
+
+    test("unwrapOrThrow converts non-Error rejection values into Error", () => {
+        const result = err("string-fail");
+
+        try {
+            unwrapOrThrow(result);
+            throw new Error("unwrapOrThrow should have thrown");
+        } catch (thrown) {
+            expect(thrown).toBeInstanceOf(Error);
+            expect((thrown as Error).message).toBe("string-fail");
+        }
+    });
 });

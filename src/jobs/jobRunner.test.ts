@@ -39,6 +39,42 @@ describe("startJobs intervalMs validation", () => {
     });
 });
 
+describe("startJobs lifecycle", () => {
+    test("runOnStart triggers an immediate run before the first interval tick", async () => {
+        let runs = 0;
+        const job: Job = {
+            name: "immediate",
+            intervalMs: 60_000,
+            runOnStart: true,
+            run: () => {
+                runs += 1;
+            },
+        };
+
+        startJobs([job]);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(runs).toBe(1);
+        expect(getScheduledJobNamesForTesting()).toEqual(["immediate"]);
+    });
+
+    test("ignores a second startJobs call while already started", () => {
+        startJobs([{ name: "first", intervalMs: 60_000, run: () => {} }]);
+        startJobs([{ name: "second", intervalMs: 60_000, run: () => {} }]);
+
+        expect(getScheduledJobNamesForTesting()).toEqual(["first"]);
+    });
+
+    test("stopJobs allows startJobs to be called again afterwards", () => {
+        startJobs([{ name: "a", intervalMs: 60_000, run: () => {} }]);
+        resetJobsForTesting();
+
+        startJobs([{ name: "b", intervalMs: 60_000, run: () => {} }]);
+
+        expect(getScheduledJobNamesForTesting()).toEqual(["b"]);
+    });
+});
+
 describe("runJob overlap guard", () => {
     test("skips concurrent runs of the same job", async () => {
         let resolveFirst: (() => void) | undefined;

@@ -243,12 +243,14 @@ await handler.execute(interaction);
 expect(replies).toEqual([]);
 ```
 
-- `createCommandInteractionMock(name, replies, options?)`: slash command interaction
+- `createCommandInteractionMock(name, replies, options?)`: slash command interaction (`reply` のみ)
+- `createRichCommandInteractionMock(name, records, options?)`: `reply` / `editReply` / `followUp` / `deferReply` を記録し、`options.getSubcommand[Group]` をモックするリッチ版。`commandExecutor` の AsyncGenerator パスや `replyError` のフォールバック分岐をテストするときに使う
 - `createCustomIdInteractionMock(customId, replies, options?)`: button / modal / select menu interaction
 - `createContextMenuInteractionMock(name, replies, options?)`: user / message context menu interaction
 - `createAutocompleteInteractionMock(commandName, recorder, options?)`: autocomplete interaction
+- `createKindInteractionMock(kind, overrides?)`: `interaction.isXxx()` ガードだけを切り替える最小 mock。`buildInteractionContext` の分岐テスト向け
 
-実例は `src/events/interactionCreate/commands/chatInput/commandHandler.test.ts` / `commands/contextMenu/contextMenuHandler.test.ts` / `components/customIdHandler.test.ts` / `commands/autocomplete/autocompleteHandler.test.ts` を参照してください。
+実例は `commands/chatInput/{commandHandler,commandExecutor,commandWithSubCommand,subCommand,subCommandGroup}.test.ts` / `commands/contextMenu/contextMenuHandler.test.ts` / `commands/autocomplete/autocompleteHandler.test.ts` / `components/customIdHandler.test.ts` / `src/lib/{replyError,resultHandler,interactionContext,errorWebhook,embed}.test.ts` を参照してください。
 
 ## Scripts
 
