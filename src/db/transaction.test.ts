@@ -1,8 +1,14 @@
 import { describe, expect, mock, test } from "bun:test";
+import type { PgTransactionConfig } from "drizzle-orm/pg-core";
+
+const transactionCalls: Array<{ config: PgTransactionConfig | undefined }> = [];
 
 mock.module("@/db", () => ({
     db: {
-        transaction: async <T>(callback: (tx: Record<string, unknown>) => Promise<T>) => callback({}),
+        transaction: async <T>(callback: (tx: Record<string, unknown>) => Promise<T>, config?: PgTransactionConfig) => {
+            transactionCalls.push({ config });
+            return callback({});
+        },
     },
 }));
 
@@ -38,5 +44,15 @@ describe("withTransaction", () => {
             expect(result.error).toBeInstanceOf(Error);
             expect(result.error.message).toBe("string-fail");
         }
+    });
+
+    test("passes through PgTransactionConfig to db.transaction", async () => {
+        transactionCalls.length = 0;
+        const config: PgTransactionConfig = { isolationLevel: "serializable", accessMode: "read write" };
+
+        await withTransaction(async () => 1, config);
+        await withTransaction(async () => 2);
+
+        expect(transactionCalls).toEqual([{ config }, { config: undefined }]);
     });
 });
