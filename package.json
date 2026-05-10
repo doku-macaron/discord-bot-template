@@ -11,6 +11,8 @@
         "generate:local": "drizzle-kit generate --config=drizzle-dev.config.ts",
         "migrate": "drizzle-kit migrate",
         "migrate:local": "NODE_ENV=development bun run scripts/migrate.ts",
+        "db:seed:local": "NODE_ENV=development bun run scripts/seedLocalDb.ts",
+        "db:reset:local": "NODE_ENV=development bun run scripts/resetLocalDb.ts",
         "studio": "drizzle-kit studio",
         "studio:local": "drizzle-kit studio --config=drizzle-dev.config.ts",
         "generateERdiagram": "bun run scripts/generateERdiagram.ts",

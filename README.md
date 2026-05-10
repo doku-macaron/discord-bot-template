@@ -102,6 +102,8 @@ DB query が失敗しうる処理では `src/lib/result.ts` の `Result` 型と 
 ```sh
 bun generate:local   # ローカル PGlite 用 migration 作成
 bun migrate:local    # ローカル PGlite へ migration 適用
+bun db:seed:local    # ローカル PGlite にサンプル guild/member を投入
+bun db:reset:local   # ローカル PGlite の app tables を空にする
 bun studio:local     # ローカル DB を Drizzle Studio で確認
 ```
 
