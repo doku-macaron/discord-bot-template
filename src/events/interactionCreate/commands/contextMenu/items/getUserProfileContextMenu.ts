@@ -1,4 +1,4 @@
-import { ApplicationCommandType, ApplicationIntegrationType, InteractionContextType, MessageFlags } from "discord.js";
+import { ApplicationCommandType, ApplicationIntegrationType, InteractionContextType, MessageFlags, userMention } from "discord.js";
 import { ContextMenuCommand } from "@/events/interactionCreate/commands/contextMenu/contextMenuHandler";
 import { infoEmbed } from "@/lib/embed";
 
@@ -16,7 +16,7 @@ export const getUserProfileContextMenu = new ContextMenuCommand(
 
         const target = interaction.targetUser;
         const embed = infoEmbed(`Profile of ${target.username}`).addFields([
-            { name: "User", value: `<@${target.id}>`, inline: true },
+            { name: "User", value: userMention(target.id), inline: true },
             { name: "ID", value: target.id, inline: true },
         ]);
 

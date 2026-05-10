@@ -1,6 +1,7 @@
 import {
     ActionRowBuilder,
     ApplicationIntegrationType,
+    bold,
     InteractionContextType,
     PermissionFlagsBits,
     StringSelectMenuBuilder,
@@ -58,7 +59,7 @@ export function buildHelpPage(rawPage: number) {
         throw new Error("HELP_PAGES must contain at least one section.");
     }
 
-    const description = section.entries.map((entry) => `**${entry.name}** — ${entry.description}`).join("\n");
+    const description = section.entries.map((entry) => `${bold(entry.name)} — ${entry.description}`).join("\n");
     const embed = infoEmbed(`Help • ${section.title}`, description).setFooter({ text: `Page ${page + 1} / ${total}` });
     const paginationRow = buildPaginationRow(HELP_FEATURE, page, total);
     const selectRow = buildSectionSelectRow(section.title);

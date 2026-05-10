@@ -1,4 +1,4 @@
-import { ApplicationIntegrationType, EmbedBuilder, InteractionContextType, PermissionFlagsBits } from "discord.js";
+import { ApplicationIntegrationType, EmbedBuilder, InteractionContextType, PermissionFlagsBits, userMention } from "discord.js";
 import { Command } from "@/events/interactionCreate/commands/chatInput/commandHandler";
 
 export const pingCommand = new Command(
@@ -21,7 +21,7 @@ export const pingCommand = new Command(
                 },
                 {
                     name: "User",
-                    value: `<@${interaction.user.id}>`,
+                    value: userMention(interaction.user.id),
                     inline: true,
                 },
             ]);

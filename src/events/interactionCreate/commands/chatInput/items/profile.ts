@@ -10,6 +10,7 @@ import {
     SeparatorSpacingSize,
     TextDisplayBuilder,
     ThumbnailBuilder,
+    userMention,
 } from "discord.js";
 import { CUSTOM_ID } from "@/constants/customIds";
 import { getOrCreateGuild } from "@/db/query/guild/getOrCreateGuild";
@@ -58,7 +59,7 @@ profileCommand.register(
             const headerSection = new SectionBuilder()
                 .addTextDisplayComponents(
                     new TextDisplayBuilder().setContent("## Profile"),
-                    new TextDisplayBuilder().setContent(`User: <@${member.userId}>`),
+                    new TextDisplayBuilder().setContent(`User: ${userMention(member.userId)}`),
                     new TextDisplayBuilder().setContent(`Display name: ${member.displayName || "-"}`),
                     new TextDisplayBuilder().setContent(`Command count: ${member.commandCount}`)
                 )
