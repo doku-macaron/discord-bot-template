@@ -78,8 +78,9 @@ bun dev
 - `/ping`: Bot の応答確認
 - `/echo <message>`: 入力内容を返すサンプル (autocomplete)
 - `/help`: コマンド一覧をページャ付き embed で表示するサンプル (pagination + String Select)
-- `/profile view`: DB に guild/member を保存し、実行回数を更新するサンプル
+- `/profile view`: プロフィールを Container / Section / Thumbnail / Button accessory で組み立てるサンプル (Components v2)
 - `/profile edit`: モーダルでプロフィール表示名を更新するサンプル
+- `/showcase`: Components v2 (Container / Section + Thumbnail / Section + Button / MediaGallery / Separator / TextDisplay) のリファレンス実装
 - `/admin report-user-select`: ユーザーを選んで report するサンプル (User Select)
 - `/admin set-mod-role`: Mod ロールを選ぶサンプル (Role Select)
 - `/admin set-archive-channel`: アーカイブ用 text channel を選ぶサンプル (Channel Select)
@@ -122,6 +123,30 @@ interaction は種類ごとに handler/register を分けています。
 ### Context menu
 
 `src/events/interactionCreate/commands/contextMenu/items/` に User / Message context menu を置きます。`new ContextMenuCommand(build, execute)` を `contextMenuRegister.ts` で登録すると、`bun register` 時に slash command と一緒に Discord へ送られます。
+
+### Components v2
+
+`/showcase` ([src/events/interactionCreate/commands/chatInput/items/showcase.ts](src/events/interactionCreate/commands/chatInput/items/showcase.ts)) と `/profile view` ([items/profile.ts](src/events/interactionCreate/commands/chatInput/items/profile.ts)) が Components v2 のリファレンス実装です。
+
+- 送信時に `flags: MessageFlags.IsComponentsV2` を立てる必要があります。`content` / `embeds` とは併用できません
+- root は `ContainerBuilder` を使うと accent color + 子コンポーネントをまとめられます
+- `SectionBuilder.setThumbnailAccessory(...)` で右側にサムネイル、`SectionBuilder.setButtonAccessory(...)` で interactive button を置けます。button の customId は通常通り `buttonRegister.ts` の handler でルーティングされます
+- `MediaGalleryBuilder.addItems(...)` で URL ベースの画像 gallery、`SeparatorBuilder` で divider と spacing を制御します
+- file component (`FileBuilder`) は attachment を伴いますが、Components v2 と一緒に送る場合も `flags: MessageFlags.IsComponentsV2` は必要です。必要な場合は `interaction.reply({ flags: MessageFlags.IsComponentsV2, files: [...], components: [container] })` の形で送ります
+
+**flag を渡す場所**: `IsComponentsV2` は **メッセージ送信側のオプション** (`reply` / `editReply` / `followUp`) に渡します。`deferReply` 側の `flags` は `Ephemeral` のみ受け付けるため、defer 段階では渡せません。
+
+```ts
+// パターン 1: 重い前処理なしで一発返信 — /showcase が採用
+await interaction.reply({ flags: MessageFlags.IsComponentsV2, components: [container] });
+
+// パターン 2: DB 等で 3 秒の応答期限を超えそうなら defer → editReply で v2 を送る — /profile view が採用
+await interaction.deferReply();
+// ... DB 操作など ...
+await interaction.editReply({ flags: MessageFlags.IsComponentsV2, components: [container] });
+```
+
+`commandExecutor.ts` の `runAsAsyncGenerator` も同じ仕組みで使えます。`yield { flags: MessageFlags.IsComponentsV2, components: [container] }` のように `InteractionEditReplyOptions` を yield すれば v2 メッセージとして送られます。
 
 ### Select menus
 
