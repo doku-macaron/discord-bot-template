@@ -259,9 +259,10 @@ rollback 方針は **forward-only** を推奨します。
 ## Scheduled jobs
 
 `src/jobs/jobsRegister.ts` で `Job` を配列に登録すると、`clientReady` 時に `startJobs` が `setInterval` で開始します。
+普段の開発では `src/jobs/items/` に job を追加し、`src/jobs/jobsRegister.ts` に登録してください。runner と `Job` 型は `src/jobs/_core/`、runner tests は `src/jobs/__tests__/` にあります。
 
 ```ts
-import type { Job } from "@/jobs/job";
+import type { Job } from "@/jobs/_core/job";
 
 export const myJob: Job = {
     name: "my-job",
@@ -273,7 +274,7 @@ export const myJob: Job = {
 };
 ```
 
-shutdown task として interval が clear されるため、`registerShutdownTask` を別途呼ぶ必要はありません。サンプルは `src/jobs/jobs/uptimeJob.ts`。
+shutdown task として interval が clear されるため、`registerShutdownTask` を別途呼ぶ必要はありません。サンプルは `src/jobs/items/uptimeJob.ts`。
 
 - `intervalMs` は正の有限な数値である必要があります。0 / 負値 / `NaN` / `Infinity` の job は warn ログを出してスキップします
 - 同じ job の前回 tick がまだ走っている間は、新しい tick は skip されます（per-job overlap guard）。slow job が重複実行される事故を防ぐためです

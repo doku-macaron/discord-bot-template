@@ -1,4 +1,4 @@
-import type { Job } from "@/jobs/job";
-import { uptimeJob } from "@/jobs/jobs/uptimeJob";
+import type { Job } from "@/jobs/_core/job";
+import { uptimeJob } from "@/jobs/items/uptimeJob";
 
 export const jobs: ReadonlyArray<Job> = [uptimeJob];
