@@ -1,4 +1,4 @@
-import { Autocomplete } from "@/events/interactionCreate/commands/autocomplete/autocompleteHandler";
+import { Autocomplete } from "@/events/interactionCreate/commands/autocomplete/_core/autocompleteHandler";
 
 const SUGGESTIONS = ["Hello!", "Hi there!", "Hey!", "Good morning!", "Good evening!", "Good night!"];
 

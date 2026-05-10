@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { MessageFlags } from "discord.js";
-import { CustomIdHandler, type CustomIdItem } from "@/events/interactionCreate/components/customIdHandler";
+import { CustomIdHandler, type CustomIdItem } from "@/events/interactionCreate/components/_core/customIdHandler";
 import { type CustomIdInteractionMock, createCustomIdInteractionMock, type MockReplyPayload } from "@/lib/testing/interactions";
 
 function createItem(data: string | RegExp, values: Array<string>): CustomIdItem<CustomIdInteractionMock> {

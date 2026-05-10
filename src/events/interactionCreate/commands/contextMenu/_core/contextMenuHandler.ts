@@ -1,8 +1,8 @@
 import { type ContextMenuCommandInteraction, MessageFlags, type RESTPostAPIContextMenuApplicationCommandsJSONBody } from "discord.js";
 import type { Handler } from "@/events/handler";
-import type { ContextMenuCommand } from "@/events/interactionCreate/commands/contextMenu/contextMenuCommand";
+import type { ContextMenuCommand } from "@/events/interactionCreate/commands/contextMenu/_core/contextMenuCommand";
 
-export { ContextMenuCommand } from "@/events/interactionCreate/commands/contextMenu/contextMenuCommand";
+export { ContextMenuCommand } from "@/events/interactionCreate/commands/contextMenu/_core/contextMenuCommand";
 
 export class ContextMenuHandler implements Handler<ContextMenuCommand, ContextMenuCommandInteraction> {
     private commands = new Map<string, ContextMenuCommand>();

@@ -1,6 +1,6 @@
 import { LabelBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
 import { CUSTOM_ID } from "@/constants/customIds";
-import { Modal } from "@/events/interactionCreate/components/modal/modalHandler";
+import { Modal } from "@/events/interactionCreate/components/modal/_core/modalHandler";
 import { handleResult } from "@/lib/resultHandler";
 
 export function createProfileEditModal(displayName = ""): ModalBuilder {

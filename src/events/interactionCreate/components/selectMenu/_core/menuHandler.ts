@@ -1,5 +1,5 @@
 import type { AnySelectMenuInteraction } from "discord.js";
-import { type CustomId, CustomIdHandler, type CustomIdItem } from "@/events/interactionCreate/components/customIdHandler";
+import { type CustomId, CustomIdHandler, type CustomIdItem } from "@/events/interactionCreate/components/_core/customIdHandler";
 
 export class Menu implements CustomIdItem<AnySelectMenuInteraction> {
     data: CustomId;
