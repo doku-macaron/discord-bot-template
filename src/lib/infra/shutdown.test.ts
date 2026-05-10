@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { registerShutdownTask, resetShutdownForTesting, runShutdown, SHUTDOWN_PRIORITY } from "@/lib/shutdown";
+import { registerShutdownTask, resetShutdownForTesting, runShutdown, SHUTDOWN_PRIORITY } from "@/lib/infra/shutdown";
 
 afterEach(() => {
     resetShutdownForTesting();

@@ -1,4 +1,4 @@
-import type { InteractionContext } from "@/lib/interactionContext";
+import type { InteractionContext } from "@/lib/discord/interactionContext";
 
 export type ErrorReporterContext = {
     category?: string;

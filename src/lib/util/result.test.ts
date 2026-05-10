@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { err, isErr, isOk, ok, unwrapOr, unwrapOrThrow } from "@/lib/result";
+import { err, isErr, isOk, ok, unwrapOr, unwrapOrThrow } from "@/lib/util/result";
 
 describe("Result", () => {
     test("wraps success values", () => {

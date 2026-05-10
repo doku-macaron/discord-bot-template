@@ -5,8 +5,8 @@ import { clientReadyEvent } from "@/events/clientReady";
 import { guildCreateEvent } from "@/events/guildCreate";
 import { guildDeleteEvent } from "@/events/guildDelete";
 import { interactionCreateEvent } from "@/events/interactionCreate";
-import { logger } from "@/lib/logger";
-import { registerShutdownTask, runShutdown, SHUTDOWN_PRIORITY } from "@/lib/shutdown";
+import { logger } from "@/lib/infra/logger";
+import { registerShutdownTask, runShutdown, SHUTDOWN_PRIORITY } from "@/lib/infra/shutdown";
 
 export function setupProcessHandlers() {
     process.on("uncaughtException", (error) => {

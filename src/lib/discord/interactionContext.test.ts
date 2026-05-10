@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { buildInteractionContext, formatInteractionContext } from "@/lib/interactionContext";
+import { buildInteractionContext, formatInteractionContext } from "@/lib/discord/interactionContext";
 import { createKindInteractionMock } from "@/lib/testing/interactions";
 
 describe("buildInteractionContext", () => {

@@ -1,6 +1,6 @@
 import type { ClientEvents, Events } from "discord.js";
 import { recordGuildJoin } from "@/db/query/guild/recordGuildJoin";
-import { logger } from "@/lib/logger";
+import { logger } from "@/lib/infra/logger";
 
 export const guildCreateEvent: (...args: ClientEvents[Events.GuildCreate]) => void = async (guild) => {
     try {

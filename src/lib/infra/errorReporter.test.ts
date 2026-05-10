@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { captureException, type ErrorReporter, resetErrorReporter, setErrorReporter } from "@/lib/errorReporter";
+import { captureException, type ErrorReporter, resetErrorReporter, setErrorReporter } from "@/lib/infra/errorReporter";
 
 afterEach(() => {
     resetErrorReporter();

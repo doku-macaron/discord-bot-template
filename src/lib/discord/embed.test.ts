@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { EMBED_COLOR, errorEmbed, infoEmbed, successEmbed, warnEmbed } from "@/lib/embed";
+import { EMBED_COLOR, errorEmbed, infoEmbed, successEmbed, warnEmbed } from "@/lib/discord/embed";
 
 function snapshot(embed: ReturnType<typeof successEmbed>) {
     const json = embed.toJSON();

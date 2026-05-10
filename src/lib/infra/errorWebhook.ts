@@ -1,6 +1,6 @@
 import { bold, codeBlock, WebhookClient } from "discord.js";
 import { getEnv } from "@/env";
-import { formatInteractionContext, type InteractionContext } from "@/lib/interactionContext";
+import { formatInteractionContext, type InteractionContext } from "@/lib/discord/interactionContext";
 
 let webhookClient: WebhookClient | undefined;
 

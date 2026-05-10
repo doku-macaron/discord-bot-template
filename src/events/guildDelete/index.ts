@@ -1,6 +1,6 @@
 import type { ClientEvents, Events } from "discord.js";
 import { markGuildLeft } from "@/db/query/guild/markGuildLeft";
-import { logger } from "@/lib/logger";
+import { logger } from "@/lib/infra/logger";
 
 export const guildDeleteEvent: (...args: ClientEvents[Events.GuildDelete]) => void = async (guild) => {
     // `guild.available` is false when Discord experiences an outage, not when the bot was removed.

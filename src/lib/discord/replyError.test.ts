@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { MessageFlags } from "discord.js";
-import { replyError } from "@/lib/replyError";
+import { replyError } from "@/lib/discord/replyError";
 import { createRichCommandInteractionMock, type MockReplyRecord } from "@/lib/testing/interactions";
 
 describe("replyError", () => {

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { CooldownStore, createCooldownKey } from "@/lib/cooldown";
+import { CooldownStore, createCooldownKey } from "@/lib/util/cooldown";
 
 describe("CooldownStore", () => {
     test("allows the first hit and blocks until the window resets", () => {
