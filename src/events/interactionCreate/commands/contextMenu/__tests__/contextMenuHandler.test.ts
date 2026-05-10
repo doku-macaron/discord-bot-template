@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { ApplicationCommandType, MessageFlags } from "discord.js";
-import { ContextMenuCommand, ContextMenuHandler } from "@/events/interactionCreate/commands/contextMenu/contextMenuHandler";
+import { ContextMenuCommand, ContextMenuHandler } from "@/events/interactionCreate/commands/contextMenu/_core/contextMenuHandler";
 import { createContextMenuInteractionMock, type MockReplyPayload } from "@/lib/testing/interactions";
 
 describe("ContextMenuHandler", () => {

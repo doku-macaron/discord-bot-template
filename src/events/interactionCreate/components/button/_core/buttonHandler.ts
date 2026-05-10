@@ -1,5 +1,5 @@
 import type { ButtonInteraction } from "discord.js";
-import { type CustomId, CustomIdHandler, type CustomIdItem } from "@/events/interactionCreate/components/customIdHandler";
+import { type CustomId, CustomIdHandler, type CustomIdItem } from "@/events/interactionCreate/components/_core/customIdHandler";
 
 export class Button implements CustomIdItem<ButtonInteraction> {
     data: CustomId;

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { Autocomplete, AutocompleteHandler } from "@/events/interactionCreate/commands/autocomplete/autocompleteHandler";
+import { Autocomplete, AutocompleteHandler } from "@/events/interactionCreate/commands/autocomplete/_core/autocompleteHandler";
 import { type AutocompleteResponseRecorder, createAutocompleteInteractionMock } from "@/lib/testing/interactions";
 
 function createRecorder(): AutocompleteResponseRecorder {

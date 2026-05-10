@@ -1,6 +1,6 @@
 import { MessageFlags } from "discord.js";
 import { CUSTOM_ID } from "@/constants/customIds";
-import { Button } from "@/events/interactionCreate/components/button/buttonHandler";
+import { Button } from "@/events/interactionCreate/components/button/_core/buttonHandler";
 
 export const showcaseAccessoryButton = new Button(
     () => CUSTOM_ID.BUTTON.SHOWCASE_ACCESSORY,

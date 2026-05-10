@@ -1,4 +1,4 @@
-import { contextMenuHandler } from "@/events/interactionCreate/commands/contextMenu/contextMenuHandlerInstance";
+import { contextMenuHandler } from "@/events/interactionCreate/commands/contextMenu/_core/contextMenuHandlerInstance";
 import { getUserProfileContextMenu } from "@/events/interactionCreate/commands/contextMenu/items/getUserProfileContextMenu";
 import { reportMessageContextMenu } from "@/events/interactionCreate/commands/contextMenu/items/reportMessageContextMenu";
 

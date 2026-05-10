@@ -1,6 +1,6 @@
 import { MessageFlags, roleMention } from "discord.js";
 import { CUSTOM_ID } from "@/constants/customIds";
-import { Menu } from "@/events/interactionCreate/components/selectMenu/menuHandler";
+import { Menu } from "@/events/interactionCreate/components/selectMenu/_core/menuHandler";
 import { successEmbed } from "@/lib/embed";
 
 export const modRoleSelectMenu = new Menu(

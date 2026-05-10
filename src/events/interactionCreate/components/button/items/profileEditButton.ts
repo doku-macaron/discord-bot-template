@@ -1,5 +1,5 @@
 import { CUSTOM_ID } from "@/constants/customIds";
-import { Button } from "@/events/interactionCreate/components/button/buttonHandler";
+import { Button } from "@/events/interactionCreate/components/button/_core/buttonHandler";
 import { createProfileEditModal } from "@/events/interactionCreate/components/modal/items/profileEditModal";
 
 export const profileEditButton = new Button(
