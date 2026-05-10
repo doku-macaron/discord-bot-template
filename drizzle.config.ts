@@ -5,7 +5,6 @@ export default {
     schema: ["src/db/schema/guilds.ts", "src/db/schema/members.ts", "src/db/schema/relations.ts"],
     out: "drizzle",
     dialect: "postgresql",
-    casing: "snake_case",
     dbCredentials: {
         url: process.env.DATABASE_URL || "",
     },

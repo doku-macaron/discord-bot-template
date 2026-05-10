@@ -1,14 +1,17 @@
-import { relations } from "drizzle-orm";
+import { defineRelations } from "drizzle-orm";
 import { guilds } from "@/db/schema/guilds";
 import { members } from "@/db/schema/members";
 
-export const guildRelations = relations(guilds, ({ many }) => ({
-    members: many(members),
-}));
+const tables = { guilds, members };
 
-export const memberRelations = relations(members, ({ one }) => ({
-    guild: one(guilds, {
-        fields: [members.guildId],
-        references: [guilds.guildId],
-    }),
+export const relations = defineRelations(tables, (r) => ({
+    guilds: {
+        members: r.many.members(),
+    },
+    members: {
+        guild: r.one.guilds({
+            from: r.members.guildId,
+            to: r.guilds.guildId,
+        }),
+    },
 }));
