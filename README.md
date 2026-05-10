@@ -61,7 +61,11 @@ bun register
 bun dev
 ```
 
-`GUILD_ID` を設定している場合、`bun register` はそのサーバーにだけコマンドを登録します。未設定の場合はグローバルコマンドとして登録します。
+`GUILD_ID` を設定している場合、`bun register` はそのサーバーにだけコマンドを登録します (dev guild 即時反映)。未設定の場合は **Discord REST `/users/@me/guilds` から bot 参加中の全 guild を取得して、それぞれに guild scope で broadcast 登録** します。
+
+旧来のグローバル登録 (反映に最大 1 時間) は廃止しました。本番デプロイは `GUILD_ID` を外して broadcast、開発は dev サーバーの ID を `GUILD_ID` に入れて 1 guild に絞る、という運用です。
+
+大規模 bot (数千 guild) では `/users/@me/guilds` のページングと rate limit に注意してください。テンプレートでは小〜中規模を想定した単純な直列 PUT のみ実装しています。
 
 ## Environment
 
@@ -99,6 +103,8 @@ interaction は種類ごとに handler/register を分けています。
 - `src/events/interactionCreate/components/selectMenu/items/`: select menu (string / user / role / channel / mentionable)
 
 各 handler は `<type>HandlerInstance.ts` (singleton) と `<type>Register.ts` (items の `register()` 呼び出し) に分かれており、`src/events/interactionCreate/setup.ts` がすべての register を side-effect import で読み込んで handler を再 export します。`index.ts` と `scripts/registerCommand.ts` はこの `setup.ts` 経由で handler を取得します。
+
+`src/events/guildCreate/` と `src/events/guildDelete/` が bot の参加・退出に合わせて `guilds` テーブルを sync します。退出は物理削除ではなく `leftAt` に時刻を入れる soft-delete で、再入会時に `joinedAt` がリセット・`leftAt` が null に戻ります。lazy populate (コマンド実行時の `getOrCreateGuild` 呼び出し) も残っているため、event を取りこぼしても DB 整合性は保たれます。
 
 `src/lib/interactionContext.ts` と `src/lib/logger.ts` で、エラー時に command/customId/user/guild/channel/interactionId/ageMs をログへ出します。
 `NODE_ENV=production` では JSON line 形式、development では人間が読みやすい形式で出力します。

@@ -3,14 +3,17 @@ import { db } from "@/db";
 import { guilds, type InsertGuild, type SelectGuild } from "@/db/schema/guilds";
 
 export async function getOrCreateGuild(input: InsertGuild): Promise<SelectGuild> {
+    const now = new Date();
     const [created] = await db
         .insert(guilds)
-        .values(input)
+        .values({ ...input, joinedAt: input.joinedAt ?? now, leftAt: input.leftAt ?? null })
         .onConflictDoUpdate({
             target: guilds.guildId,
             set: {
                 name: input.name ?? "",
-                updatedAt: new Date(),
+                updatedAt: now,
+                joinedAt: now,
+                leftAt: null,
             },
         })
         .returning();

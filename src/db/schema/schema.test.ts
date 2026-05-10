@@ -6,4 +6,9 @@ describe("database schema", () => {
         expect(schema.guilds).toBeDefined();
         expect(schema.members).toBeDefined();
     });
+
+    test("guilds tracks join/leave timestamps", () => {
+        expect(schema.guilds.joinedAt).toBeDefined();
+        expect(schema.guilds.leftAt).toBeDefined();
+    });
 });

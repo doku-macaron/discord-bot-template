@@ -10,6 +10,8 @@ export const guilds = pgTable("guilds", {
         .defaultNow()
         .$onUpdate(() => new Date()),
     name: text().notNull().default(""),
+    joinedAt: timestamp().notNull().defaultNow(),
+    leftAt: timestamp(),
 });
 
 export const insertGuildSchema = createInsertSchema(guilds).omit({ createdAt: true, updatedAt: true }).strict();
