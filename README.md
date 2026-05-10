@@ -24,7 +24,7 @@ bun install
 - `README.md` の Bot 名・説明・コマンド一覧
 - `LICENSE` の `Copyright` 行（Apache-2.0 のままにする場合）
 - `.github/CODEOWNERS` のオーナー
-- 不要なサンプル commands (`src/events/interactionCreate/command/commands/`)
+- 不要なサンプル (`src/events/interactionCreate/commands/chatInput/items/`, `commands/contextMenu/items/`, `components/*/items/`)
 
 ## Requirements
 
@@ -86,12 +86,14 @@ bun dev
 
 interaction は種類ごとに handler/register を分けています。
 
-- `src/events/interactionCreate/command`: slash command
-- `src/events/interactionCreate/command/contextMenus`: user / message context menu
-- `src/events/interactionCreate/interactions/buttons`: button
-- `src/events/interactionCreate/interactions/modals`: modal
-- `src/events/interactionCreate/interactions/menus`: select menu
-- `src/events/interactionCreate/interactions/autocompletes`: autocomplete
+- `src/events/interactionCreate/commands/chatInput/items/`: slash command
+- `src/events/interactionCreate/commands/contextMenu/items/`: user / message context menu
+- `src/events/interactionCreate/commands/autocomplete/items/`: autocomplete
+- `src/events/interactionCreate/components/button/items/`: button
+- `src/events/interactionCreate/components/modal/items/`: modal
+- `src/events/interactionCreate/components/selectMenu/items/`: select menu (string / user / role / channel / mentionable)
+
+各 handler は `<type>HandlerInstance.ts` (singleton) と `<type>Register.ts` (items の `register()` 呼び出し) に分かれており、`src/events/interactionCreate/setup.ts` がすべての register を side-effect import で読み込んで handler を再 export します。`index.ts` と `scripts/registerCommand.ts` はこの `setup.ts` 経由で handler を取得します。
 
 `src/lib/interactionContext.ts` と `src/lib/logger.ts` で、エラー時に command/customId/user/guild/channel/interactionId/ageMs をログへ出します。
 `NODE_ENV=production` では JSON line 形式、development では人間が読みやすい形式で出力します。
@@ -107,15 +109,15 @@ interaction は種類ごとに handler/register を分けています。
 
 ### Pagination
 
-`src/lib/pagination.ts` の `buildPaginationRow` で前/次ボタン付きの行を作り、`parsePaginationCustomId` + `nextPage` で button handler から新しいページに更新します。サンプルは `/help` コマンド (`src/events/interactionCreate/command/commands/help.ts`) と `helpPaginationButton` を参照してください。
+`src/lib/pagination.ts` の `buildPaginationRow` で前/次ボタン付きの行を作り、`parsePaginationCustomId` + `nextPage` で button handler から新しいページに更新します。サンプルは `/help` コマンド (`src/events/interactionCreate/commands/chatInput/items/help.ts`) と `helpPaginationButton` を参照してください。
 
 ### Autocomplete
 
-`/echo` コマンドが autocomplete のサンプルです。option に `.setAutocomplete(true)` を付け、`src/events/interactionCreate/interactions/autocompletes/` 配下に `new Autocomplete(commandName, execute)` を定義して `autocompleteRegister.ts` で登録します。
+`/echo` コマンドが autocomplete のサンプルです。option に `.setAutocomplete(true)` を付け、`src/events/interactionCreate/commands/autocomplete/items/` 配下に `new Autocomplete(commandName, execute)` を定義して `autocompleteRegister.ts` で登録します。
 
 ### Context menu
 
-`src/events/interactionCreate/command/contextMenus/` に User / Message context menu を置きます。`new ContextMenuCommand(build, execute)` を `contextMenuRegister.ts` で登録すると、`bun register` 時に slash command と一緒に Discord へ送られます。
+`src/events/interactionCreate/commands/contextMenu/items/` に User / Message context menu を置きます。`new ContextMenuCommand(build, execute)` を `contextMenuRegister.ts` で登録すると、`bun register` 時に slash command と一緒に Discord へ送られます。
 
 ## Database
 
@@ -229,7 +231,7 @@ expect(replies).toEqual([]);
 - `createContextMenuInteractionMock(name, replies, options?)`: user / message context menu interaction
 - `createAutocompleteInteractionMock(commandName, recorder, options?)`: autocomplete interaction
 
-実例は `src/events/interactionCreate/command/commandHandler.test.ts` / `contextMenuHandler.test.ts` / `src/events/interactionCreate/interactions/customIdHandler.test.ts` / `autocompleteHandler.test.ts` を参照してください。
+実例は `src/events/interactionCreate/commands/chatInput/commandHandler.test.ts` / `commands/contextMenu/contextMenuHandler.test.ts` / `components/customIdHandler.test.ts` / `commands/autocomplete/autocompleteHandler.test.ts` を参照してください。
 
 ## Scripts
 
