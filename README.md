@@ -87,6 +87,7 @@ interaction は種類ごとに handler/register を分けています。
 - `src/events/interactionCreate/interactions/menus`: select menu
 
 `src/lib/interactionContext.ts` と `src/lib/logger.ts` で、エラー時に command/customId/user/guild/channel/interactionId/ageMs をログへ出します。
+`NODE_ENV=production` では JSON line 形式、development では人間が読みやすい形式で出力します。
 `WEBHOOK_URL` を設定している場合だけ、同じ内容を Discord webhook にも通知します。
 
 `customId` は `feature:action` または `feature:action:id` の形式を推奨します。
