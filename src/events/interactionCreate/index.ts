@@ -1,6 +1,6 @@
 import "@/events/interactionCreate/command/commandRegister";
 
-import type { ClientEvents, Events } from "discord.js";
+import { type ClientEvents, type Events, MessageFlags } from "discord.js";
 import { commandHandler } from "@/events/interactionCreate/command/commandHandlerInstance";
 import { buttonHandler } from "@/events/interactionCreate/interactions/buttonRegister";
 import { menuHandler } from "@/events/interactionCreate/interactions/menuRegister";
@@ -8,9 +8,24 @@ import { modalHandler } from "@/events/interactionCreate/interactions/modalRegis
 import { buildInteractionContext } from "@/lib/interactionContext";
 import { logger } from "@/lib/logger";
 import { replyError } from "@/lib/replyError";
-import { trackInflight } from "@/lib/shutdown";
+import { isShuttingDown, trackInflight } from "@/lib/shutdown";
 
-export const interactionCreateEvent: (...args: ClientEvents[Events.InteractionCreate]) => void = (interaction) =>
+export const interactionCreateEvent: (...args: ClientEvents[Events.InteractionCreate]) => void = (interaction) => {
+    if (isShuttingDown()) {
+        if (interaction.isRepliable()) {
+            void interaction
+                .reply({
+                    content: "Bot is shutting down. Please try again shortly.",
+                    flags: MessageFlags.Ephemeral,
+                })
+                .catch((replyErrorUnknown: unknown) => {
+                    const replyError = replyErrorUnknown instanceof Error ? replyErrorUnknown : new Error(String(replyErrorUnknown));
+                    logger.error("Bot", replyError, buildInteractionContext(interaction));
+                });
+        }
+        return;
+    }
+
     trackInflight(async () => {
         try {
             if (interaction.isButton()) {
@@ -47,3 +62,4 @@ export const interactionCreateEvent: (...args: ClientEvents[Events.InteractionCr
             }
         }
     });
+};
