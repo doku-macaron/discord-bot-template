@@ -12,7 +12,7 @@ export const helpPaginationButton = new Button(
         }
 
         const target = nextPage(parsed.action, parsed.page, HELP_PAGES.length);
-        const { embed, row } = buildHelpPage(target);
-        await interaction.update({ embeds: [embed], components: [row] });
+        const { embed, row, selectRow } = buildHelpPage(target);
+        await interaction.update({ embeds: [embed], components: [row, selectRow] });
     }
 );

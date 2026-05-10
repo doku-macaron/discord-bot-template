@@ -77,10 +77,14 @@ bun dev
 
 - `/ping`: Bot の応答確認
 - `/echo <message>`: 入力内容を返すサンプル (autocomplete)
-- `/help`: コマンド一覧をページャ付き embed で表示するサンプル (pagination)
+- `/help`: コマンド一覧をページャ付き embed で表示するサンプル (pagination + String Select)
 - `/profile view`: DB に guild/member を保存し、実行回数を更新するサンプル
 - `/profile edit`: モーダルでプロフィール表示名を更新するサンプル
+- `/admin report-user-select`: ユーザーを選んで report するサンプル (User Select)
+- `/admin set-mod-role`: Mod ロールを選ぶサンプル (Role Select)
+- `/admin set-archive-channel`: アーカイブ用 text channel を選ぶサンプル (Channel Select)
 - Context menu "Get user profile" (User): 右クリックでユーザー情報を表示
+- Context menu "Report message" (Message): メッセージを右クリックして report ID と URL を取得
 
 ## Interaction Structure
 
@@ -118,6 +122,19 @@ interaction は種類ごとに handler/register を分けています。
 ### Context menu
 
 `src/events/interactionCreate/commands/contextMenu/items/` に User / Message context menu を置きます。`new ContextMenuCommand(build, execute)` を `contextMenuRegister.ts` で登録すると、`bun register` 時に slash command と一緒に Discord へ送られます。
+
+### Select menus
+
+`src/events/interactionCreate/components/selectMenu/items/` 配下に String / User / Role / Channel / Mentionable の select menu を置けます。`new Menu(() => customId, execute)` で定義し、`menuRegister.ts` で `menuHandler.register(...)` を呼びます。`MenuHandler` は内部で `CustomIdHandler<AnySelectMenuInteraction>` を使うため、execute の中で `interaction.isStringSelectMenu()` などで narrow して値を取り出します。
+
+サンプルとして 4 種類を同梱しています:
+
+- `helpSectionSelectMenu` (String): `/help` の section ジャンプ
+- `reportUserSelectMenu` (User): `/admin report-user-select`
+- `modRoleSelectMenu` (Role): `/admin set-mod-role`
+- `archiveChannelSelectMenu` (Channel, `ChannelType.GuildText` フィルタ): `/admin set-archive-channel`
+
+Mentionable select は `MentionableSelectMenuBuilder` を使って同じ `Menu` クラスで追加できます。
 
 ## Database
 
@@ -226,12 +243,14 @@ await handler.execute(interaction);
 expect(replies).toEqual([]);
 ```
 
-- `createCommandInteractionMock(name, replies, options?)`: slash command interaction
+- `createCommandInteractionMock(name, replies, options?)`: slash command interaction (`reply` のみ)
+- `createRichCommandInteractionMock(name, records, options?)`: `reply` / `editReply` / `followUp` / `deferReply` を記録し、`options.getSubcommand[Group]` をモックするリッチ版。`commandExecutor` の AsyncGenerator パスや `replyError` のフォールバック分岐をテストするときに使う
 - `createCustomIdInteractionMock(customId, replies, options?)`: button / modal / select menu interaction
 - `createContextMenuInteractionMock(name, replies, options?)`: user / message context menu interaction
 - `createAutocompleteInteractionMock(commandName, recorder, options?)`: autocomplete interaction
+- `createKindInteractionMock(kind, overrides?)`: `interaction.isXxx()` ガードだけを切り替える最小 mock。`buildInteractionContext` の分岐テスト向け
 
-実例は `src/events/interactionCreate/commands/chatInput/commandHandler.test.ts` / `commands/contextMenu/contextMenuHandler.test.ts` / `components/customIdHandler.test.ts` / `commands/autocomplete/autocompleteHandler.test.ts` を参照してください。
+実例は `src/events/interactionCreate/commands/chatInput/{commandHandler,commandExecutor,commandWithSubCommand,subCommand,subCommandGroup}.test.ts` / `src/events/interactionCreate/commands/contextMenu/contextMenuHandler.test.ts` / `src/events/interactionCreate/commands/autocomplete/autocompleteHandler.test.ts` / `src/events/interactionCreate/components/customIdHandler.test.ts` / `src/lib/{replyError,resultHandler,interactionContext,errorWebhook,embed}.test.ts` を参照してください。
 
 ## Scripts
 

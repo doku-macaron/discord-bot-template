@@ -1,4 +1,11 @@
-import { ApplicationIntegrationType, InteractionContextType, PermissionFlagsBits } from "discord.js";
+import {
+    ActionRowBuilder,
+    ApplicationIntegrationType,
+    InteractionContextType,
+    PermissionFlagsBits,
+    StringSelectMenuBuilder,
+} from "discord.js";
+import { CUSTOM_ID } from "@/constants/customIds";
 import { Command } from "@/events/interactionCreate/commands/chatInput/commandHandler";
 import { infoEmbed } from "@/lib/embed";
 import { buildPaginationRow } from "@/lib/pagination";
@@ -29,6 +36,20 @@ export const HELP_PAGES: ReadonlyArray<HelpSection> = [
     },
 ];
 
+function buildSectionSelectRow(currentTitle: string): ActionRowBuilder<StringSelectMenuBuilder> {
+    const menu = new StringSelectMenuBuilder()
+        .setCustomId(CUSTOM_ID.SELECT_MENU.HELP_SECTION)
+        .setPlaceholder("セクションへジャンプ")
+        .addOptions(
+            HELP_PAGES.map((section) => ({
+                label: section.title,
+                value: section.title,
+                default: section.title === currentTitle,
+            }))
+        );
+    return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(menu);
+}
+
 export function buildHelpPage(rawPage: number) {
     const total = HELP_PAGES.length;
     const page = Math.max(0, Math.min(total - 1, rawPage));
@@ -39,9 +60,10 @@ export function buildHelpPage(rawPage: number) {
 
     const description = section.entries.map((entry) => `**${entry.name}** — ${entry.description}`).join("\n");
     const embed = infoEmbed(`Help • ${section.title}`, description).setFooter({ text: `Page ${page + 1} / ${total}` });
-    const row = buildPaginationRow(HELP_FEATURE, page, total);
+    const paginationRow = buildPaginationRow(HELP_FEATURE, page, total);
+    const selectRow = buildSectionSelectRow(section.title);
 
-    return { embed, row, page };
+    return { embed, row: paginationRow, selectRow, page };
 }
 
 export const helpCommand = new Command(
@@ -53,7 +75,7 @@ export const helpCommand = new Command(
             .setIntegrationTypes(ApplicationIntegrationType.GuildInstall)
             .setDefaultMemberPermissions(PermissionFlagsBits.SendMessages),
     async (interaction) => {
-        const { embed, row } = buildHelpPage(0);
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const { embed, row, selectRow } = buildHelpPage(0);
+        await interaction.reply({ embeds: [embed], components: [row, selectRow] });
     }
 );

@@ -8,6 +8,12 @@ export const CUSTOM_ID = {
     INPUT: {
         PROFILE_DISPLAY_NAME: "profile:display-name",
     },
+    SELECT_MENU: {
+        HELP_SECTION: "help:section-select",
+        REPORT_USER: "report:user-select",
+        MOD_ROLE: "admin:mod-role-select",
+        ARCHIVE_CHANNEL: "admin:archive-channel-select",
+    },
 } as const;
 
 export const CUSTOM_ID_PATTERN = {
