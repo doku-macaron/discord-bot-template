@@ -12,6 +12,9 @@ import {
     ThumbnailBuilder,
 } from "discord.js";
 import { CUSTOM_ID } from "@/constants/customIds";
+import { getOrCreateGuild } from "@/db/query/guild/getOrCreateGuild";
+import { getOrCreateMember } from "@/db/query/member/getOrCreateMember";
+import { incrementMemberCommandCount } from "@/db/query/member/incrementMemberCommandCount";
 import { CommandWithSubCommand, SubCommand } from "@/events/interactionCreate/commands/chatInput/commandHandler";
 import { createProfileEditModal } from "@/events/interactionCreate/components/modal/items/profileEditModal";
 import { EMBED_COLOR } from "@/lib/embed";
@@ -34,10 +37,6 @@ profileCommand.register(
                 await interaction.reply("このコマンドはサーバー内で実行してください。");
                 return;
             }
-
-            const { getOrCreateGuild } = await import("@/db/query/guild/getOrCreateGuild");
-            const { getOrCreateMember } = await import("@/db/query/member/getOrCreateMember");
-            const { incrementMemberCommandCount } = await import("@/db/query/member/incrementMemberCommandCount");
 
             await getOrCreateGuild({
                 guildId: interaction.guildId,
