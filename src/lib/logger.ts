@@ -1,4 +1,5 @@
 import { isProduction } from "@/isProduction";
+import { captureException } from "@/lib/errorReporter";
 import { sendErrorToWebhook } from "@/lib/errorWebhook";
 import { formatInteractionContext, type InteractionContext } from "@/lib/interactionContext";
 
@@ -70,6 +71,7 @@ export const logger = {
                 stack: error.stack,
             },
         });
+        captureException(error, { category, interaction: context });
         sendErrorToWebhook(category, error, context).catch((webhookError: unknown) => {
             const normalizedWebhookError = normalizeError(webhookError instanceof Error ? webhookError : String(webhookError));
             writeLog({
