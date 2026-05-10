@@ -1,7 +1,7 @@
 import { type ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder, type SlashCommandSubcommandsOnlyBuilder } from "discord.js";
 import type { BaseItem, Handler } from "@/events/handler";
-import { SubCommand } from "@/events/interactionCreate/commands/chatInput/subCommand";
-import { SubCommandGroup } from "@/events/interactionCreate/commands/chatInput/subCommandGroup";
+import { SubCommand } from "@/events/interactionCreate/commands/chatInput/_core/subCommand";
+import { SubCommandGroup } from "@/events/interactionCreate/commands/chatInput/_core/subCommandGroup";
 import { logger } from "@/lib/logger";
 
 export class CommandWithSubCommand

@@ -1,6 +1,6 @@
 import { type ChatInputCommandInteraction, SlashCommandBuilder, type SlashCommandOptionsOnlyBuilder } from "discord.js";
 import type { BaseItem } from "@/events/handler";
-import { type CommandExecutor, executeCommand } from "@/events/interactionCreate/commands/chatInput/commandExecutor";
+import { type CommandExecutor, executeCommand } from "@/events/interactionCreate/commands/chatInput/_core/commandExecutor";
 
 export class Command implements BaseItem<SlashCommandOptionsOnlyBuilder, ChatInputCommandInteraction> {
     data: SlashCommandOptionsOnlyBuilder;
