@@ -41,7 +41,19 @@ bun dev
 ## Commands
 
 - `/ping`: Bot の応答確認
-- `/profile`: DB に guild/member を保存し、実行回数を更新するサンプル
+- `/profile view`: DB に guild/member を保存し、実行回数を更新するサンプル
+- `/profile edit`: モーダルでプロフィール表示名を更新するサンプル
+
+## Interaction Structure
+
+interaction は種類ごとに handler/register を分けています。
+
+- `src/events/interactionCreate/command`: slash command
+- `src/events/interactionCreate/interactions/buttons`: button
+- `src/events/interactionCreate/interactions/modals`: modal
+- `src/events/interactionCreate/interactions/menus`: select menu
+
+`src/lib/interactionContext.ts` と `src/lib/logger.ts` で、エラー時に command/customId/user/guild/channel/interactionId/ageMs をログへ出します。
 
 ## Database
 
