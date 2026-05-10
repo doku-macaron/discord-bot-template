@@ -76,17 +76,22 @@ bun dev
 ## Commands
 
 - `/ping`: Bot の応答確認
+- `/echo <message>`: 入力内容を返すサンプル (autocomplete)
+- `/help`: コマンド一覧をページャ付き embed で表示するサンプル (pagination)
 - `/profile view`: DB に guild/member を保存し、実行回数を更新するサンプル
 - `/profile edit`: モーダルでプロフィール表示名を更新するサンプル
+- Context menu "Get user profile" (User): 右クリックでユーザー情報を表示
 
 ## Interaction Structure
 
 interaction は種類ごとに handler/register を分けています。
 
 - `src/events/interactionCreate/command`: slash command
+- `src/events/interactionCreate/command/contextMenus`: user / message context menu
 - `src/events/interactionCreate/interactions/buttons`: button
 - `src/events/interactionCreate/interactions/modals`: modal
 - `src/events/interactionCreate/interactions/menus`: select menu
+- `src/events/interactionCreate/interactions/autocompletes`: autocomplete
 
 `src/lib/interactionContext.ts` と `src/lib/logger.ts` で、エラー時に command/customId/user/guild/channel/interactionId/ageMs をログへ出します。
 `NODE_ENV=production` では JSON line 形式、development では人間が読みやすい形式で出力します。
@@ -95,6 +100,22 @@ interaction は種類ごとに handler/register を分けています。
 `customId` は `feature:action` または `feature:action:id` の形式を推奨します。
 固定IDは `CUSTOM_ID`、動的IDに対応する正規表現は `CUSTOM_ID_PATTERN` にまとめます。
 単一プロセスの cooldown / rate-limit には `src/lib/cooldown.ts` の `CooldownStore` と `createCooldownKey` を使えます。
+
+### Embed helpers
+
+`src/lib/embed.ts` の `successEmbed` / `errorEmbed` / `infoEmbed` / `warnEmbed` で色を統一した `EmbedBuilder` を作れます。
+
+### Pagination
+
+`src/lib/pagination.ts` の `buildPaginationRow` で前/次ボタン付きの行を作り、`parsePaginationCustomId` + `nextPage` で button handler から新しいページに更新します。サンプルは `/help` コマンド (`src/events/interactionCreate/command/commands/help.ts`) と `helpPaginationButton` を参照してください。
+
+### Autocomplete
+
+`/echo` コマンドが autocomplete のサンプルです。option に `.setAutocomplete(true)` を付け、`src/events/interactionCreate/interactions/autocompletes/` 配下に `new Autocomplete(commandName, execute)` を定義して `autocompleteRegister.ts` で登録します。
+
+### Context menu
+
+`src/events/interactionCreate/command/contextMenus/` に User / Message context menu を置きます。`new ContextMenuCommand(build, execute)` を `contextMenuRegister.ts` で登録すると、`bun register` 時に slash command と一緒に Discord へ送られます。
 
 ## Database
 

@@ -1,7 +1,10 @@
 import "@/events/interactionCreate/command/commandRegister";
+import "@/events/interactionCreate/command/contextMenuRegister";
 
 import { type ClientEvents, type Events, MessageFlags } from "discord.js";
 import { commandHandler } from "@/events/interactionCreate/command/commandHandlerInstance";
+import { contextMenuHandler } from "@/events/interactionCreate/command/contextMenuHandlerInstance";
+import { autocompleteHandler } from "@/events/interactionCreate/interactions/autocompleteRegister";
 import { buttonHandler } from "@/events/interactionCreate/interactions/buttonRegister";
 import { menuHandler } from "@/events/interactionCreate/interactions/menuRegister";
 import { modalHandler } from "@/events/interactionCreate/interactions/modalRegister";
@@ -42,6 +45,14 @@ export const interactionCreateEvent: (...args: ClientEvents[Events.InteractionCr
             }
             if (interaction.isChatInputCommand()) {
                 await commandHandler.execute(interaction);
+                return;
+            }
+            if (interaction.isContextMenuCommand()) {
+                await contextMenuHandler.execute(interaction);
+                return;
+            }
+            if (interaction.isAutocomplete()) {
+                await autocompleteHandler.execute(interaction);
                 return;
             }
 
