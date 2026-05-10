@@ -64,10 +64,12 @@ export function nextPage(action: PaginationAction, current: number, totalPages: 
 }
 
 export function buildPaginationRow(feature: string, currentPage: number, totalPages: number): ActionRowBuilder<ButtonBuilder> {
-    const totalSafe = Math.max(totalPages, 1);
-    const page = clampPage(currentPage, totalSafe);
-    const atFirst = page <= 0;
-    const atLast = page >= totalSafe - 1;
+    const empty = totalPages <= 0;
+    const total = empty ? 0 : totalPages;
+    const page = empty ? 0 : clampPage(currentPage, total);
+    const atFirst = empty || page <= 0;
+    const atLast = empty || page >= total - 1;
+    const indicatorLabel = empty ? "0 / 0" : `${page + 1} / ${total}`;
 
     const buttons = [
         new ButtonBuilder()
@@ -82,7 +84,7 @@ export function buildPaginationRow(feature: string, currentPage: number, totalPa
             .setDisabled(atFirst),
         new ButtonBuilder()
             .setCustomId(`${feature}:pagination:indicator`)
-            .setLabel(`${page + 1} / ${totalSafe}`)
+            .setLabel(indicatorLabel)
             .setStyle(ButtonStyle.Secondary)
             .setDisabled(true),
         new ButtonBuilder()

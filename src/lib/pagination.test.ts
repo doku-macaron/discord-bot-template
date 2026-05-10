@@ -1,5 +1,26 @@
 import { describe, expect, test } from "bun:test";
-import { buildPaginationCustomId, clampPage, nextPage, paginationCustomIdPattern, parsePaginationCustomId } from "@/lib/pagination";
+import type { ButtonBuilder } from "discord.js";
+import {
+    buildPaginationCustomId,
+    buildPaginationRow,
+    clampPage,
+    nextPage,
+    paginationCustomIdPattern,
+    parsePaginationCustomId,
+} from "@/lib/pagination";
+
+type ButtonSnapshot = { customId: string; label: string; disabled: boolean };
+
+function snapshotRow(row: ReturnType<typeof buildPaginationRow>): Array<ButtonSnapshot> {
+    return (row.components as Array<ButtonBuilder>).map((button) => {
+        const data = button.data as { custom_id?: string; label?: string; disabled?: boolean };
+        return {
+            customId: data.custom_id ?? "",
+            label: data.label ?? "",
+            disabled: data.disabled === true,
+        };
+    });
+}
 
 describe("pagination customId", () => {
     test("builds and parses customId", () => {
@@ -56,5 +77,61 @@ describe("nextPage", () => {
     test("next increments with clamp", () => {
         expect(nextPage("next", 2, 5)).toBe(3);
         expect(nextPage("next", 4, 5)).toBe(4);
+    });
+});
+
+describe("buildPaginationRow", () => {
+    test("first page disables first/prev and indicator", () => {
+        const snapshot = snapshotRow(buildPaginationRow("help", 0, 5));
+
+        expect(snapshot).toEqual([
+            { customId: "help:pagination:first:0", label: "«", disabled: true },
+            { customId: "help:pagination:prev:0", label: "‹", disabled: true },
+            { customId: "help:pagination:indicator", label: "1 / 5", disabled: true },
+            { customId: "help:pagination:next:0", label: "›", disabled: false },
+            { customId: "help:pagination:last:0", label: "»", disabled: false },
+        ]);
+    });
+
+    test("middle page enables all navigation", () => {
+        const snapshot = snapshotRow(buildPaginationRow("help", 2, 5));
+
+        expect(snapshot.map((b) => b.disabled)).toEqual([false, false, true, false, false]);
+        expect(snapshot.map((b) => b.customId)).toEqual([
+            "help:pagination:first:2",
+            "help:pagination:prev:2",
+            "help:pagination:indicator",
+            "help:pagination:next:2",
+            "help:pagination:last:2",
+        ]);
+        expect(snapshot[2]?.label).toBe("3 / 5");
+    });
+
+    test("last page disables next/last", () => {
+        const snapshot = snapshotRow(buildPaginationRow("help", 4, 5));
+
+        expect(snapshot.map((b) => b.disabled)).toEqual([false, false, true, true, true]);
+        expect(snapshot[2]?.label).toBe("5 / 5");
+    });
+
+    test("clamps currentPage beyond totalPages", () => {
+        const snapshot = snapshotRow(buildPaginationRow("help", 99, 3));
+
+        expect(snapshot.map((b) => b.customId)).toEqual([
+            "help:pagination:first:2",
+            "help:pagination:prev:2",
+            "help:pagination:indicator",
+            "help:pagination:next:2",
+            "help:pagination:last:2",
+        ]);
+        expect(snapshot[2]?.label).toBe("3 / 3");
+        expect(snapshot.map((b) => b.disabled)).toEqual([false, false, true, true, true]);
+    });
+
+    test("empty (totalPages <= 0) disables all and shows 0 / 0", () => {
+        const snapshot = snapshotRow(buildPaginationRow("help", 0, 0));
+
+        expect(snapshot.map((b) => b.disabled)).toEqual([true, true, true, true, true]);
+        expect(snapshot[2]?.label).toBe("0 / 0");
     });
 });
