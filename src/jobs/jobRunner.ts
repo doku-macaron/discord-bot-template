@@ -1,6 +1,6 @@
 import type { Job } from "@/jobs/job";
 import { logger } from "@/lib/logger";
-import { registerShutdownTask } from "@/lib/shutdown";
+import { registerShutdownTask, SHUTDOWN_PRIORITY } from "@/lib/shutdown";
 
 const intervals = new Map<string, ReturnType<typeof setInterval>>();
 let started = false;
@@ -45,6 +45,7 @@ export function startJobs(jobs: ReadonlyArray<Job>): void {
         shutdownRegistered = true;
         registerShutdownTask({
             name: "scheduled-jobs",
+            priority: SHUTDOWN_PRIORITY.JOBS,
             run: () => {
                 stopJobs();
             },

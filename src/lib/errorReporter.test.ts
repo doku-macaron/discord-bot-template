@@ -43,4 +43,22 @@ describe("errorReporter", () => {
         captureException(new Error("real"));
         await new Promise((resolve) => setTimeout(resolve, 0));
     });
+
+    test("swallows thenable (non-Promise) rejections", async () => {
+        function makeRejectingThenable(): PromiseLike<void> {
+            const obj: Record<string, unknown> = {};
+            // biome-ignore lint/suspicious/noThenProperty: intentionally testing thenable detection
+            obj.then = (_resolve: unknown, reject: ((reason: unknown) => void) | undefined) => {
+                reject?.(new Error("thenable fail"));
+            };
+            return obj as unknown as PromiseLike<void>;
+        }
+
+        setErrorReporter({
+            captureException: () => makeRejectingThenable() as unknown as Promise<void>,
+        });
+
+        expect(() => captureException(new Error("real"))).not.toThrow();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+    });
 });

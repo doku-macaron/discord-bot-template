@@ -25,11 +25,19 @@ export function resetErrorReporter(): void {
     reporter = noopReporter;
 }
 
+function isThenable(value: unknown): value is PromiseLike<unknown> {
+    return (
+        value !== null &&
+        (typeof value === "object" || typeof value === "function") &&
+        typeof (value as PromiseLike<unknown>).then === "function"
+    );
+}
+
 export function captureException(error: Error, context?: ErrorReporterContext): void {
     try {
         const result = reporter.captureException(error, context);
-        if (result instanceof Promise) {
-            result.catch(() => {
+        if (isThenable(result)) {
+            Promise.resolve(result).catch(() => {
                 // swallow reporter errors to avoid feedback loops with logger.error
             });
         }

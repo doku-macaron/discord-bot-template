@@ -179,7 +179,8 @@ reporter が throw / reject しても呼び出し元には伝搬しません（w
 
 - 進行中 interaction の待機タイムアウト: 10 秒（既定）
 - 各タスクのタイムアウト: 5 秒（既定）
-- 追加の close 処理は `registerShutdownTask({ name, run })` で登録できます
+- 追加の close 処理は `registerShutdownTask({ name, priority?, run })` で登録できます
+- task は `priority` 昇順で実行されます（既定 100）。プリセットは `SHUTDOWN_PRIORITY.JOBS` (10) → `DISCORD_CLIENT` (100) → `DATABASE` (200)。jobs を最初に止めて新規 interaction や interval を抑え、その後 client / DB を閉じる順を保証するためです
 
 PM2 reload や Docker stop のときに、処理中の interaction や DB transaction を取りこぼさないための仕組みです。
 

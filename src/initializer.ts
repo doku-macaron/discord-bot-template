@@ -4,7 +4,7 @@ import { closeDatabase } from "@/db";
 import { clientReadyEvent } from "@/events/clientReady";
 import { interactionCreateEvent } from "@/events/interactionCreate";
 import { logger } from "@/lib/logger";
-import { registerShutdownTask, runShutdown } from "@/lib/shutdown";
+import { registerShutdownTask, runShutdown, SHUTDOWN_PRIORITY } from "@/lib/shutdown";
 
 export function setupProcessHandlers() {
     process.on("uncaughtException", (error) => {
@@ -17,6 +17,7 @@ export function setupProcessHandlers() {
 
     registerShutdownTask({
         name: "discord-client",
+        priority: SHUTDOWN_PRIORITY.DISCORD_CLIENT,
         run: async () => {
             await client.destroy();
         },
@@ -24,6 +25,7 @@ export function setupProcessHandlers() {
 
     registerShutdownTask({
         name: "database",
+        priority: SHUTDOWN_PRIORITY.DATABASE,
         run: async () => {
             await closeDatabase();
         },
