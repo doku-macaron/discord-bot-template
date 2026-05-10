@@ -182,8 +182,10 @@ expect(replies).toEqual([]);
 
 - `createCommandInteractionMock(name, replies, options?)`: slash command interaction
 - `createCustomIdInteractionMock(customId, replies, options?)`: button / modal / select menu interaction
+- `createContextMenuInteractionMock(name, replies, options?)`: user / message context menu interaction
+- `createAutocompleteInteractionMock(commandName, recorder, options?)`: autocomplete interaction
 
-実例は `src/events/interactionCreate/command/commandHandler.test.ts` および `src/events/interactionCreate/interactions/customIdHandler.test.ts` を参照してください。
+実例は `src/events/interactionCreate/command/commandHandler.test.ts` / `contextMenuHandler.test.ts` / `src/events/interactionCreate/interactions/customIdHandler.test.ts` / `autocompleteHandler.test.ts` を参照してください。
 
 ## Scripts
 

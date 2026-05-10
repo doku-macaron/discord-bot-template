@@ -2,6 +2,7 @@ import type {
     ApplicationCommandOptionChoiceData,
     AutocompleteInteraction,
     ChatInputCommandInteraction,
+    ContextMenuCommandInteraction,
     Interaction,
     RepliableInteraction,
 } from "discord.js";
@@ -70,6 +71,21 @@ export function createCommandInteractionMock(
             replies.push(payload);
         },
     } as unknown as ChatInputCommandInteraction;
+}
+
+export function createContextMenuInteractionMock(
+    commandName: string,
+    replies: Array<MockReplyPayload>,
+    options: MockOptions = {}
+): ContextMenuCommandInteraction {
+    return {
+        commandName,
+        deferred: options.deferred ?? false,
+        replied: options.replied ?? false,
+        reply: async (payload: MockReplyPayload) => {
+            replies.push(payload);
+        },
+    } as unknown as ContextMenuCommandInteraction;
 }
 
 export function createCustomIdInteractionMock(

@@ -1,5 +1,4 @@
 import { describe, expect, test } from "bun:test";
-import type { ButtonBuilder } from "discord.js";
 import {
     buildPaginationCustomId,
     buildPaginationRow,
@@ -12,12 +11,12 @@ import {
 type ButtonSnapshot = { customId: string; label: string; disabled: boolean };
 
 function snapshotRow(row: ReturnType<typeof buildPaginationRow>): Array<ButtonSnapshot> {
-    return (row.components as Array<ButtonBuilder>).map((button) => {
-        const data = button.data as { custom_id?: string; label?: string; disabled?: boolean };
+    return row.toJSON().components.map((component) => {
+        const button = component as { custom_id?: string; label?: string; disabled?: boolean };
         return {
-            customId: data.custom_id ?? "",
-            label: data.label ?? "",
-            disabled: data.disabled === true,
+            customId: button.custom_id ?? "",
+            label: button.label ?? "",
+            disabled: button.disabled === true,
         };
     });
 }
