@@ -1,13 +1,12 @@
-import "@/events/interactionCreate/command/commandRegister";
-import "@/events/interactionCreate/command/contextMenuRegister";
-
 import { type ClientEvents, type Events, MessageFlags } from "discord.js";
-import { commandHandler } from "@/events/interactionCreate/command/commandHandlerInstance";
-import { contextMenuHandler } from "@/events/interactionCreate/command/contextMenuHandlerInstance";
-import { autocompleteHandler } from "@/events/interactionCreate/interactions/autocompleteRegister";
-import { buttonHandler } from "@/events/interactionCreate/interactions/buttonRegister";
-import { menuHandler } from "@/events/interactionCreate/interactions/menuRegister";
-import { modalHandler } from "@/events/interactionCreate/interactions/modalRegister";
+import {
+    autocompleteHandler,
+    buttonHandler,
+    commandHandler,
+    contextMenuHandler,
+    menuHandler,
+    modalHandler,
+} from "@/events/interactionCreate/setup";
 import { buildInteractionContext } from "@/lib/interactionContext";
 import { logger } from "@/lib/logger";
 import { replyError } from "@/lib/replyError";

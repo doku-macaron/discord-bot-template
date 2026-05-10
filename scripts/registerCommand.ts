@@ -1,11 +1,8 @@
 import "@/env";
-import "@/events/interactionCreate/command/commandRegister";
-import "@/events/interactionCreate/command/contextMenuRegister";
 
 import { REST, type RESTPutAPIApplicationCommandsResult, Routes } from "discord.js";
 import { getEnv } from "@/env";
-import { commandHandler } from "@/events/interactionCreate/command/commandHandlerInstance";
-import { contextMenuHandler } from "@/events/interactionCreate/command/contextMenuHandlerInstance";
+import { commandHandler, contextMenuHandler } from "@/events/interactionCreate/setup";
 
 const env = getEnv("register");
 
