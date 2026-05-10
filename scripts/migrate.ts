@@ -8,11 +8,13 @@ if (process.env.NODE_ENV !== "development") {
     process.exit(1);
 }
 
-const db = createPGliteDb();
+const { db, close } = createPGliteDb();
 
 await migrate(db, {
     migrationsFolder: "./drizzle",
 });
+
+await close();
 
 console.log("Local migration complete");
 process.exit(0);

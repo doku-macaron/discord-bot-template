@@ -7,10 +7,12 @@ import { getEnv } from "@/env";
 
 export function createPostgresDb() {
     const env = getEnv("postgres");
+    const client = postgres(env.DATABASE_URL);
 
-    return drizzle({
-        client: postgres(env.DATABASE_URL),
-        schema,
-        casing: "snake_case",
-    });
+    return {
+        db: drizzle({ client, schema, casing: "snake_case" }),
+        close: async () => {
+            await client.end();
+        },
+    };
 }

@@ -7,10 +7,12 @@ import { getEnv } from "@/env";
 
 export function createPGliteDb() {
     const env = getEnv("pglite");
+    const client = new PGlite(env.DATABASE_URL_DEV);
 
-    return drizzle({
-        client: new PGlite(env.DATABASE_URL_DEV),
-        schema,
-        casing: "snake_case",
-    });
+    return {
+        db: drizzle({ client, schema, casing: "snake_case" }),
+        close: async () => {
+            await client.close();
+        },
+    };
 }
