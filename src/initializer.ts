@@ -1,22 +1,44 @@
 import { Events } from "discord.js";
 import { client } from "@/client";
+import { closeDatabase } from "@/db";
 import { clientReadyEvent } from "@/events/clientReady";
 import { interactionCreateEvent } from "@/events/interactionCreate";
+import { logger } from "@/lib/logger";
+import { registerShutdownTask, runShutdown } from "@/lib/shutdown";
 
 export function setupProcessHandlers() {
     process.on("uncaughtException", (error) => {
-        console.error(error);
+        logger.error("Core", error instanceof Error ? error : new Error(String(error)));
     });
 
-    process.on("unhandledRejection", (reason, promise) => {
-        console.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
+    process.on("unhandledRejection", (reason) => {
+        logger.error("Core", reason instanceof Error ? reason : new Error(String(reason)));
     });
 
-    function shutdown(signal: NodeJS.Signals) {
-        console.log(`Received ${signal}, shutting down`);
-        client.destroy();
-        process.exit(0);
-    }
+    registerShutdownTask({
+        name: "discord-client",
+        run: async () => {
+            await client.destroy();
+        },
+    });
+
+    registerShutdownTask({
+        name: "database",
+        run: async () => {
+            await closeDatabase();
+        },
+    });
+
+    let exiting = false;
+    const shutdown = (signal: NodeJS.Signals) => {
+        if (exiting) {
+            return;
+        }
+        exiting = true;
+        runShutdown(signal).finally(() => {
+            process.exit(0);
+        });
+    };
 
     process.on("SIGINT", shutdown);
     process.on("SIGTERM", shutdown);
