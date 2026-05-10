@@ -1,4 +1,4 @@
-import { ApplicationIntegrationType, EmbedBuilder, InteractionContextType, PermissionFlagsBits, userMention } from "discord.js";
+import { ApplicationIntegrationType, Colors, EmbedBuilder, InteractionContextType, PermissionFlagsBits, userMention } from "discord.js";
 import { Command } from "@/events/interactionCreate/commands/chatInput/commandHandler";
 
 export const pingCommand = new Command(
@@ -12,7 +12,7 @@ export const pingCommand = new Command(
     async (interaction) => {
         const embed = new EmbedBuilder()
             .setTitle("Pong!")
-            .setColor(0x5865f2)
+            .setColor(Colors.Blurple)
             .addFields([
                 {
                     name: "Latency",
