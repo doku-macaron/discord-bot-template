@@ -153,6 +153,10 @@ export const myJob: Job = {
 
 shutdown task として interval が clear されるため、`registerShutdownTask` を別途呼ぶ必要はありません。サンプルは `src/jobs/jobs/uptimeJob.ts`。
 
+- `intervalMs` は正の有限な数値である必要があります。0 / 負値 / `NaN` / `Infinity` の job は warn ログを出してスキップします
+- 同じ job の前回 tick がまだ走っている間は、新しい tick は skip されます（per-job overlap guard）。slow job が重複実行される事故を防ぐためです
+- 失敗時のログは `Job '<name>' failed` を message に、元のエラーを `cause` に含めます
+
 ## Error reporting
 
 `src/lib/errorReporter.ts` に外部エラートラッカー (Sentry など) の差し込み口があります。`logger.error` が呼ばれるたびに `captureException` が走り、既定では何もしません。
