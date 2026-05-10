@@ -1,10 +1,10 @@
-import { EmbedBuilder } from "discord.js";
+import { Colors, EmbedBuilder } from "discord.js";
 
 export const EMBED_COLOR = {
-    success: 0x57f287,
-    error: 0xed4245,
-    info: 0x5865f2,
-    warn: 0xfee75c,
+    success: Colors.Green,
+    error: Colors.Red,
+    info: Colors.Blurple,
+    warn: Colors.Yellow,
 } as const;
 
 function build(color: number, title: string, description?: string): EmbedBuilder {
