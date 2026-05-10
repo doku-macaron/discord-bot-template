@@ -1,4 +1,4 @@
-import { MessageFlags } from "discord.js";
+import { channelMention, MessageFlags } from "discord.js";
 import { CUSTOM_ID } from "@/constants/customIds";
 import { Menu } from "@/events/interactionCreate/components/selectMenu/menuHandler";
 import { successEmbed } from "@/lib/embed";
@@ -16,7 +16,7 @@ export const archiveChannelSelectMenu = new Menu(
             return;
         }
 
-        const embed = successEmbed("Archive channel updated", `Selected channel: <#${channelId}>`);
+        const embed = successEmbed("Archive channel updated", `Selected channel: ${channelMention(channelId)}`);
         await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 );

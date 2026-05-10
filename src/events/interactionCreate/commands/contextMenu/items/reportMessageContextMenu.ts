@@ -1,4 +1,4 @@
-import { ApplicationCommandType, ApplicationIntegrationType, InteractionContextType, MessageFlags } from "discord.js";
+import { ApplicationCommandType, ApplicationIntegrationType, InteractionContextType, MessageFlags, userMention } from "discord.js";
 import { ContextMenuCommand } from "@/events/interactionCreate/commands/contextMenu/contextMenuHandler";
 import { infoEmbed } from "@/lib/embed";
 
@@ -16,7 +16,7 @@ export const reportMessageContextMenu = new ContextMenuCommand(
 
         const message = interaction.targetMessage;
         const embed = infoEmbed("Message reported").addFields([
-            { name: "Author", value: `<@${message.author.id}>`, inline: true },
+            { name: "Author", value: userMention(message.author.id), inline: true },
             { name: "Message ID", value: message.id, inline: true },
             { name: "Link", value: message.url },
         ]);

@@ -1,4 +1,5 @@
 import { afterAll, beforeEach, describe, expect, mock, test } from "bun:test";
+import * as actualDiscordJs from "discord.js";
 
 type CapturedSend = { content?: string };
 
@@ -19,8 +20,11 @@ class FakeWebhookClient {
 const previousWebhookUrl = process.env.WEBHOOK_URL;
 process.env.WEBHOOK_URL = "https://discord.com/api/webhooks/123/test-token";
 
+// Only the WebhookClient constructor needs swapping out; keep the real
+// formatter helpers (bold / codeBlock / ...) so the test does not need
+// updating each time errorWebhook.ts adopts another helper.
 mock.module("discord.js", () => ({
-    codeBlock: (lang: string, content: string) => `\`\`\`${lang}\n${content}\n\`\`\``,
+    ...actualDiscordJs,
     WebhookClient: FakeWebhookClient,
 }));
 

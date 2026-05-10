@@ -1,4 +1,4 @@
-import { codeBlock, WebhookClient } from "discord.js";
+import { bold, codeBlock, WebhookClient } from "discord.js";
 import { getEnv } from "@/env";
 import { formatInteractionContext, type InteractionContext } from "@/lib/interactionContext";
 
@@ -41,6 +41,6 @@ export async function sendErrorToWebhook(category: string, error: Error, context
         .join("\n");
 
     await client.send({
-        content: truncateContent(`**Discord Bot Error**\n${codeBlock("ml", body)}`),
+        content: truncateContent(`${bold("Discord Bot Error")}\n${codeBlock("ml", body)}`),
     });
 }

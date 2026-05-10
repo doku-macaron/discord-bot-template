@@ -1,4 +1,4 @@
-import { MessageFlags } from "discord.js";
+import { MessageFlags, roleMention } from "discord.js";
 import { CUSTOM_ID } from "@/constants/customIds";
 import { Menu } from "@/events/interactionCreate/components/selectMenu/menuHandler";
 import { successEmbed } from "@/lib/embed";
@@ -16,7 +16,7 @@ export const modRoleSelectMenu = new Menu(
             return;
         }
 
-        const embed = successEmbed("Mod role updated", `Selected role: <@&${roleId}>`);
+        const embed = successEmbed("Mod role updated", `Selected role: ${roleMention(roleId)}`);
         await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 );
