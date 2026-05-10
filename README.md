@@ -25,6 +25,7 @@ CLIENT_ID="Discord application client ID"
 GUILD_ID="Optional: development guild ID"
 DATABASE_URL="Production PostgreSQL URL"
 DATABASE_URL_DEV="./.pglite"
+WEBHOOK_URL="Optional: Discord webhook URL for error reports"
 ```
 
 ## Development
@@ -54,6 +55,7 @@ interaction は種類ごとに handler/register を分けています。
 - `src/events/interactionCreate/interactions/menus`: select menu
 
 `src/lib/interactionContext.ts` と `src/lib/logger.ts` で、エラー時に command/customId/user/guild/channel/interactionId/ageMs をログへ出します。
+`WEBHOOK_URL` を設定している場合だけ、同じ内容を Discord webhook にも通知します。
 
 ## Database
 

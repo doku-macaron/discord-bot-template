@@ -6,6 +6,7 @@ export const envVariables = z.object({
     GUILD_ID: z.string().optional(),
     DATABASE_URL: z.string().optional(),
     DATABASE_URL_DEV: z.string().default("./.pglite"),
+    WEBHOOK_URL: z.string().optional(),
 });
 
 if (process.env.NODE_ENV !== "setup") {

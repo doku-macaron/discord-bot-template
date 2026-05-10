@@ -1,3 +1,4 @@
+import { sendErrorToWebhook } from "@/lib/errorWebhook";
 import { formatInteractionContext, type InteractionContext } from "@/lib/interactionContext";
 
 type Category = "Core" | "Bot" | "Discord" | "Database" | "Misc";
@@ -26,5 +27,9 @@ export const logger = {
     error(category: Category, message: string | Error, context?: InteractionContext) {
         const error = normalizeError(message);
         console.error(`[${category}] ${appendContext(error.stack ?? `${error.name}: ${error.message}`, context)}`);
+        sendErrorToWebhook(category, error, context).catch((webhookError: unknown) => {
+            const normalizedWebhookError = normalizeError(webhookError instanceof Error ? webhookError : String(webhookError));
+            console.warn(`[${category}] Failed to send error webhook: ${normalizedWebhookError.message}`);
+        });
     },
 };
