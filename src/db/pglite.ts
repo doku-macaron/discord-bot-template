@@ -2,7 +2,7 @@ import "@/env";
 
 import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
-import { schema } from "@/db/schema";
+import { relations } from "@/db/schema";
 import { getEnv } from "@/env";
 
 export function createPGliteDb() {
@@ -10,7 +10,7 @@ export function createPGliteDb() {
     const client = new PGlite(env.DATABASE_URL_DEV);
 
     return {
-        db: drizzle({ client, schema, casing: "snake_case" }),
+        db: drizzle({ client, relations }),
         close: async () => {
             await client.close();
         },

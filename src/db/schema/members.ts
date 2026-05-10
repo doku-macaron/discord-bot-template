@@ -1,9 +1,9 @@
-import { integer, pgTable, text, timestamp, unique } from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
+import { integer, snakeCase, text, timestamp, unique } from "drizzle-orm/pg-core";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/zod";
 import type { z } from "zod";
 import { guilds } from "@/db/schema/guilds";
 
-export const members = pgTable(
+export const members = snakeCase.table(
     "members",
     {
         id: integer().primaryKey().generatedAlwaysAsIdentity(),

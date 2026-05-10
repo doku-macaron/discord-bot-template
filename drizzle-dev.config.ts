@@ -6,7 +6,6 @@ export default {
     out: "drizzle",
     dialect: "postgresql",
     driver: "pglite",
-    casing: "snake_case",
     dbCredentials: {
         url: process.env.DATABASE_URL_DEV || "./.pglite",
     },

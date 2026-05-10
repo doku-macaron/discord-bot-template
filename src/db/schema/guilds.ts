@@ -1,8 +1,8 @@
-import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
+import { snakeCase, text, timestamp } from "drizzle-orm/pg-core";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/zod";
 import type { z } from "zod";
 
-export const guilds = pgTable("guilds", {
+export const guilds = snakeCase.table("guilds", {
     guildId: text().primaryKey(),
     createdAt: timestamp().notNull().defaultNow(),
     updatedAt: timestamp()

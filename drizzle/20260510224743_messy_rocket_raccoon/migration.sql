@@ -1,8 +1,10 @@
 CREATE TABLE "guilds" (
-	"guild_id" text PRIMARY KEY NOT NULL,
+	"guild_id" text PRIMARY KEY,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"name" text DEFAULT '' NOT NULL
+	"name" text DEFAULT '' NOT NULL,
+	"joined_at" timestamp DEFAULT now() NOT NULL,
+	"left_at" timestamp
 );
 --> statement-breakpoint
 CREATE TABLE "members" (
@@ -16,4 +18,4 @@ CREATE TABLE "members" (
 	CONSTRAINT "members_guild_id_user_id_unique" UNIQUE("guild_id","user_id")
 );
 --> statement-breakpoint
-ALTER TABLE "members" ADD CONSTRAINT "members_guild_id_guilds_guild_id_fk" FOREIGN KEY ("guild_id") REFERENCES "public"."guilds"("guild_id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "members" ADD CONSTRAINT "members_guild_id_guilds_guild_id_fkey" FOREIGN KEY ("guild_id") REFERENCES "guilds"("guild_id") ON DELETE CASCADE;

@@ -5,31 +5,41 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-interface Column {
+interface TableEntity {
+    entityType: "tables";
     name: string;
+    schema: string;
+}
+
+interface ColumnEntity {
+    entityType: "columns";
+    name: string;
+    table: string;
+    schema: string;
     type: string;
-    primaryKey?: boolean;
-    notNull?: boolean;
+    notNull: boolean;
 }
 
-interface ForeignKey {
+interface ForeignKeyEntity {
+    entityType: "fks";
+    table: string;
+    schema: string;
+    columns: Array<string>;
     tableTo: string;
-    columnsFrom: Array<string>;
+    schemaTo: string;
 }
 
-interface Table {
-    columns: Record<string, Column>;
-    foreignKeys?: Record<string, ForeignKey>;
+interface PrimaryKeyEntity {
+    entityType: "pks";
+    table: string;
+    schema: string;
+    columns: Array<string>;
 }
+
+type DdlEntity = TableEntity | ColumnEntity | ForeignKeyEntity | PrimaryKeyEntity | { entityType: string };
 
 interface Snapshot {
-    tables: Record<string, Table>;
-}
-
-interface Journal {
-    entries: Array<{
-        tag: string;
-    }>;
+    ddl: Array<DdlEntity>;
 }
 
 function readJson<T>(filePath: string): T {
@@ -55,22 +65,25 @@ function cleanType(type: string | undefined): string {
 }
 
 function getLatestSnapshot(): Snapshot {
-    const metaDir = path.join(__dirname, "..", "drizzle", "meta");
-    const journalPath = path.join(metaDir, "_journal.json");
+    const drizzleDir = path.join(__dirname, "..", "drizzle");
 
-    if (!fs.existsSync(journalPath)) {
-        throw new Error(`Journal not found: ${journalPath}`);
+    if (!fs.existsSync(drizzleDir)) {
+        throw new Error(`Drizzle directory not found: ${drizzleDir}`);
     }
 
-    const journal = readJson<Journal>(journalPath);
-    const latestEntry = journal.entries.at(-1);
+    const migrationDirs = fs
+        .readdirSync(drizzleDir, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory() && /^\d/.test(entry.name))
+        .map((entry) => entry.name)
+        .sort();
 
-    if (!latestEntry) {
-        throw new Error("_journal.json has no entries.");
+    const latest = migrationDirs.at(-1);
+
+    if (!latest) {
+        throw new Error(`No migration folders found in ${drizzleDir}`);
     }
 
-    const snapshotNumber = latestEntry.tag.split("_")[0];
-    const snapshotPath = path.join(metaDir, `${snapshotNumber}_snapshot.json`);
+    const snapshotPath = path.join(drizzleDir, latest, "snapshot.json");
 
     if (!fs.existsSync(snapshotPath)) {
         throw new Error(`Snapshot not found: ${snapshotPath}`);
@@ -80,29 +93,56 @@ function getLatestSnapshot(): Snapshot {
 }
 
 function generateERDiagram(snapshot: Snapshot): string {
+    const tables = new Map<
+        string,
+        { columns: Array<ColumnEntity>; primaryKeyColumns: Set<string>; foreignKeys: Array<ForeignKeyEntity> }
+    >();
+
+    for (const entity of snapshot.ddl) {
+        if (entity.entityType === "tables") {
+            const t = entity as TableEntity;
+            const key = `${t.schema}.${t.name}`;
+            tables.set(key, { columns: [], primaryKeyColumns: new Set(), foreignKeys: [] });
+        }
+    }
+
+    for (const entity of snapshot.ddl) {
+        if (entity.entityType === "columns") {
+            const c = entity as ColumnEntity;
+            tables.get(`${c.schema}.${c.table}`)?.columns.push(c);
+        } else if (entity.entityType === "pks") {
+            const pk = entity as PrimaryKeyEntity;
+            const bucket = tables.get(`${pk.schema}.${pk.table}`);
+            for (const col of pk.columns) {
+                bucket?.primaryKeyColumns.add(col);
+            }
+        } else if (entity.entityType === "fks") {
+            const fk = entity as ForeignKeyEntity;
+            tables.get(`${fk.schema}.${fk.table}`)?.foreignKeys.push(fk);
+        }
+    }
+
     const lines: Array<string> = ["erDiagram"];
 
-    for (const [rawTableName, table] of Object.entries(snapshot.tables)) {
+    for (const [rawTableName, table] of tables) {
         const tableName = cleanName(rawTableName);
-
         lines.push(`  ${tableName} {`);
 
-        for (const [rawColumnName, column] of Object.entries(table.columns)) {
-            const columnName = cleanName(rawColumnName);
-            const keyPart = column.primaryKey ? " PK" : "";
+        for (const column of table.columns) {
+            const keyPart = table.primaryKeyColumns.has(column.name) ? " PK" : "";
             const commentPart = column.notNull ? ' "not null"' : "";
-
-            lines.push(`    ${cleanType(column.type)} ${columnName}${keyPart}${commentPart}`);
+            lines.push(`    ${cleanType(column.type)} ${cleanName(column.name)}${keyPart}${commentPart}`);
         }
 
         lines.push("  }", "");
     }
 
-    for (const [rawTableName, table] of Object.entries(snapshot.tables)) {
+    for (const [rawTableName, table] of tables) {
         const fromTable = cleanName(rawTableName);
 
-        for (const foreignKey of Object.values(table.foreignKeys ?? {})) {
-            lines.push(`  ${fromTable} }o--|| ${cleanName(foreignKey.tableTo)} : "${foreignKey.columnsFrom.join("_")}"`);
+        for (const fk of table.foreignKeys) {
+            const toTable = cleanName(`${fk.schemaTo}.${fk.tableTo}`);
+            lines.push(`  ${fromTable} }o--|| ${toTable} : "${fk.columns.join("_")}"`);
         }
     }
 
