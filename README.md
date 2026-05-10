@@ -24,7 +24,7 @@ bun install
 - `README.md` の Bot 名・説明・コマンド一覧
 - `LICENSE` の `Copyright` 行（Apache-2.0 のままにする場合）
 - `.github/CODEOWNERS` のオーナー
-- 不要なサンプル (`src/events/interactionCreate/commands/chatInput/items/`, `commands/contextMenu/items/`, `components/*/items/`)
+- 不要なサンプル (`src/events/interactionCreate/commands/chatInput/items/`, `src/events/interactionCreate/commands/contextMenu/items/`, `src/events/interactionCreate/components/*/items/`)
 
 ## Requirements
 
