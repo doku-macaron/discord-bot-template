@@ -79,4 +79,47 @@ describe("runShutdown task ordering", () => {
 
         expect(runs).toEqual(["task"]);
     });
+
+    test("aborts hung task after taskTimeoutMs and moves on", async () => {
+        const completed: Array<string> = [];
+
+        registerShutdownTask({
+            name: "hang",
+            run: () =>
+                new Promise<void>(() => {
+                    // never resolves — should be aborted by the timeout
+                }),
+        });
+        registerShutdownTask({
+            name: "after",
+            run: () => {
+                completed.push("after");
+            },
+        });
+
+        await runShutdown("SIGTEST", { taskTimeoutMs: 20 });
+
+        expect(completed).toEqual(["after"]);
+    });
+
+    test("isolates a task throw so later tasks still run", async () => {
+        const completed: Array<string> = [];
+
+        registerShutdownTask({
+            name: "throws",
+            run: () => {
+                throw new Error("task boom");
+            },
+        });
+        registerShutdownTask({
+            name: "after",
+            run: () => {
+                completed.push("after");
+            },
+        });
+
+        await runShutdown("SIGTEST");
+
+        expect(completed).toEqual(["after"]);
+    });
 });

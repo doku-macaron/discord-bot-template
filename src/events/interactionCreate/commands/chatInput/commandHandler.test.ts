@@ -51,4 +51,31 @@ describe("CommandHandler", () => {
 
         await expect(run).rejects.toBe(failure);
     });
+
+    test("re-registering the same name overwrites the previous command", async () => {
+        const handler = new CommandHandler();
+        const called: Array<string> = [];
+
+        handler.register(
+            new Command(
+                (builder) => builder.setName("ping").setDescription("v1"),
+                async () => {
+                    called.push("v1");
+                }
+            )
+        );
+        handler.register(
+            new Command(
+                (builder) => builder.setName("ping").setDescription("v2"),
+                async () => {
+                    called.push("v2");
+                }
+            )
+        );
+
+        const replies: Array<MockReplyPayload> = [];
+        await handler.execute(createCommandInteractionMock("ping", replies));
+
+        expect(called).toEqual(["v2"]);
+    });
 });
