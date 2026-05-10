@@ -94,6 +94,7 @@ interaction は種類ごとに handler/register を分けています。
 
 `customId` は `feature:action` または `feature:action:id` の形式を推奨します。
 固定IDは `CUSTOM_ID`、動的IDに対応する正規表現は `CUSTOM_ID_PATTERN` にまとめます。
+単一プロセスの cooldown / rate-limit には `src/lib/cooldown.ts` の `CooldownStore` と `createCooldownKey` を使えます。
 
 ## Database
 
