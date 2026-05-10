@@ -1,13 +1,13 @@
 import { type ChatInputCommandInteraction, MessageFlags, type RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord.js";
 import type { Handler } from "@/events/handler";
-import type { Command } from "@/events/interactionCreate/commands/chatInput/command";
-import type { CommandWithSubCommand } from "@/events/interactionCreate/commands/chatInput/commandWithSubCommand";
+import type { Command } from "@/events/interactionCreate/commands/chatInput/_core/command";
+import type { CommandWithSubCommand } from "@/events/interactionCreate/commands/chatInput/_core/commandWithSubCommand";
 
-export { Command } from "@/events/interactionCreate/commands/chatInput/command";
-export type { CommandExecutor } from "@/events/interactionCreate/commands/chatInput/commandExecutor";
-export { CommandWithSubCommand } from "@/events/interactionCreate/commands/chatInput/commandWithSubCommand";
-export { SubCommand } from "@/events/interactionCreate/commands/chatInput/subCommand";
-export { SubCommandGroup } from "@/events/interactionCreate/commands/chatInput/subCommandGroup";
+export { Command } from "@/events/interactionCreate/commands/chatInput/_core/command";
+export type { CommandExecutor } from "@/events/interactionCreate/commands/chatInput/_core/commandExecutor";
+export { CommandWithSubCommand } from "@/events/interactionCreate/commands/chatInput/_core/commandWithSubCommand";
+export { SubCommand } from "@/events/interactionCreate/commands/chatInput/_core/subCommand";
+export { SubCommandGroup } from "@/events/interactionCreate/commands/chatInput/_core/subCommandGroup";
 
 export class CommandHandler implements Handler<Command | CommandWithSubCommand, ChatInputCommandInteraction> {
     private commands = new Map<string, Command | CommandWithSubCommand>();

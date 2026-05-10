@@ -9,7 +9,7 @@ import "@/events/interactionCreate/components/modal/modalRegister";
 import "@/events/interactionCreate/components/selectMenu/menuRegister";
 
 export { autocompleteHandler } from "@/events/interactionCreate/commands/autocomplete/autocompleteHandlerInstance";
-export { commandHandler } from "@/events/interactionCreate/commands/chatInput/commandHandlerInstance";
+export { commandHandler } from "@/events/interactionCreate/commands/chatInput/_core/commandHandlerInstance";
 export { contextMenuHandler } from "@/events/interactionCreate/commands/contextMenu/contextMenuHandlerInstance";
 export { buttonHandler } from "@/events/interactionCreate/components/button/buttonHandlerInstance";
 export { modalHandler } from "@/events/interactionCreate/components/modal/modalHandlerInstance";

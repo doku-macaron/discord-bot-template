@@ -153,6 +153,7 @@ interaction は種類ごとに handler/register を分けています。
 - `src/events/interactionCreate/components/selectMenu/items/`: select menu (string / user / role / channel / mentionable)
 
 各 handler は `<type>HandlerInstance.ts` (singleton) と `<type>Register.ts` (items の `register()` 呼び出し) に分かれており、`src/events/interactionCreate/setup.ts` がすべての register を side-effect import で読み込んで handler を再 export します。`index.ts` と `scripts/registerCommand.ts` はこの `setup.ts` 経由で handler を取得します。
+chat input command の普段の開発では `commands/chatInput/items/` に command を追加し、`commands/chatInput/commandRegister.ts` に登録してください。handler class、singleton、subcommand helper などの framework 側実装は `commands/chatInput/_core/` にあります。
 
 `src/events/guildCreate/` と `src/events/guildDelete/` が bot の参加・退出に合わせて `guilds` テーブルを sync します。退出は物理削除ではなく `leftAt` に時刻を入れる soft-delete で、再入会時に `joinedAt` がリセット・`leftAt` が null に戻ります。lazy populate (コマンド実行時の `getOrCreateGuild` 呼び出し) も残っているため、event を取りこぼしても DB 整合性は保たれます。
 
@@ -333,7 +334,7 @@ expect(replies).toEqual([]);
 - `createAutocompleteInteractionMock(commandName, recorder, options?)`: autocomplete interaction
 - `createKindInteractionMock(kind, overrides?)`: `interaction.isXxx()` ガードだけを切り替える最小 mock。`buildInteractionContext` の分岐テスト向け
 
-実例は `src/events/interactionCreate/commands/chatInput/{commandHandler,commandExecutor,commandWithSubCommand,subCommand,subCommandGroup}.test.ts` / `src/events/interactionCreate/commands/contextMenu/contextMenuHandler.test.ts` / `src/events/interactionCreate/commands/autocomplete/autocompleteHandler.test.ts` / `src/events/interactionCreate/components/customIdHandler.test.ts` / `src/lib/{replyError,resultHandler,interactionContext,errorWebhook,embed}.test.ts` を参照してください。
+実例は `src/events/interactionCreate/commands/chatInput/__tests__/` / `src/events/interactionCreate/commands/contextMenu/contextMenuHandler.test.ts` / `src/events/interactionCreate/commands/autocomplete/autocompleteHandler.test.ts` / `src/events/interactionCreate/components/customIdHandler.test.ts` / `src/lib/{replyError,resultHandler,interactionContext,errorWebhook,embed}.test.ts` を参照してください。
 
 ## Scripts
 

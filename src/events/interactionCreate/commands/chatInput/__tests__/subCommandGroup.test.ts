@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { MessageFlags } from "discord.js";
-import { SubCommand } from "@/events/interactionCreate/commands/chatInput/subCommand";
-import { SubCommandGroup } from "@/events/interactionCreate/commands/chatInput/subCommandGroup";
+import { SubCommand } from "@/events/interactionCreate/commands/chatInput/_core/subCommand";
+import { SubCommandGroup } from "@/events/interactionCreate/commands/chatInput/_core/subCommandGroup";
 import { createRichCommandInteractionMock, type MockReplyRecord } from "@/lib/testing/interactions";
 
 function makeSub(name: string, hit: { value: string | null }) {

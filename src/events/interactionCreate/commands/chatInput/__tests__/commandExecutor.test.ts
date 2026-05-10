@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { executeCommand } from "@/events/interactionCreate/commands/chatInput/commandExecutor";
+import { executeCommand } from "@/events/interactionCreate/commands/chatInput/_core/commandExecutor";
 import { createRichCommandInteractionMock, type MockReplyRecord } from "@/lib/testing/interactions";
 
 describe("executeCommand", () => {

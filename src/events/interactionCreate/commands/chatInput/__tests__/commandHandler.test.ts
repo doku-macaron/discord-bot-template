@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { MessageFlags } from "discord.js";
-import { Command, CommandHandler } from "@/events/interactionCreate/commands/chatInput/commandHandler";
+import { Command, CommandHandler } from "@/events/interactionCreate/commands/chatInput/_core/commandHandler";
 import { createCommandInteractionMock, type MockReplyPayload } from "@/lib/testing/interactions";
 
 describe("CommandHandler", () => {
