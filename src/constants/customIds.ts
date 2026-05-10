@@ -1,6 +1,7 @@
 export const CUSTOM_ID = {
     BUTTON: {
         PROFILE_EDIT: "profile:edit-button",
+        SHOWCASE_ACCESSORY: "showcase:accessory-button",
     },
     MODAL: {
         PROFILE_EDIT: "profile:edit-modal",

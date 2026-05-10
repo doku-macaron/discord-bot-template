@@ -1,7 +1,20 @@
-import { ActionRowBuilder, ApplicationIntegrationType, ButtonBuilder, ButtonStyle, EmbedBuilder, InteractionContextType } from "discord.js";
+import {
+    ApplicationIntegrationType,
+    ButtonBuilder,
+    ButtonStyle,
+    ContainerBuilder,
+    InteractionContextType,
+    MessageFlags,
+    SectionBuilder,
+    SeparatorBuilder,
+    SeparatorSpacingSize,
+    TextDisplayBuilder,
+    ThumbnailBuilder,
+} from "discord.js";
 import { CUSTOM_ID } from "@/constants/customIds";
 import { CommandWithSubCommand, SubCommand } from "@/events/interactionCreate/commands/chatInput/commandHandler";
 import { createProfileEditModal } from "@/events/interactionCreate/components/modal/items/profileEditModal";
+import { EMBED_COLOR } from "@/lib/embed";
 
 export const profileCommand = new CommandWithSubCommand((builder) =>
     builder
@@ -14,15 +27,13 @@ export const profileCommand = new CommandWithSubCommand((builder) =>
 profileCommand.register(
     new SubCommand(
         (builder) => {
-            builder.setName("view").setDescription("プロフィールを表示します");
+            builder.setName("view").setDescription("プロフィールを表示します (Components v2)");
         },
         async (interaction) => {
             if (!interaction.inCachedGuild()) {
                 await interaction.reply("このコマンドはサーバー内で実行してください。");
                 return;
             }
-
-            await interaction.deferReply();
 
             const { getOrCreateGuild } = await import("@/db/query/guild/getOrCreateGuild");
             const { getOrCreateMember } = await import("@/db/query/member/getOrCreateMember");
@@ -43,34 +54,35 @@ profileCommand.register(
                 userId: interaction.user.id,
             });
 
-            const embed = new EmbedBuilder()
-                .setTitle("Profile")
-                .setColor(0x57f287)
-                .addFields([
-                    {
-                        name: "User",
-                        value: `<@${member.userId}>`,
-                        inline: true,
-                    },
-                    {
-                        name: "Display Name",
-                        value: member.displayName || "-",
-                        inline: true,
-                    },
-                    {
-                        name: "Command Count",
-                        value: `${member.commandCount}`,
-                        inline: true,
-                    },
-                ]);
+            const headerSection = new SectionBuilder()
+                .addTextDisplayComponents(
+                    new TextDisplayBuilder().setContent("## Profile"),
+                    new TextDisplayBuilder().setContent(`User: <@${member.userId}>`),
+                    new TextDisplayBuilder().setContent(`Display name: ${member.displayName || "-"}`),
+                    new TextDisplayBuilder().setContent(`Command count: ${member.commandCount}`)
+                )
+                .setThumbnailAccessory(
+                    new ThumbnailBuilder()
+                        .setURL(interaction.user.displayAvatarURL({ size: 256 }))
+                        .setDescription(`${interaction.user.username}'s avatar`)
+                );
 
-            const editButton = new ButtonBuilder()
-                .setCustomId(CUSTOM_ID.BUTTON.PROFILE_EDIT)
-                .setLabel("Edit")
-                .setStyle(ButtonStyle.Primary);
-            const row = new ActionRowBuilder<ButtonBuilder>().addComponents(editButton);
+            const editSection = new SectionBuilder()
+                .addTextDisplayComponents(new TextDisplayBuilder().setContent("プロフィールの表示名を更新できます。"))
+                .setButtonAccessory(
+                    new ButtonBuilder().setCustomId(CUSTOM_ID.BUTTON.PROFILE_EDIT).setLabel("Edit").setStyle(ButtonStyle.Primary)
+                );
 
-            await interaction.editReply({ embeds: [embed], components: [row] });
+            const container = new ContainerBuilder()
+                .setAccentColor(EMBED_COLOR.success)
+                .addSectionComponents(headerSection)
+                .addSeparatorComponents(new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true))
+                .addSectionComponents(editSection);
+
+            await interaction.reply({
+                flags: MessageFlags.IsComponentsV2,
+                components: [container],
+            });
         }
     )
 );
