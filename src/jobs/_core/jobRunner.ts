@@ -1,4 +1,4 @@
-import type { Job } from "@/jobs/job";
+import type { Job } from "@/jobs/_core/job";
 import { logger } from "@/lib/logger";
 import { registerShutdownTask, SHUTDOWN_PRIORITY } from "@/lib/shutdown";
 
