@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { err, ok } from "@/lib/result";
-import { handleResult, logResult, logVoidResult } from "@/lib/resultHandler";
+import { handleResult, logResult, logVoidResult } from "@/lib/discord/resultHandler";
 import { createRichCommandInteractionMock, type MockReplyRecord } from "@/lib/testing/interactions";
+import { err, ok } from "@/lib/util/result";
 
 describe("handleResult", () => {
     test("returns data on success without sending any reply", async () => {

@@ -8,8 +8,8 @@ import {
 } from "discord.js";
 import { CUSTOM_ID } from "@/constants/customIds";
 import { Command } from "@/events/interactionCreate/commands/chatInput/_core/commandHandler";
-import { infoEmbed } from "@/lib/embed";
-import { buildPaginationRow } from "@/lib/pagination";
+import { infoEmbed } from "@/lib/discord/embed";
+import { buildPaginationRow } from "@/lib/discord/pagination";
 
 export const HELP_FEATURE = "help";
 

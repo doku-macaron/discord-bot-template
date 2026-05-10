@@ -1,7 +1,7 @@
 import { type Interaction, MessageFlags, type RepliableInteraction } from "discord.js";
 import type { BaseItem, Handler } from "@/events/handler";
-import { buildInteractionContext } from "@/lib/interactionContext";
-import { logger } from "@/lib/logger";
+import { buildInteractionContext } from "@/lib/discord/interactionContext";
+import { logger } from "@/lib/infra/logger";
 
 export type CustomId = string | RegExp;
 type CustomIdInteraction = Interaction & RepliableInteraction & { customId: string };

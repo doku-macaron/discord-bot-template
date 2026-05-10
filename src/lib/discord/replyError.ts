@@ -5,7 +5,7 @@ import {
     MessageFlags,
     type RepliableInteraction,
 } from "discord.js";
-import { buildInteractionContext, formatInteractionContext, type InteractionContext } from "@/lib/interactionContext";
+import { buildInteractionContext, formatInteractionContext, type InteractionContext } from "@/lib/discord/interactionContext";
 
 export async function replyError(interaction: RepliableInteraction, error: Error, context?: InteractionContext) {
     const ctx = context ?? buildInteractionContext(interaction);

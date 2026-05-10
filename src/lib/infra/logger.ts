@@ -1,7 +1,7 @@
 import { isProduction } from "@/isProduction";
-import { captureException } from "@/lib/errorReporter";
-import { sendErrorToWebhook } from "@/lib/errorWebhook";
-import { formatInteractionContext, type InteractionContext } from "@/lib/interactionContext";
+import { formatInteractionContext, type InteractionContext } from "@/lib/discord/interactionContext";
+import { captureException } from "@/lib/infra/errorReporter";
+import { sendErrorToWebhook } from "@/lib/infra/errorWebhook";
 
 export type LogCategory = "Core" | "Bot" | "Discord" | "Database" | "Misc";
 type LogLevel = "info" | "warn" | "error";

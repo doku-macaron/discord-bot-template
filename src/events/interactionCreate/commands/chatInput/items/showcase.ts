@@ -16,7 +16,7 @@ import {
 } from "discord.js";
 import { CUSTOM_ID } from "@/constants/customIds";
 import { Command } from "@/events/interactionCreate/commands/chatInput/_core/commandHandler";
-import { EMBED_COLOR } from "@/lib/embed";
+import { EMBED_COLOR } from "@/lib/discord/embed";
 
 const SHOWCASE_THUMBNAIL = "https://cdn.discordapp.com/embed/avatars/0.png";
 const SHOWCASE_GALLERY = [

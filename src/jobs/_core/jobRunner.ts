@@ -1,6 +1,6 @@
 import type { Job } from "@/jobs/_core/job";
-import { logger } from "@/lib/logger";
-import { registerShutdownTask, SHUTDOWN_PRIORITY } from "@/lib/shutdown";
+import { logger } from "@/lib/infra/logger";
+import { registerShutdownTask, SHUTDOWN_PRIORITY } from "@/lib/infra/shutdown";
 
 const intervals = new Map<string, ReturnType<typeof setInterval>>();
 const runningJobs = new Set<string>();

@@ -1,6 +1,6 @@
 import { buildHelpPage, HELP_FEATURE, HELP_PAGES } from "@/events/interactionCreate/commands/chatInput/items/help";
 import { Button } from "@/events/interactionCreate/components/button/_core/buttonHandler";
-import { nextPage, paginationCustomIdPattern, parsePaginationCustomId } from "@/lib/pagination";
+import { nextPage, paginationCustomIdPattern, parsePaginationCustomId } from "@/lib/discord/pagination";
 
 export const helpPaginationButton = new Button(
     () => paginationCustomIdPattern(HELP_FEATURE),

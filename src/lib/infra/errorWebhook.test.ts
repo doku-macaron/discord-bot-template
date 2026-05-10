@@ -28,7 +28,7 @@ mock.module("discord.js", () => ({
     WebhookClient: FakeWebhookClient,
 }));
 
-const { sendErrorToWebhook } = await import("@/lib/errorWebhook");
+const { sendErrorToWebhook } = await import("@/lib/infra/errorWebhook");
 
 afterAll(() => {
     if (previousWebhookUrl === undefined) {

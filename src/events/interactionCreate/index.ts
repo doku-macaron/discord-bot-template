@@ -7,10 +7,10 @@ import {
     menuHandler,
     modalHandler,
 } from "@/events/interactionCreate/setup";
-import { buildInteractionContext } from "@/lib/interactionContext";
-import { logger } from "@/lib/logger";
-import { replyError } from "@/lib/replyError";
-import { isShuttingDown, trackInflight } from "@/lib/shutdown";
+import { buildInteractionContext } from "@/lib/discord/interactionContext";
+import { replyError } from "@/lib/discord/replyError";
+import { logger } from "@/lib/infra/logger";
+import { isShuttingDown, trackInflight } from "@/lib/infra/shutdown";
 
 export const interactionCreateEvent: (...args: ClientEvents[Events.InteractionCreate]) => void = (interaction) => {
     if (isShuttingDown()) {

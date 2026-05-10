@@ -1,7 +1,7 @@
 import { getOrCreateGuild } from "@/db/query/guild/getOrCreateGuild";
 import { getOrCreateMember } from "@/db/query/member/getOrCreateMember";
 import type { SelectMember } from "@/db/schema/members";
-import { err, ok, type Result } from "@/lib/result";
+import { err, ok, type Result } from "@/lib/util/result";
 
 type SaveMemberProfileInput = {
     guildId: string;

@@ -6,7 +6,7 @@ import {
     nextPage,
     paginationCustomIdPattern,
     parsePaginationCustomId,
-} from "@/lib/pagination";
+} from "@/lib/discord/pagination";
 
 type ButtonSnapshot = { customId: string; label: string; disabled: boolean };
 

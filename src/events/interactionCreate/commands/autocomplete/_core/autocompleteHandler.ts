@@ -1,7 +1,7 @@
 import type { AutocompleteInteraction } from "discord.js";
 import type { BaseItem, Handler } from "@/events/handler";
-import { buildInteractionContext } from "@/lib/interactionContext";
-import { logger } from "@/lib/logger";
+import { buildInteractionContext } from "@/lib/discord/interactionContext";
+import { logger } from "@/lib/infra/logger";
 
 export class Autocomplete implements BaseItem<string, AutocompleteInteraction> {
     data: string;

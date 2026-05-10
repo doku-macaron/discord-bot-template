@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import type { Job } from "@/jobs/_core/job";
 import { getScheduledJobNamesForTesting, resetJobsForTesting, runJobForTesting, startJobs } from "@/jobs/_core/jobRunner";
-import { resetShutdownForTesting } from "@/lib/shutdown";
+import { resetShutdownForTesting } from "@/lib/infra/shutdown";
 
 afterEach(() => {
     resetJobsForTesting();

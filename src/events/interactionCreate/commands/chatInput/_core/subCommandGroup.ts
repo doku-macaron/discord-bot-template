@@ -1,7 +1,7 @@
 import { type ChatInputCommandInteraction, MessageFlags, SlashCommandSubcommandGroupBuilder } from "discord.js";
 import type { BaseItem, Handler } from "@/events/handler";
 import type { SubCommand } from "@/events/interactionCreate/commands/chatInput/_core/subCommand";
-import { logger } from "@/lib/logger";
+import { logger } from "@/lib/infra/logger";
 
 export class SubCommandGroup
     implements BaseItem<SlashCommandSubcommandGroupBuilder, ChatInputCommandInteraction>, Handler<SubCommand, ChatInputCommandInteraction>

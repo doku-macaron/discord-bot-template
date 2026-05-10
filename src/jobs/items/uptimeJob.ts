@@ -1,5 +1,5 @@
 import type { Job } from "@/jobs/_core/job";
-import { logger } from "@/lib/logger";
+import { logger } from "@/lib/infra/logger";
 
 const start = Date.now();
 

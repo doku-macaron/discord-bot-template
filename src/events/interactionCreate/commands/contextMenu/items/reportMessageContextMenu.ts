@@ -1,6 +1,6 @@
 import { ApplicationCommandType, ApplicationIntegrationType, InteractionContextType, MessageFlags, userMention } from "discord.js";
 import { ContextMenuCommand } from "@/events/interactionCreate/commands/contextMenu/_core/contextMenuHandler";
-import { infoEmbed } from "@/lib/embed";
+import { infoEmbed } from "@/lib/discord/embed";
 
 export const reportMessageContextMenu = new ContextMenuCommand(
     (builder) =>
