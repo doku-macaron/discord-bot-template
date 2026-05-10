@@ -131,8 +131,16 @@ export function createRichCommandInteractionMock(
         id: "interaction-id",
         createdTimestamp: Date.now(),
         options: {
-            getSubcommandGroup: (_required = false) => options.group ?? null,
-            getSubcommand: (required = false) => {
+            getSubcommandGroup: (required = false) => {
+                if (options.group !== undefined && options.group !== null) {
+                    return options.group;
+                }
+                if (required) {
+                    throw new Error("getSubcommandGroup(required) called but no group provided");
+                }
+                return null;
+            },
+            getSubcommand: (required = true) => {
                 if (options.subcommand !== undefined && options.subcommand !== null) {
                     return options.subcommand;
                 }

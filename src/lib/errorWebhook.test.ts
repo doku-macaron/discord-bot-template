@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterAll, beforeEach, describe, expect, mock, test } from "bun:test";
 
 type CapturedSend = { content?: string };
 
@@ -14,15 +14,17 @@ class FakeWebhookClient {
     }
 }
 
+// `mock.module` and env setup must run before `@/lib/errorWebhook` is imported,
+// so they're at module top-level rather than in `beforeAll`.
 const previousWebhookUrl = process.env.WEBHOOK_URL;
+process.env.WEBHOOK_URL = "https://discord.com/api/webhooks/123/test-token";
 
-beforeAll(() => {
-    process.env.WEBHOOK_URL = "https://discord.com/api/webhooks/123/test-token";
-    mock.module("discord.js", () => ({
-        codeBlock: (lang: string, content: string) => `\`\`\`${lang}\n${content}\n\`\`\``,
-        WebhookClient: FakeWebhookClient,
-    }));
-});
+mock.module("discord.js", () => ({
+    codeBlock: (lang: string, content: string) => `\`\`\`${lang}\n${content}\n\`\`\``,
+    WebhookClient: FakeWebhookClient,
+}));
+
+const { sendErrorToWebhook } = await import("@/lib/errorWebhook");
 
 afterAll(() => {
     if (previousWebhookUrl === undefined) {
@@ -36,8 +38,6 @@ beforeEach(() => {
     sentMessages.length = 0;
     constructedUrls.length = 0;
 });
-
-const { sendErrorToWebhook } = await import("@/lib/errorWebhook");
 
 describe("sendErrorToWebhook", () => {
     test("sends a codeBlock-formatted body with category and stack", async () => {

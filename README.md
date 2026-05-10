@@ -250,7 +250,7 @@ expect(replies).toEqual([]);
 - `createAutocompleteInteractionMock(commandName, recorder, options?)`: autocomplete interaction
 - `createKindInteractionMock(kind, overrides?)`: `interaction.isXxx()` ガードだけを切り替える最小 mock。`buildInteractionContext` の分岐テスト向け
 
-実例は `commands/chatInput/{commandHandler,commandExecutor,commandWithSubCommand,subCommand,subCommandGroup}.test.ts` / `commands/contextMenu/contextMenuHandler.test.ts` / `commands/autocomplete/autocompleteHandler.test.ts` / `components/customIdHandler.test.ts` / `src/lib/{replyError,resultHandler,interactionContext,errorWebhook,embed}.test.ts` を参照してください。
+実例は `src/events/interactionCreate/commands/chatInput/{commandHandler,commandExecutor,commandWithSubCommand,subCommand,subCommandGroup}.test.ts` / `src/events/interactionCreate/commands/contextMenu/contextMenuHandler.test.ts` / `src/events/interactionCreate/commands/autocomplete/autocompleteHandler.test.ts` / `src/events/interactionCreate/components/customIdHandler.test.ts` / `src/lib/{replyError,resultHandler,interactionContext,errorWebhook,embed}.test.ts` を参照してください。
 
 ## Scripts
 
