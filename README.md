@@ -132,7 +132,7 @@ interaction は種類ごとに handler/register を分けています。
 - root は `ContainerBuilder` を使うと accent color + 子コンポーネントをまとめられます
 - `SectionBuilder.setThumbnailAccessory(...)` で右側にサムネイル、`SectionBuilder.setButtonAccessory(...)` で interactive button を置けます。button の customId は通常通り `buttonRegister.ts` の handler でルーティングされます
 - `MediaGalleryBuilder.addItems(...)` で URL ベースの画像 gallery、`SeparatorBuilder` で divider と spacing を制御します
-- file component (`FileBuilder`) は attachment を伴うため、必要な場合は `interaction.reply({ files: [...], components: [container] })` の形で送ります (サンプルでは省略)
+- file component (`FileBuilder`) は attachment を伴いますが、Components v2 と一緒に送る場合も `flags: MessageFlags.IsComponentsV2` は必要です。必要な場合は `interaction.reply({ flags: MessageFlags.IsComponentsV2, files: [...], components: [container] })` の形で送ります
 
 **flag を渡す場所**: `IsComponentsV2` は **メッセージ送信側のオプション** (`reply` / `editReply` / `followUp`) に渡します。`deferReply` 側の `flags` は `Ephemeral` のみ受け付けるため、defer 段階では渡せません。
 
