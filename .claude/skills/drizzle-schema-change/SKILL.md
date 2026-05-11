@@ -1,6 +1,6 @@
 ---
 name: drizzle-schema-change
-description: このテンプレ (Bun + drizzle + PGlite/Postgres) で DB schema を変更する際に、連鎖する更新 (drizzle config / migration / queries / usecases / events / seed-reset / tests) を漏れなく辿るためのワークフロー。Use when adding, dropping, or renaming tables/columns, regenerating migrations, or doing schema redesigns in this template's `src/db/schema/` directory.
+description: このテンプレ (Bun + drizzle + PGlite/Postgres) で DB schema 自体を変更する際に、連鎖する更新 (drizzle config / migration / queries / usecases / events / seed-reset / tests) を漏れなく辿るためのワークフロー。Use when adding, dropping, or renaming tables/columns or regenerating migrations in `src/db/schema/`. 既存テーブルに query だけ足したい場合は drizzle-add-query を使うこと。
 ---
 
 # Drizzle schema change
@@ -13,7 +13,10 @@ description: このテンプレ (Bun + drizzle + PGlite/Postgres) で DB schema 
 - テーブルの新設 / リネーム / 削除
 - migration を fresh で作り直したい (本番デプロイ前のテンプレ・PoC 段階のみ)
 
-trivial な 1 カラム追加 (caller が無い) なら ad-hoc でよく、わざわざこの skill を経由する必要はない。テーブルが新増減する規模・他層への影響がある変更で使う。
+**この skill を使わない場合**:
+- 既存テーブルに query を追加するだけ → `drizzle-add-query`
+- 既存 query を改修するだけ → ad-hoc に編集
+- 1 カラム追加で caller も無い trivial 変更 → ad-hoc に編集
 
 ## 1. 影響範囲の事前把握 (read-only)
 
@@ -55,7 +58,7 @@ ls drizzle/
 3. **drizzle config** — `drizzle.config.ts` と `drizzle-dev.config.ts` の `schema` 配列を新ファイル一覧に
 4. **migration** — fresh なら既存 `drizzle/<id>/` を削除してから、`bun generate:local`
 5. **local DB** — `bun db:reset:local` で truncate + 再 migrate
-6. **queries** — `src/db/query/<domain>/` の中で削除 / 簡素化 / 追加。新規 query は必ず `defineQuery` で wrap し、本体は `client` を受け取って `db` を直掴みしない。Insert 系 query の入力は `Pick<InsertX, ...>` で必要なフィールドだけに絞ると caller の事故を防げる
+6. **queries** — 削除 / 簡素化 / 追加。query 単体の作り方 (`defineQuery` の使い方、入力型の絞り方、命名規約) は `drizzle-add-query` に任せる。schema-change としてはどの query を増やす / 消す / 直すかを決めるところまで
 7. **usecases** — DB 層をまたぐ集約は `src/usecases/<domain>/` で `withTransaction` を使い、`tx` を各 query に渡す
 8. **events / items** — UI が読む / 書く対象を新スキーマに合わせる。discord.js から取れる値は usecase に渡さず、events 側で primitive に変換 (CONTRIBUTING.md の "discord.js stays at the boundary")
 9. **scripts** — `seedLocalDb.ts` の `insert` 対象と `resetLocalDb.ts` の `truncate` 対象を新テーブル群で更新
