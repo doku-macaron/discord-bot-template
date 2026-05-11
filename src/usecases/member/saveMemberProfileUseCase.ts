@@ -1,35 +1,33 @@
 import { getOrCreateGuild } from "@/db/query/guild/getOrCreateGuild";
-import { getOrCreateMember } from "@/db/query/member/getOrCreateMember";
-import type { SelectMember } from "@/db/schema/members";
+import { getOrCreateMemberProfile } from "@/db/query/member/getOrCreateMemberProfile";
+import { updateMemberProfileBio } from "@/db/query/member/updateMemberProfileBio";
+import type { SelectMemberProfile } from "@/db/schema/memberProfiles";
 import { withTransaction } from "@/db/transaction";
 import type { Result } from "@/lib/util/result";
 
 export type SaveMemberProfileInput = {
     guildId: string;
-    guildName: string;
     userId: string;
-    displayName: string;
+    bio: string;
 };
 
-export async function saveMemberProfileUseCase(input: SaveMemberProfileInput): Promise<Result<SelectMember, Error>> {
+/**
+ * Ensure the guild row, ensure the member profile row, and write the supplied
+ * bio — all in one transaction so the FK chain and the write are atomic.
+ */
+export async function saveMemberProfileUseCase(input: SaveMemberProfileInput): Promise<Result<SelectMemberProfile, Error>> {
     return withTransaction(async (tx) => {
-        const guild = await getOrCreateGuild(
-            {
-                guildId: input.guildId,
-                name: input.guildName,
-            },
-            tx
-        );
+        const guild = await getOrCreateGuild({ guildId: input.guildId }, tx);
 
-        const member = await getOrCreateMember(
+        await getOrCreateMemberProfile({ guildId: guild.guildId, userId: input.userId }, tx);
+
+        return updateMemberProfileBio(
             {
                 guildId: guild.guildId,
                 userId: input.userId,
-                displayName: input.displayName,
+                bio: input.bio,
             },
             tx
         );
-
-        return member;
     });
 }

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 
-// Sentinel tx — the test asserts that the same reference is propagated to both
-// queries, so identity is what we care about, not shape.
+// Sentinel tx — the test asserts that the same reference is propagated to
+// every query, so identity is what we care about, not shape.
 const fakeTx = { __tag: "fake-tx" } as const;
 
 let transactionShouldThrow: Error | undefined;
@@ -18,28 +18,34 @@ mock.module("@/db", () => ({
 }));
 
 const guildClients: Array<unknown> = [];
-let guildShouldThrow: Error | undefined;
 
 mock.module("@/db/query/guild/getOrCreateGuild", () => ({
     getOrCreateGuild: async (_input: unknown, client: unknown) => {
         guildClients.push(client);
-        if (guildShouldThrow) {
-            throw guildShouldThrow;
-        }
-        return { guildId: "g1", name: "Guild" };
+        return { guildId: "g1" };
     },
 }));
 
-const memberClients: Array<unknown> = [];
+const profileClients: Array<unknown> = [];
 
-mock.module("@/db/query/member/getOrCreateMember", () => ({
-    getOrCreateMember: async (_input: unknown, client: unknown) => {
-        memberClients.push(client);
-        return {
-            guildId: "g1",
-            userId: "u1",
-            displayName: "Display",
-        };
+mock.module("@/db/query/member/getOrCreateMemberProfile", () => ({
+    getOrCreateMemberProfile: async (_input: unknown, client: unknown) => {
+        profileClients.push(client);
+        return { guildId: "g1", userId: "u1", bio: "" };
+    },
+}));
+
+const bioCalls: Array<{ input: unknown; client: unknown }> = [];
+let bioShouldThrow: Error | undefined;
+
+mock.module("@/db/query/member/updateMemberProfileBio", () => ({
+    updateMemberProfileBio: async (input: unknown, client: unknown) => {
+        bioCalls.push({ input, client });
+        if (bioShouldThrow) {
+            throw bioShouldThrow;
+        }
+        const typed = input as { guildId: string; userId: string; bio: string };
+        return { guildId: typed.guildId, userId: typed.userId, bio: typed.bio };
     },
 }));
 
@@ -47,38 +53,39 @@ const { saveMemberProfileUseCase } = await import("@/usecases/member/saveMemberP
 
 const baseInput = {
     guildId: "g1",
-    guildName: "Guild",
     userId: "u1",
-    displayName: "Display",
+    bio: "Hello",
 } as const;
 
 beforeEach(() => {
     guildClients.length = 0;
-    memberClients.length = 0;
-    guildShouldThrow = undefined;
+    profileClients.length = 0;
+    bioCalls.length = 0;
+    bioShouldThrow = undefined;
     transactionShouldThrow = undefined;
 });
 
 describe("saveMemberProfileUseCase", () => {
-    test("runs both queries with the same tx handle and returns ok with the member", async () => {
+    test("runs all three queries with the same tx and returns ok with the saved profile", async () => {
         const result = await saveMemberProfileUseCase({ ...baseInput });
 
         expect(result.success).toBe(true);
         if (result.success) {
             expect(result.data.guildId).toBe("g1");
             expect(result.data.userId).toBe("u1");
-            expect(result.data.displayName).toBe("Display");
+            expect(result.data.bio).toBe("Hello");
         }
 
-        expect(guildClients).toEqual([fakeTx]);
-        expect(memberClients).toEqual([fakeTx]);
-        // The whole point of the refactor: both queries share the same tx reference.
-        expect(guildClients[0]).toBe(memberClients[0]);
+        // Every query gets the same `tx` reference — the whole point of the
+        // shared transaction.
+        expect(guildClients[0]).toBe(fakeTx);
+        expect(profileClients[0]).toBe(fakeTx);
+        expect(bioCalls[0]?.client).toBe(fakeTx);
     });
 
-    test("returns err Result when a query throws (tx rolls back)", async () => {
-        const boom = new Error("guild write failed");
-        guildShouldThrow = boom;
+    test("returns err Result when a query throws", async () => {
+        const boom = new Error("bio write failed");
+        bioShouldThrow = boom;
 
         const result = await saveMemberProfileUseCase({ ...baseInput });
 
@@ -86,12 +93,9 @@ describe("saveMemberProfileUseCase", () => {
         if (!result.success) {
             expect(result.error).toBe(boom);
         }
-        // The member query must NOT have been called because the first one threw
-        // before reaching it inside the same transaction callback.
-        expect(memberClients).toEqual([]);
     });
 
-    test("returns err Result when withTransaction itself throws (e.g. connection failure)", async () => {
+    test("returns err Result when withTransaction itself throws", async () => {
         const boom = new Error("transaction open failed");
         transactionShouldThrow = boom;
 
@@ -102,6 +106,7 @@ describe("saveMemberProfileUseCase", () => {
             expect(result.error).toBe(boom);
         }
         expect(guildClients).toEqual([]);
-        expect(memberClients).toEqual([]);
+        expect(profileClients).toEqual([]);
+        expect(bioCalls).toEqual([]);
     });
 });

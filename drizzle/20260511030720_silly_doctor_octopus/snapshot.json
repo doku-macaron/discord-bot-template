@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "d43b57ed-2bd3-48da-83b1-cc11171bb8bd",
+  "id": "c6eb42df-7052-4076-a047-c362dd49ed68",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -14,7 +14,13 @@
     },
     {
       "isRlsEnabled": false,
-      "name": "members",
+      "name": "guild_settings",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "member_profiles",
       "entityType": "tables",
       "schema": "public"
     },
@@ -53,19 +59,6 @@
       "generated": null,
       "identity": null,
       "name": "updated_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "guilds"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "''",
-      "generated": null,
-      "identity": null,
-      "name": "name",
       "entityType": "columns",
       "schema": "public",
       "table": "guilds"
@@ -97,26 +90,17 @@
       "table": "guilds"
     },
     {
-      "type": "integer",
+      "type": "text",
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
       "default": null,
       "generated": null,
-      "identity": {
-        "type": "always",
-        "name": "members_id_seq",
-        "increment": "1",
-        "startWith": "1",
-        "minValue": "1",
-        "maxValue": "2147483647",
-        "cache": 1,
-        "cycle": false
-      },
-      "name": "id",
+      "identity": null,
+      "name": "guild_id",
       "entityType": "columns",
       "schema": "public",
-      "table": "members"
+      "table": "guild_settings"
     },
     {
       "type": "timestamp",
@@ -129,7 +113,7 @@
       "name": "created_at",
       "entityType": "columns",
       "schema": "public",
-      "table": "members"
+      "table": "guild_settings"
     },
     {
       "type": "timestamp",
@@ -142,7 +126,33 @@
       "name": "updated_at",
       "entityType": "columns",
       "schema": "public",
-      "table": "members"
+      "table": "guild_settings"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "mod_role_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "guild_settings"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "archive_channel_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "guild_settings"
     },
     {
       "type": "text",
@@ -155,7 +165,7 @@
       "name": "guild_id",
       "entityType": "columns",
       "schema": "public",
-      "table": "members"
+      "table": "member_profiles"
     },
     {
       "type": "text",
@@ -168,7 +178,33 @@
       "name": "user_id",
       "entityType": "columns",
       "schema": "public",
-      "table": "members"
+      "table": "member_profiles"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "member_profiles"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "member_profiles"
     },
     {
       "type": "text",
@@ -178,23 +214,10 @@
       "default": "''",
       "generated": null,
       "identity": null,
-      "name": "display_name",
+      "name": "bio",
       "entityType": "columns",
       "schema": "public",
-      "table": "members"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "0",
-      "generated": null,
-      "identity": null,
-      "name": "command_count",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "members"
+      "table": "member_profiles"
     },
     {
       "nameExplicit": false,
@@ -208,10 +231,38 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "members_guild_id_guilds_guild_id_fkey",
+      "name": "guild_settings_guild_id_guilds_guild_id_fkey",
       "entityType": "fks",
       "schema": "public",
-      "table": "members"
+      "table": "guild_settings"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "guild_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "guilds",
+      "columnsTo": [
+        "guild_id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "member_profiles_guild_id_guilds_guild_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "member_profiles"
+    },
+    {
+      "columns": [
+        "guild_id",
+        "user_id"
+      ],
+      "nameExplicit": false,
+      "name": "member_profiles_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "member_profiles"
     },
     {
       "columns": [
@@ -225,25 +276,13 @@
     },
     {
       "columns": [
-        "id"
+        "guild_id"
       ],
       "nameExplicit": false,
-      "name": "members_pkey",
+      "name": "guild_settings_pkey",
       "schema": "public",
-      "table": "members",
+      "table": "guild_settings",
       "entityType": "pks"
-    },
-    {
-      "nameExplicit": true,
-      "columns": [
-        "guild_id",
-        "user_id"
-      ],
-      "nullsNotDistinct": false,
-      "name": "members_guild_id_user_id_unique",
-      "entityType": "uniques",
-      "schema": "public",
-      "table": "members"
     }
   ],
   "renames": []

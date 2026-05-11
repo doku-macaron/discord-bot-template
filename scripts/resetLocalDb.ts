@@ -16,7 +16,7 @@ try {
         migrationsFolder: "./drizzle",
     });
 
-    await db.execute(sql`truncate table members, guilds restart identity cascade`);
+    await db.execute(sql`truncate table member_profiles, guild_settings, guilds restart identity cascade`);
     console.log("Local DB reset complete");
 } finally {
     await close();

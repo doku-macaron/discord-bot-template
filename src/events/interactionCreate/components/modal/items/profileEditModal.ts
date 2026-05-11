@@ -3,18 +3,20 @@ import { CUSTOM_ID } from "@/constants/customIds";
 import { Modal } from "@/framework/discord/interactions/components/modal";
 import { handleResult } from "@/lib/discord/resultHandler";
 
-export function createProfileEditModal(displayName = ""): ModalBuilder {
-    const displayNameInput = new TextInputBuilder()
-        .setCustomId(CUSTOM_ID.INPUT.PROFILE_DISPLAY_NAME)
-        .setStyle(TextInputStyle.Short)
-        .setRequired(true)
-        .setMaxLength(80)
-        .setValue(displayName);
+const BIO_MAX_LENGTH = 200;
+
+export function createProfileEditModal(bio = ""): ModalBuilder {
+    const bioInput = new TextInputBuilder()
+        .setCustomId(CUSTOM_ID.INPUT.PROFILE_BIO)
+        .setStyle(TextInputStyle.Paragraph)
+        .setRequired(false)
+        .setMaxLength(BIO_MAX_LENGTH)
+        .setValue(bio);
 
     return new ModalBuilder()
         .setCustomId(CUSTOM_ID.MODAL.PROFILE_EDIT)
         .setTitle("プロフィール編集")
-        .addLabelComponents(new LabelBuilder().setLabel("表示名").setTextInputComponent(displayNameInput));
+        .addLabelComponents(new LabelBuilder().setLabel("自己紹介").setTextInputComponent(bioInput));
 }
 
 export const profileEditModal = new Modal(
@@ -25,16 +27,15 @@ export const profileEditModal = new Modal(
             return;
         }
 
-        const displayName = interaction.fields.getTextInputValue(CUSTOM_ID.INPUT.PROFILE_DISPLAY_NAME).trim();
+        const bio = interaction.fields.getTextInputValue(CUSTOM_ID.INPUT.PROFILE_BIO).trim();
 
         const { saveMemberProfileUseCase } = await import("@/usecases/member/saveMemberProfileUseCase");
 
-        const member = await handleResult(
+        const profile = await handleResult(
             await saveMemberProfileUseCase({
                 guildId: interaction.guildId,
-                guildName: interaction.guild.name,
                 userId: interaction.user.id,
-                displayName,
+                bio,
             }),
             interaction,
             {
@@ -43,12 +44,12 @@ export const profileEditModal = new Modal(
             }
         );
 
-        if (!member) {
+        if (!profile) {
             return;
         }
 
         await interaction.reply({
-            content: `表示名を ${member.displayName} に更新しました。`,
+            content: profile.bio ? `自己紹介を更新しました。` : "自己紹介をクリアしました。",
             ephemeral: true,
         });
     }

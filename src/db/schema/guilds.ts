@@ -9,7 +9,6 @@ export const guilds = snakeCase.table("guilds", {
         .notNull()
         .defaultNow()
         .$onUpdate(() => new Date()),
-    name: text().notNull().default(""),
     joinedAt: timestamp().notNull().defaultNow(),
     leftAt: timestamp(),
 });

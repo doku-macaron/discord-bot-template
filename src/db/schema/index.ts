@@ -1,9 +1,11 @@
+import { guildSettings } from "@/db/schema/guildSettings";
 import { guilds } from "@/db/schema/guilds";
-import { members } from "@/db/schema/members";
+import { memberProfiles } from "@/db/schema/memberProfiles";
 
 export { relations } from "@/db/schema/relations";
 
 export const schema = {
     guilds,
-    members,
+    guildSettings,
+    memberProfiles,
 };

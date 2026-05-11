@@ -13,9 +13,7 @@ import {
     userMention,
 } from "discord.js";
 import { CUSTOM_ID } from "@/constants/customIds";
-import { getOrCreateGuild } from "@/db/query/guild/getOrCreateGuild";
-import { getOrCreateMember } from "@/db/query/member/getOrCreateMember";
-import { incrementMemberCommandCount } from "@/db/query/member/incrementMemberCommandCount";
+import { findMemberProfile } from "@/db/query/member/findMemberProfile";
 import { createProfileEditModal } from "@/events/interactionCreate/components/modal/items/profileEditModal";
 import { CommandWithSubCommand, SubCommand } from "@/framework/discord/interactions/chatInput";
 import { EMBED_COLOR } from "@/lib/discord/embed";
@@ -41,27 +39,18 @@ profileCommand.register(
 
             await interaction.deferReply();
 
-            await getOrCreateGuild({
-                guildId: interaction.guildId,
-                name: interaction.guild.name,
-            });
-            await getOrCreateMember({
-                guildId: interaction.guildId,
-                userId: interaction.user.id,
-                displayName: interaction.member.displayName,
-            });
-
-            const member = await incrementMemberCommandCount({
+            const profile = await findMemberProfile({
                 guildId: interaction.guildId,
                 userId: interaction.user.id,
             });
+            const bio = profile?.bio ?? "";
 
             const headerSection = new SectionBuilder()
                 .addTextDisplayComponents(
                     new TextDisplayBuilder().setContent("## Profile"),
-                    new TextDisplayBuilder().setContent(`User: ${userMention(member.userId)}`),
-                    new TextDisplayBuilder().setContent(`Display name: ${member.displayName || "-"}`),
-                    new TextDisplayBuilder().setContent(`Command count: ${member.commandCount}`)
+                    new TextDisplayBuilder().setContent(`User: ${userMention(interaction.user.id)}`),
+                    new TextDisplayBuilder().setContent(`Display name: ${interaction.member.displayName}`),
+                    new TextDisplayBuilder().setContent(`Bio: ${bio || "-"}`)
                 )
                 .setThumbnailAccessory(
                     new ThumbnailBuilder()
@@ -70,7 +59,7 @@ profileCommand.register(
                 );
 
             const editSection = new SectionBuilder()
-                .addTextDisplayComponents(new TextDisplayBuilder().setContent("プロフィールの表示名を更新できます。"))
+                .addTextDisplayComponents(new TextDisplayBuilder().setContent("自己紹介 (bio) を更新できます。"))
                 .setButtonAccessory(
                     new ButtonBuilder().setCustomId(CUSTOM_ID.BUTTON.PROFILE_EDIT).setLabel("Edit").setStyle(ButtonStyle.Primary)
                 );
@@ -100,7 +89,11 @@ profileCommand.register(
                 return;
             }
 
-            await interaction.showModal(createProfileEditModal(interaction.member.displayName));
+            const profile = await findMemberProfile({
+                guildId: interaction.guildId,
+                userId: interaction.user.id,
+            });
+            await interaction.showModal(createProfileEditModal(profile?.bio ?? ""));
         }
     )
 );

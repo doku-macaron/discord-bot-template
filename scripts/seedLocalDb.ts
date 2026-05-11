@@ -2,8 +2,9 @@ import "@/env";
 
 import { migrate } from "drizzle-orm/pglite/migrator";
 import { createPGliteDb } from "@/db/pglite";
+import { guildSettings } from "@/db/schema/guildSettings";
 import { guilds } from "@/db/schema/guilds";
-import { members } from "@/db/schema/members";
+import { memberProfiles } from "@/db/schema/memberProfiles";
 
 if (process.env.NODE_ENV !== "development") {
     console.error("Local DB seed can only run with NODE_ENV=development.");
@@ -17,41 +18,28 @@ try {
         migrationsFolder: "./drizzle",
     });
 
-    await db
-        .insert(guilds)
-        .values({
-            guildId: "template-guild",
-            name: "Template Guild",
-        })
-        .onConflictDoUpdate({
-            target: guilds.guildId,
-            set: {
-                name: "Template Guild",
-            },
-        });
+    await db.insert(guilds).values({ guildId: "template-guild" }).onConflictDoNothing();
 
-    const [member] = await db
-        .insert(members)
+    await db.insert(guildSettings).values({ guildId: "template-guild" }).onConflictDoNothing();
+
+    const [profile] = await db
+        .insert(memberProfiles)
         .values({
             guildId: "template-guild",
             userId: "template-user",
-            displayName: "Template User",
-            commandCount: 1,
+            bio: "Hello! I'm a template member.",
         })
         .onConflictDoUpdate({
-            target: [members.guildId, members.userId],
-            set: {
-                displayName: "Template User",
-                commandCount: 1,
-            },
+            target: [memberProfiles.guildId, memberProfiles.userId],
+            set: { bio: "Hello! I'm a template member." },
         })
         .returning();
 
-    if (!member) {
-        throw new Error("Failed to seed template member.");
+    if (!profile) {
+        throw new Error("Failed to seed template member profile.");
     }
 
-    console.log(`Local DB seed complete: guild=${member.guildId}, member=${member.userId}`);
+    console.log(`Local DB seed complete: guild=${profile.guildId}, user=${profile.userId}`);
 } finally {
     await close();
 }
