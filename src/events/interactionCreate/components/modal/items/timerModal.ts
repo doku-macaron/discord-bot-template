@@ -147,7 +147,7 @@ export const timerModal = new Modal(
         const delayMs = fireAt.getTime() - now.getTime();
         if (delayMs > MAX_DELAY_MS) {
             await interaction.reply({
-                content: `タイマーは最長 7 日までです (指定: ${time(fireAt, TimestampStyles.LongDateTime)})。`,
+                content: `タイマーは最長 7 日までです (指定: ${time(fireAt, TimestampStyles.FullDateShortTime)})。`,
                 flags: MessageFlags.Ephemeral,
             });
             return;
@@ -165,10 +165,14 @@ export const timerModal = new Modal(
             void (async () => {
                 try {
                     const channel = await client.channels.fetch(channelId);
-                    if (!channel?.isSendable()) {
-                        return;
+                    if (channel?.isSendable()) {
+                        await channel.send(`${userMention(user.id)} ⏰ ${message}`);
                     }
-                    await channel.send(`${userMention(user.id)} ⏰ ${message}`);
+                    // Confirmation reply の relative timestamp が Discord 側で
+                    // 更新され続けてしまうので、発火後は静的な文言に置き換える。
+                    await interaction.editReply({
+                        content: `タイマーが発火しました (${time(fireAt, TimestampStyles.FullDateShortTime)})`,
+                    });
                 } catch (unknownError) {
                     const error = unknownError instanceof Error ? unknownError : new Error(String(unknownError));
                     logger.error("Bot", error);
@@ -177,7 +181,7 @@ export const timerModal = new Modal(
         }, delayMs);
 
         await interaction.reply({
-            content: `タイマーをセットしました: ${time(fireAt, TimestampStyles.RelativeTime)} (${time(fireAt, TimestampStyles.LongDateTime)})`,
+            content: `タイマーをセットしました: ${time(fireAt, TimestampStyles.RelativeTime)} (${time(fireAt, TimestampStyles.FullDateShortTime)})`,
             flags: MessageFlags.Ephemeral,
         });
     }
