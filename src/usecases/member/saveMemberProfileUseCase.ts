@@ -13,7 +13,7 @@ export type SaveMemberProfileInput = {
 
 export async function saveMemberProfileUseCase(input: SaveMemberProfileInput): Promise<Result<SelectMember, Error>> {
     return withTransaction(async (tx) => {
-        await getOrCreateGuild(
+        const guild = await getOrCreateGuild(
             {
                 guildId: input.guildId,
                 name: input.guildName,
@@ -23,7 +23,7 @@ export async function saveMemberProfileUseCase(input: SaveMemberProfileInput): P
 
         const member = await getOrCreateMember(
             {
-                guildId: input.guildId,
+                guildId: guild.guildId,
                 userId: input.userId,
                 displayName: input.displayName,
             },
