@@ -1,9 +1,10 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { type InsertMember, members, type SelectMember } from "@/db/schema/members";
+import type { DbClient } from "@/db/transaction";
 
-export async function getOrCreateMember(input: InsertMember): Promise<SelectMember> {
-    const [created] = await db
+export async function getOrCreateMember(input: InsertMember, client: DbClient = db): Promise<SelectMember> {
+    const [created] = await client
         .insert(members)
         .values(input)
         .onConflictDoUpdate({
@@ -19,7 +20,7 @@ export async function getOrCreateMember(input: InsertMember): Promise<SelectMemb
         return created;
     }
 
-    const [member] = await db
+    const [member] = await client
         .select()
         .from(members)
         .where(and(eq(members.guildId, input.guildId), eq(members.userId, input.userId)))

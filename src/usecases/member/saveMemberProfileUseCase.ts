@@ -1,7 +1,8 @@
 import { getOrCreateGuild } from "@/db/query/guild/getOrCreateGuild";
 import { getOrCreateMember } from "@/db/query/member/getOrCreateMember";
 import type { SelectMember } from "@/db/schema/members";
-import { err, ok, type Result } from "@/lib/util/result";
+import { withTransaction } from "@/db/transaction";
+import type { Result } from "@/lib/util/result";
 
 export type SaveMemberProfileInput = {
     guildId: string;
@@ -11,20 +12,24 @@ export type SaveMemberProfileInput = {
 };
 
 export async function saveMemberProfileUseCase(input: SaveMemberProfileInput): Promise<Result<SelectMember, Error>> {
-    try {
-        await getOrCreateGuild({
-            guildId: input.guildId,
-            name: input.guildName,
-        });
+    return withTransaction(async (tx) => {
+        await getOrCreateGuild(
+            {
+                guildId: input.guildId,
+                name: input.guildName,
+            },
+            tx
+        );
 
-        const member = await getOrCreateMember({
-            guildId: input.guildId,
-            userId: input.userId,
-            displayName: input.displayName,
-        });
+        const member = await getOrCreateMember(
+            {
+                guildId: input.guildId,
+                userId: input.userId,
+                displayName: input.displayName,
+            },
+            tx
+        );
 
-        return ok(member);
-    } catch (error) {
-        return err(error instanceof Error ? error : new Error(String(error)));
-    }
+        return member;
+    });
 }
