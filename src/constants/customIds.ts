@@ -7,6 +7,7 @@ export const CUSTOM_ID = {
         PROFILE_EDIT: "profile:edit-modal",
         POLL: "poll:modal",
         SHOWCASE_MODAL_V2: "showcase:modal-v2",
+        TIMER: "timer:modal",
     },
     INPUT: {
         PROFILE_BIO: "profile:bio",
@@ -19,6 +20,10 @@ export const CUSTOM_ID = {
         SHOWCASE_MODAL_V2_PRIORITY: "showcase:modal-v2:priority",
         SHOWCASE_MODAL_V2_FEATURES: "showcase:modal-v2:features",
         SHOWCASE_MODAL_V2_ATTACHMENT: "showcase:modal-v2:attachment",
+        TIMER_MODE: "timer:mode",
+        TIMER_DURATION: "timer:duration",
+        TIMER_TARGET_TIME: "timer:target-time",
+        TIMER_MESSAGE: "timer:message",
     },
     SELECT_MENU: {
         HELP_SECTION: "help:section-select",

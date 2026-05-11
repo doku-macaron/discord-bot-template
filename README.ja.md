@@ -139,6 +139,7 @@ docker compose logs -f bot
 - `/showcase`: Components v2 (Container / Section + Thumbnail / Section + Button / MediaGallery / Separator / TextDisplay) のリファレンス実装
 - `/showcase-modal`: Modal v2 (Checkbox / RadioGroup / CheckboxGroup / FileUpload + Label + TextInput) のリファレンス実装
 - `/poll`: モーダルから Discord ネイティブ Poll を作成するサンプル (`interaction.reply({ poll: ... })`)
+- `/timer`: モーダルで「経過時間後」or「指定時刻」を設定するリマインダー サンプル (in-memory setTimeout、再起動で失効)
 - `/admin report-user-select`: ユーザーを選んで report するサンプル (User Select)
 - `/admin set-mod-role`: Mod ロールを選ぶサンプル (Role Select)
 - `/admin set-archive-channel`: アーカイブ用 text channel を選ぶサンプル (Channel Select)

@@ -139,6 +139,7 @@ Environment variables are validated per use case by `getEnv` in `src/env.ts`.
 - `/showcase`: reference implementation for Components v2 (Container / Section + Thumbnail / Section + Button / MediaGallery / Separator / TextDisplay)
 - `/showcase-modal`: reference implementation for Modal v2 (Checkbox / RadioGroup / CheckboxGroup / FileUpload + Label + TextInput)
 - `/poll`: opens a modal to compose and post a Discord native Poll via `interaction.reply({ poll: ... })`
+- `/timer`: opens a modal to set a reminder either after a duration or at a target time (in-memory `setTimeout`, lost on restart)
 - `/admin report-user-select`: pick a user and report them (User Select sample)
 - `/admin set-mod-role`: pick the mod role (Role Select sample)
 - `/admin set-archive-channel`: pick the archive text channel (Channel Select sample)

@@ -6,6 +6,7 @@ import { pollCommand } from "@/events/interactionCreate/commands/chatInput/items
 import { profileCommand } from "@/events/interactionCreate/commands/chatInput/items/profile";
 import { showcaseCommand } from "@/events/interactionCreate/commands/chatInput/items/showcase";
 import { showcaseModalCommand } from "@/events/interactionCreate/commands/chatInput/items/showcaseModal";
+import { timerCommand } from "@/events/interactionCreate/commands/chatInput/items/timer";
 import { commandHandler } from "@/framework/discord/interactions/chatInput";
 
 commandHandler.clear();
@@ -17,3 +18,4 @@ commandHandler.register(adminCommand);
 commandHandler.register(showcaseCommand);
 commandHandler.register(showcaseModalCommand);
 commandHandler.register(pollCommand);
+commandHandler.register(timerCommand);
