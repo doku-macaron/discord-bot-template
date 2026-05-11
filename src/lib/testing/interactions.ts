@@ -205,6 +205,14 @@ const GUARD_METHODS: Record<InteractionGuardKind, string> = {
     "context-menu": "isContextMenuCommand",
 };
 
+const SELECT_KINDS: ReadonlySet<InteractionGuardKind> = new Set([
+    "string-select",
+    "user-select",
+    "role-select",
+    "channel-select",
+    "mentionable-select",
+]);
+
 export function createKindInteractionMock(kind: InteractionGuardKind, overrides: Record<string, unknown> = {}): Interaction {
     const base: Record<string, unknown> = {
         user: { id: "user-id", username: "user" },
@@ -218,6 +226,7 @@ export function createKindInteractionMock(kind: InteractionGuardKind, overrides:
         base[methodName] = () => false;
     }
     base[GUARD_METHODS[kind]] = () => true;
+    base.isAnySelectMenu = () => SELECT_KINDS.has(kind);
 
     return { ...base, ...overrides } as unknown as Interaction;
 }
