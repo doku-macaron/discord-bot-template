@@ -1,5 +1,5 @@
 import { ApplicationIntegrationType, Colors, EmbedBuilder, InteractionContextType, PermissionFlagsBits, userMention } from "discord.js";
-import { Command } from "@/framework/discord/interactions/chatInput/commandHandler";
+import { Command } from "@/framework/discord/interactions/chatInput";
 
 export const pingCommand = new Command(
     (builder) =>
