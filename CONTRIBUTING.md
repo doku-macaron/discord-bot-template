@@ -34,6 +34,42 @@ This repository is maintained through pull requests.
     gh pr create --draft --base main --head feat/my-change
     ```
 
+## Layer responsibilities
+
+The project layers code by concern. New code should go into the directory that matches its responsibility.
+
+- `src/events/` — Discord event adapters. The boundary that receives `Interaction`, `Guild`, `Message`, etc. from discord.js and hands work off to the rest of the system.
+- `src/framework/` — Reusable framework primitives. Handlers, dispatchers, the job runner, and other building blocks that an item or a usecase can plug into. No app-specific behavior lives here.
+- `src/usecases/` — Application behavior and orchestration. Pure of discord.js: usecases receive primitive inputs (IDs, strings, plain DTOs) and return primitive results.
+- `src/db/query/` — Persistence operations. Drizzle-based queries and small data-access helpers.
+- `src/lib/` — Cross-cutting helpers used across layers (logging, result handling, Discord formatting utilities, infrastructure glue).
+
+### Dependency direction
+
+Dependencies are one-directional. Higher layers reference lower layers; the reverse is not allowed.
+
+```txt
+events    -> usecases
+events    -> framework
+usecases  -> db/query
+usecases  -> lib
+items/register -> framework public API
+framework -> lib
+```
+
+- `src/framework/` MUST NOT import from `src/events/` or `src/usecases/`.
+- `src/db/query/` MUST NOT import from `src/usecases/` or `src/events/`.
+- Items / registers under `src/events/` consume `src/framework/` only through its public barrel exports (e.g. `@/framework/discord/interactions/chatInput`), not through deep paths.
+- Same-layer horizontal coupling between unrelated features should also be avoided.
+
+### discord.js stays at the boundary
+
+Do not pass discord.js objects (`Interaction`, `Guild`, `Message`, builders, …) into `src/usecases/`. The events layer is responsible for extracting the values a usecase needs and feeding them in as primitives or plain DTOs.
+
+- The event adapter or item reads `interaction.user.id`, `interaction.options.getString(...)`, etc., and calls a usecase with those values.
+- A usecase returns plain data (DTOs, IDs, `Result` tags). The caller (the item) translates that back into a discord.js reply, builder, or component tree.
+- This keeps usecases testable without mocking discord.js and confines the Discord SDK surface to `src/events/` and `src/framework/`.
+
 ## Test placement
 
 Keep framework tests out of the everyday implementation surface.
