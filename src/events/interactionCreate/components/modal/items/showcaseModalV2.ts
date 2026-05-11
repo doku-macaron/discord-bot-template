@@ -43,9 +43,16 @@ export function createShowcaseModalV2(): ModalBuilder {
         .setCustomId(CUSTOM_ID.INPUT.SHOWCASE_MODAL_V2_FEATURES)
         .addOptions(...FEATURE_OPTIONS)
         .setMinValues(0)
-        .setMaxValues(FEATURE_OPTIONS.length);
+        .setMaxValues(FEATURE_OPTIONS.length)
+        // Discord rejects `min_values: 0` unless the field is explicitly
+        // marked non-required.
+        .setRequired(false);
 
-    const fileUpload = new FileUploadBuilder().setCustomId(CUSTOM_ID.INPUT.SHOWCASE_MODAL_V2_ATTACHMENT).setMinValues(0).setMaxValues(1);
+    const fileUpload = new FileUploadBuilder()
+        .setCustomId(CUSTOM_ID.INPUT.SHOWCASE_MODAL_V2_ATTACHMENT)
+        .setMinValues(0)
+        .setMaxValues(1)
+        .setRequired(false);
 
     return new ModalBuilder()
         .setCustomId(CUSTOM_ID.MODAL.SHOWCASE_MODAL_V2)
