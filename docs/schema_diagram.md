@@ -24,6 +24,6 @@ erDiagram
     text bio "not null"
   }
 
-  guild_settings }o--|| guilds : "guild_id"
+  guilds ||--o| guild_settings : "guild_id"
   member_profiles }o--|| guilds : "guild_id"
 ```
