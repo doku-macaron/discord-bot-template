@@ -135,7 +135,7 @@ Environment variables are validated per use case by `getEnv` in `src/env.ts`.
 - `/echo <message>`: echoes the input (autocomplete sample)
 - `/help`: lists commands as a paginated embed (pagination + String Select sample)
 - `/profile view`: renders a profile with Container / Section / Thumbnail / Button accessory (Components v2 sample)
-- `/profile edit`: updates the profile display name via a modal sample
+- `/profile edit`: edits and saves a profile bio through a modal
 - `/showcase`: reference implementation for Components v2 (Container / Section + Thumbnail / Section + Button / MediaGallery / Separator / TextDisplay)
 - `/admin report-user-select`: pick a user and report them (User Select sample)
 - `/admin set-mod-role`: pick the mod role (Role Select sample)
@@ -154,27 +154,27 @@ Interactions are split per kind into separate handler/register pairs.
 - `src/events/interactionCreate/components/modal/items/`: modals
 - `src/events/interactionCreate/components/selectMenu/items/`: select menus (string / user / role / channel / mentionable)
 
-Each handler is split between `<type>HandlerInstance.ts` (singleton) and `<type>Register.ts` (calls `register()` on each item). `src/events/interactionCreate/setup.ts` imports every register module for its side effects and re-exports the handlers. `index.ts` and `scripts/registerCommand.ts` get their handlers through `setup.ts`.
+Consumer code only touches the framework through the `@/framework/discord/interactions/<kind>` barrels. Each handler is a pair of `<type>Handler.ts` (class) and `<type>HandlerInstance.ts` (singleton), both re-exported from the barrel. The `<type>Register.ts` modules register each item with the handler, and `src/events/interactionCreate/setup.ts` imports every register for its side effects and then composes the dispatcher, exporting `dispatchInteraction`. `src/events/interactionCreate/index.ts` is a thin adapter that just calls `dispatchInteraction`, and `scripts/registerCommand.ts` reaches the handlers through `setup.ts` as well.
 
-For everyday development, add interaction implementations to the `items/` directories and wire them up in the matching `*Register.ts`. The framework-side implementations — handler classes, singletons, subcommand helpers, the shared customId router — live under `src/framework/discord/interactions/`.
+For everyday development, add interaction implementations to the `items/` directories and wire them up in the matching `*Register.ts`. The framework-side implementations — handler classes, the dispatcher, subcommand helpers, the shared customId router — live under `src/framework/discord/interactions/`.
 
 `src/events/guildCreate/` and `src/events/guildDelete/` keep the `guilds` table in sync as the bot joins and leaves. Leaves are soft-deletes that write a timestamp into `leftAt`; on rejoin, `joinedAt` resets and `leftAt` returns to null. The lazy populate path (`getOrCreateGuild` calls during command execution) is still there, so DB consistency holds even if you miss a gateway event.
 
-`src/lib/interactionContext.ts` and `src/lib/logger.ts` emit command/customId/user/guild/channel/interactionId/ageMs into logs on error.
+`src/lib/discord/interactionContext.ts` and `src/lib/infra/logger.ts` emit command/customId/user/guild/channel/interactionId/ageMs into logs on error.
 `NODE_ENV=production` produces JSON line format; development outputs a human-readable format.
 If `WEBHOOK_URL` is set, the same content is also forwarded to a Discord webhook.
 
 The recommended `customId` shape is `feature:action` or `feature:action:id`.
 Group static IDs under `CUSTOM_ID` and matching regexes for dynamic IDs under `CUSTOM_ID_PATTERN`.
-For single-process cooldown / rate-limiting, use `CooldownStore` and `createCooldownKey` from `src/lib/cooldown.ts`.
+For single-process cooldown / rate-limiting, use `CooldownStore` and `createCooldownKey` from `src/lib/util/cooldown.ts`.
 
 ### Embed helpers
 
-`src/lib/embed.ts` exports `successEmbed` / `errorEmbed` / `infoEmbed` / `warnEmbed` for `EmbedBuilder`s with consistent colors.
+`src/lib/discord/embed.ts` exports `successEmbed` / `errorEmbed` / `infoEmbed` / `warnEmbed` for `EmbedBuilder`s with consistent colors.
 
 ### Pagination
 
-`src/lib/pagination.ts` provides `buildPaginationRow` to build a prev/next button row, plus `parsePaginationCustomId` + `nextPage` for button handlers to advance to the next page. See `/help` (`src/events/interactionCreate/commands/chatInput/items/help.ts`) and `helpPaginationButton` for a sample.
+`src/lib/discord/pagination.ts` provides `buildPaginationRow` to build a prev/next button row, plus `parsePaginationCustomId` + `nextPage` for button handlers to advance to the next page. See `/help` (`src/events/interactionCreate/commands/chatInput/items/help.ts`) and `helpPaginationButton` for a sample.
 
 ### Autocomplete
 
@@ -223,9 +223,10 @@ You can add Mentionable selects using `MentionableSelectMenuBuilder` with the sa
 
 ## Database
 
-Schemas live under `src/db/schema`.
-For DB operations that can fail, the `Result` type from `src/lib/result.ts` together with `handleResult` from `src/lib/resultHandler.ts` lets you handle logging, webhook notifications, and user-facing error replies in one place.
-To run multiple DB operations atomically, `withTransaction` in `src/db/transaction.ts` wraps transaction failures into a `Result`.
+Schemas live under `src/db/schema/` (`guilds` / `guild_settings` / `member_profiles`, plus relations).
+Individual queries live under `src/db/query/` and are wrapped with the `defineQuery` helper ([src/db/query/defineQuery.ts](src/db/query/defineQuery.ts)). The helper injects the global `db`, so each query body receives a `client: DbClient` and never reaches for the global directly. Inside `withTransaction`, the same `tx` flows into every query.
+For DB operations that can fail, the `Result` type from `src/lib/util/result.ts` together with `handleResult` from `src/lib/discord/resultHandler.ts` lets you handle logging, webhook notifications, and user-facing error replies in one place.
+To run multiple DB operations atomically, `withTransaction` in `src/db/transaction.ts` wraps transaction failures into a `Result`. The usecase layer (`src/usecases/`) composes flows with that pattern.
 
 ```sh
 bun generate:local   # generate migrations for local PGlite
@@ -285,13 +286,13 @@ A shutdown task clears the interval, so you don't need to call `registerShutdown
 
 ## Error reporting
 
-`src/lib/errorReporter.ts` provides a pluggable hook for an external error tracker (Sentry, etc.). `captureException` runs every time `logger.error` is called and does nothing by default.
+`src/lib/infra/errorReporter.ts` provides a pluggable hook for an external error tracker (Sentry, etc.). `captureException` runs every time `logger.error` is called and does nothing by default.
 
 To use Sentry, swap the reporter at startup.
 
 ```ts
 import * as Sentry from "@sentry/bun";
-import { setErrorReporter } from "@/lib/errorReporter";
+import { setErrorReporter } from "@/lib/infra/errorReporter";
 
 Sentry.init({ dsn: process.env.SENTRY_DSN });
 setErrorReporter({
@@ -307,7 +308,7 @@ In real projects, create an initializer file that's imported from `src/index.ts`
 
 ## Graceful shutdown
 
-On `SIGINT` / `SIGTERM`, `runShutdown` in `src/lib/shutdown.ts` waits for in-flight interactions, then closes the Discord client and the DB in order.
+On `SIGINT` / `SIGTERM`, `runShutdown` in `src/lib/infra/shutdown.ts` waits for in-flight interactions, then closes the Discord client and the DB in order.
 
 - In-flight wait timeout: 10 seconds (default)
 - Per-task timeout: 5 seconds (default)
@@ -338,7 +339,7 @@ expect(replies).toEqual([]);
 - `createAutocompleteInteractionMock(commandName, recorder, options?)`: autocomplete interaction
 - `createKindInteractionMock(kind, overrides?)`: minimal mock that only toggles the `interaction.isXxx()` guards. Useful for testing branches of `buildInteractionContext`.
 
-See `src/framework/discord/interactions/chatInput/__tests__/` / `src/framework/discord/interactions/contextMenu/__tests__/` / `src/framework/discord/interactions/autocomplete/__tests__/` / `src/framework/discord/interactions/components/__tests__/` / `src/lib/{replyError,resultHandler,interactionContext,errorWebhook,embed}.test.ts` for real examples.
+See `src/framework/discord/interactions/{chatInput,contextMenu,autocomplete,components}/__tests__/`, `src/lib/discord/{replyError,resultHandler,interactionContext,embed,pagination}.test.ts`, `src/lib/infra/{errorWebhook,errorReporter,shutdown}.test.ts`, and `src/lib/util/{result,cooldown}.test.ts` for real examples.
 
 ## Scripts
 

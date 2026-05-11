@@ -135,7 +135,7 @@ docker compose logs -f bot
 - `/echo <message>`: 入力内容を返すサンプル (autocomplete)
 - `/help`: コマンド一覧をページャ付き embed で表示するサンプル (pagination + String Select)
 - `/profile view`: プロフィールを Container / Section / Thumbnail / Button accessory で組み立てるサンプル (Components v2)
-- `/profile edit`: モーダルでプロフィール表示名を更新するサンプル
+- `/profile edit`: モーダルでプロフィール bio を編集・保存するサンプル
 - `/showcase`: Components v2 (Container / Section + Thumbnail / Section + Button / MediaGallery / Separator / TextDisplay) のリファレンス実装
 - `/admin report-user-select`: ユーザーを選んで report するサンプル (User Select)
 - `/admin set-mod-role`: Mod ロールを選ぶサンプル (Role Select)
@@ -154,26 +154,26 @@ interaction は種類ごとに handler/register を分けています。
 - `src/events/interactionCreate/components/modal/items/`: modal
 - `src/events/interactionCreate/components/selectMenu/items/`: select menu (string / user / role / channel / mentionable)
 
-各 handler は `<type>HandlerInstance.ts` (singleton) と `<type>Register.ts` (items の `register()` 呼び出し) に分かれており、`src/events/interactionCreate/setup.ts` がすべての register を side-effect import で読み込んで handler を再 export します。`index.ts` と `scripts/registerCommand.ts` はこの `setup.ts` 経由で handler を取得します。
-普段の開発では各種 `items/` に interaction 実装を追加し、対応する `*Register.ts` に登録してください。handler class、singleton、subcommand helper、shared customId router などの framework 側実装は `src/framework/discord/interactions/` にあります。
+利用者側のコードは `@/framework/discord/interactions/<kind>` の barrel 経由でだけ framework に触ります。各 handler は `<type>Handler.ts` (class) と `<type>HandlerInstance.ts` (singleton) のペアで、barrel が両方を再 export します。`<type>Register.ts` が `items/` の各 interaction を handler に登録し、`src/events/interactionCreate/setup.ts` がすべての register を side-effect import で読み込んだうえで dispatcher を composition root として組み立てて `dispatchInteraction` を export します。`src/events/interactionCreate/index.ts` はこの `dispatchInteraction` を呼ぶだけの thin adapter、`scripts/registerCommand.ts` も `setup.ts` 経由で handler を取得します。
+普段の開発では各種 `items/` に interaction 実装を追加し、対応する `*Register.ts` に登録してください。handler class、dispatcher、subcommand helper、shared customId router などの framework 側実装は `src/framework/discord/interactions/` にあります。
 
 `src/events/guildCreate/` と `src/events/guildDelete/` が bot の参加・退出に合わせて `guilds` テーブルを sync します。退出は物理削除ではなく `leftAt` に時刻を入れる soft-delete で、再入会時に `joinedAt` がリセット・`leftAt` が null に戻ります。lazy populate (コマンド実行時の `getOrCreateGuild` 呼び出し) も残っているため、event を取りこぼしても DB 整合性は保たれます。
 
-`src/lib/interactionContext.ts` と `src/lib/logger.ts` で、エラー時に command/customId/user/guild/channel/interactionId/ageMs をログへ出します。
+`src/lib/discord/interactionContext.ts` と `src/lib/infra/logger.ts` で、エラー時に command/customId/user/guild/channel/interactionId/ageMs をログへ出します。
 `NODE_ENV=production` では JSON line 形式、development では人間が読みやすい形式で出力します。
 `WEBHOOK_URL` を設定している場合だけ、同じ内容を Discord webhook にも通知します。
 
 `customId` は `feature:action` または `feature:action:id` の形式を推奨します。
 固定IDは `CUSTOM_ID`、動的IDに対応する正規表現は `CUSTOM_ID_PATTERN` にまとめます。
-単一プロセスの cooldown / rate-limit には `src/lib/cooldown.ts` の `CooldownStore` と `createCooldownKey` を使えます。
+単一プロセスの cooldown / rate-limit には `src/lib/util/cooldown.ts` の `CooldownStore` と `createCooldownKey` を使えます。
 
 ### Embed helpers
 
-`src/lib/embed.ts` の `successEmbed` / `errorEmbed` / `infoEmbed` / `warnEmbed` で色を統一した `EmbedBuilder` を作れます。
+`src/lib/discord/embed.ts` の `successEmbed` / `errorEmbed` / `infoEmbed` / `warnEmbed` で色を統一した `EmbedBuilder` を作れます。
 
 ### Pagination
 
-`src/lib/pagination.ts` の `buildPaginationRow` で前/次ボタン付きの行を作り、`parsePaginationCustomId` + `nextPage` で button handler から新しいページに更新します。サンプルは `/help` コマンド (`src/events/interactionCreate/commands/chatInput/items/help.ts`) と `helpPaginationButton` を参照してください。
+`src/lib/discord/pagination.ts` の `buildPaginationRow` で前/次ボタン付きの行を作り、`parsePaginationCustomId` + `nextPage` で button handler から新しいページに更新します。サンプルは `/help` コマンド (`src/events/interactionCreate/commands/chatInput/items/help.ts`) と `helpPaginationButton` を参照してください。
 
 ### Autocomplete
 
@@ -222,9 +222,10 @@ Mentionable select は `MentionableSelectMenuBuilder` を使って同じ `Menu` 
 
 ## Database
 
-スキーマは `src/db/schema` にあります。
-DB query が失敗しうる処理では `src/lib/result.ts` の `Result` 型と `src/lib/resultHandler.ts` の `handleResult` を使うと、ログ出力・webhook通知・ユーザーへのエラー返信をまとめて扱えます。
-複数のDB操作をまとめる場合は `src/db/transaction.ts` の `withTransaction` を使うと、transaction失敗を `Result` として扱えます。
+スキーマは `src/db/schema/` にあります (`guilds` / `guild_settings` / `member_profiles` の 3 テーブル + relations)。
+個別 query は `src/db/query/` 配下に置き、ヘルパー `defineQuery` ([src/db/query/defineQuery.ts](src/db/query/defineQuery.ts)) で wrap します。defineQuery が global `db` を注入してくれるので、各 query 本体は `client: DbClient` を受け取って書き、global を直掴みしません。`withTransaction` 内では同じ `tx` を各 query に渡せます。
+DB query が失敗しうる処理では `src/lib/util/result.ts` の `Result` 型と `src/lib/discord/resultHandler.ts` の `handleResult` を使うと、ログ出力・webhook通知・ユーザーへのエラー返信をまとめて扱えます。
+複数のDB操作をまとめる場合は `src/db/transaction.ts` の `withTransaction` を使うと、transaction失敗を `Result` として扱えます。usecase 層 (`src/usecases/`) はこのパターンで composite flow を組みます。
 
 ```sh
 bun generate:local   # ローカル PGlite 用 migration 作成
@@ -284,13 +285,13 @@ shutdown task として interval が clear されるため、`registerShutdownTa
 
 ## Error reporting
 
-`src/lib/errorReporter.ts` に外部エラートラッカー (Sentry など) の差し込み口があります。`logger.error` が呼ばれるたびに `captureException` が走り、既定では何もしません。
+`src/lib/infra/errorReporter.ts` に外部エラートラッカー (Sentry など) の差し込み口があります。`logger.error` が呼ばれるたびに `captureException` が走り、既定では何もしません。
 
 Sentry を使う場合は起動時に reporter を差し替えます。
 
 ```ts
 import * as Sentry from "@sentry/bun";
-import { setErrorReporter } from "@/lib/errorReporter";
+import { setErrorReporter } from "@/lib/infra/errorReporter";
 
 Sentry.init({ dsn: process.env.SENTRY_DSN });
 setErrorReporter({
@@ -306,7 +307,7 @@ reporter が throw / reject しても呼び出し元には伝搬しません（w
 
 ## Graceful shutdown
 
-`SIGINT` / `SIGTERM` を受けると `src/lib/shutdown.ts` の `runShutdown` が走り、進行中の interaction を待ってから Discord client と DB を順に close します。
+`SIGINT` / `SIGTERM` を受けると `src/lib/infra/shutdown.ts` の `runShutdown` が走り、進行中の interaction を待ってから Discord client と DB を順に close します。
 
 - 進行中 interaction の待機タイムアウト: 10 秒（既定）
 - 各タスクのタイムアウト: 5 秒（既定）
@@ -337,7 +338,7 @@ expect(replies).toEqual([]);
 - `createAutocompleteInteractionMock(commandName, recorder, options?)`: autocomplete interaction
 - `createKindInteractionMock(kind, overrides?)`: `interaction.isXxx()` ガードだけを切り替える最小 mock。`buildInteractionContext` の分岐テスト向け
 
-実例は `src/framework/discord/interactions/chatInput/__tests__/` / `src/framework/discord/interactions/contextMenu/__tests__/` / `src/framework/discord/interactions/autocomplete/__tests__/` / `src/framework/discord/interactions/components/__tests__/` / `src/lib/{replyError,resultHandler,interactionContext,errorWebhook,embed}.test.ts` を参照してください。
+実例は `src/framework/discord/interactions/{chatInput,contextMenu,autocomplete,components}/__tests__/`、`src/lib/discord/{replyError,resultHandler,interactionContext,embed,pagination}.test.ts`、`src/lib/infra/{errorWebhook,errorReporter,shutdown}.test.ts`、`src/lib/util/{result,cooldown}.test.ts` を参照してください。
 
 ## Scripts
 
