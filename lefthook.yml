@@ -9,11 +9,16 @@ pre-commit:
   commands:
     01-create-env:
       run: NODE_ENV=setup bun run scripts/createEnv.ts
+    # ER diagram is a generated artifact. Regenerate it from the latest
+    # schema snapshot on every commit and stage the result so the file in
+    # `docs/` stays in sync with the schema.
     02-generate-er-diagram:
-      run: bun run scripts/generateERdiagram.ts
+      run: bun run scripts/generateERdiagram.ts && git add docs/schema_diagram.md
+    # biome --write may rewrite staged source files. `stage_fixed: true`
+    # re-stages only files that were already part of the commit, so
+    # unrelated working-tree changes are not pulled in.
     03-check:
       run: bun check
+      stage_fixed: true
     04-check-tsc:
       run: bun check:tsc
-    05-apply:
-      run: git add .

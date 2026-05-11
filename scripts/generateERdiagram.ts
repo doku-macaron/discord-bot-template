@@ -142,7 +142,18 @@ function generateERDiagram(snapshot: Snapshot): string {
 
         for (const fk of table.foreignKeys) {
             const toTable = cleanName(`${fk.schemaTo}.${fk.tableTo}`);
-            lines.push(`  ${fromTable} }o--|| ${toTable} : "${fk.columns.join("_")}"`);
+            const fkColumns = new Set(fk.columns);
+            // When the FK columns *are* the child table's full primary key, the
+            // child can have at most one row per parent row — that's a 1:0..1
+            // relationship, not many-to-one.
+            const isOneToOne =
+                fkColumns.size === table.primaryKeyColumns.size && [...fkColumns].every((c) => table.primaryKeyColumns.has(c));
+
+            if (isOneToOne) {
+                lines.push(`  ${toTable} ||--o| ${fromTable} : "${fk.columns.join("_")}"`);
+            } else {
+                lines.push(`  ${fromTable} }o--|| ${toTable} : "${fk.columns.join("_")}"`);
+            }
         }
     }
 
