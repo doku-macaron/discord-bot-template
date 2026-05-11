@@ -89,12 +89,12 @@ ER 図は lefthook の `02-generate-er-diagram` が `git commit` 時に自動生
 
 ## 参考: このテンプレでの DB 関連配置
 
-- schema: [src/db/schema/](src/db/schema/)
-- queries: [src/db/query/<domain>/](src/db/query/)
-- defineQuery helper: [src/db/query/defineQuery.ts](src/db/query/defineQuery.ts) — 新規 query は必ずこれ経由
-- usecases: [src/usecases/<domain>/](src/usecases/)
-- transaction helper: [src/db/transaction.ts](src/db/transaction.ts) (`withTransaction`, `DbClient`)
-- events: [src/events/](src/events/)
-- seed / reset: [scripts/seedLocalDb.ts](scripts/seedLocalDb.ts), [scripts/resetLocalDb.ts](scripts/resetLocalDb.ts)
-- drizzle config: [drizzle.config.ts](drizzle.config.ts) (本番), [drizzle-dev.config.ts](drizzle-dev.config.ts) (ローカル PGlite)
-- lefthook の自動生成 ER 図: [docs/schema_diagram.md](docs/schema_diagram.md)
+- schema: [src/db/schema/](../../../src/db/schema/)
+- queries: [src/db/query/<domain>/](../../../src/db/query/)
+- defineQuery helper: [src/db/query/defineQuery.ts](../../../src/db/query/defineQuery.ts) — 新規 query は必ずこれ経由
+- usecases: [src/usecases/<domain>/](../../../src/usecases/)
+- transaction helper: [src/db/transaction.ts](../../../src/db/transaction.ts) (`withTransaction`, `DbClient`)
+- events: [src/events/](../../../src/events/)
+- seed / reset: [scripts/seedLocalDb.ts](../../../scripts/seedLocalDb.ts), [scripts/resetLocalDb.ts](../../../scripts/resetLocalDb.ts)
+- drizzle config: [drizzle.config.ts](../../../drizzle.config.ts) (本番), [drizzle-dev.config.ts](../../../drizzle-dev.config.ts) (ローカル PGlite)
+- lefthook の自動生成 ER 図: [docs/schema_diagram.md](../../../docs/schema_diagram.md)

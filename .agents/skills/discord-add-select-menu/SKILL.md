@@ -19,7 +19,7 @@ description: このテンプレで select menu (String / User / Role / Channel /
 
 ## 1. customId を決める
 
-[src/constants/customIds.ts](src/constants/customIds.ts) の `CUSTOM_ID.SELECT_MENU.<NAME>` に追加:
+[src/constants/customIds.ts](../../../src/constants/customIds.ts) の `CUSTOM_ID.SELECT_MENU.<NAME>` に追加:
 
 ```ts
 CUSTOM_ID.SELECT_MENU.FOO = "foo:select";
@@ -76,7 +76,7 @@ handler 冒頭でやる narrow を kind に合わせる:
 
 ## 4. register に登録
 
-[src/events/interactionCreate/components/selectMenu/menuRegister.ts](src/events/interactionCreate/components/selectMenu/menuRegister.ts) の末尾に追加:
+[src/events/interactionCreate/components/selectMenu/menuRegister.ts](../../../src/events/interactionCreate/components/selectMenu/menuRegister.ts) の末尾に追加:
 
 ```ts
 import { fooSelectMenu } from "@/events/interactionCreate/components/selectMenu/items/fooSelectMenu";
@@ -131,9 +131,9 @@ new ChannelSelectMenuBuilder()
 
 ## 参考
 
-- 既存サンプル (5 種類): [src/events/interactionCreate/components/selectMenu/items/](src/events/interactionCreate/components/selectMenu/items/)
+- 既存サンプル (5 種類): [src/events/interactionCreate/components/selectMenu/items/](../../../src/events/interactionCreate/components/selectMenu/items/)
   - `helpSectionSelectMenu` (String)
   - `reportUserSelectMenu` (User)
   - `modRoleSelectMenu` (Role)
   - `archiveChannelSelectMenu` (Channel, GuildText フィルタ付き)
-- handler / 型: [src/framework/discord/interactions/components/selectMenu/](src/framework/discord/interactions/components/selectMenu/)
+- handler / 型: [src/framework/discord/interactions/components/selectMenu/](../../../src/framework/discord/interactions/components/selectMenu/)

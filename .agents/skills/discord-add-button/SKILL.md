@@ -24,7 +24,7 @@ routing キーは `customId`。テンプレの推奨フォーマット:
 - 固定 ID: `feature:action` (例: `profile:edit-button`)
 - 動的 ID 付き: `feature:action:<id>` (例: `help:pagination:next:3`)
 
-固定 ID は [src/constants/customIds.ts](src/constants/customIds.ts) の `CUSTOM_ID` に追加。動的 ID は同ファイルの `CUSTOM_ID_PATTERN` に正規表現を追加して、handler 側で `parse` する。
+固定 ID は [src/constants/customIds.ts](../../../src/constants/customIds.ts) の `CUSTOM_ID` に追加。動的 ID は同ファイルの `CUSTOM_ID_PATTERN` に正規表現を追加して、handler 側で `parse` する。
 
 ```ts
 // 固定
@@ -77,7 +77,7 @@ export const fooPaginationButton = new Button(
 
 ## 3. register に登録
 
-[src/events/interactionCreate/components/button/buttonRegister.ts](src/events/interactionCreate/components/button/buttonRegister.ts) の末尾に追加:
+[src/events/interactionCreate/components/button/buttonRegister.ts](../../../src/events/interactionCreate/components/button/buttonRegister.ts) の末尾に追加:
 
 ```ts
 import { fooButton } from "@/events/interactionCreate/components/button/items/fooButton";
@@ -132,7 +132,7 @@ const section = new SectionBuilder()
 
 ## 参考
 
-- 既存サンプル: [src/events/interactionCreate/components/button/items/](src/events/interactionCreate/components/button/items/)
-- handler / 型: [src/framework/discord/interactions/components/button/](src/framework/discord/interactions/components/button/)
-- customId 設計: [src/constants/customIds.ts](src/constants/customIds.ts)
-- pagination helper: [src/lib/discord/pagination.ts](src/lib/discord/pagination.ts) (`/help` で使用)
+- 既存サンプル: [src/events/interactionCreate/components/button/items/](../../../src/events/interactionCreate/components/button/items/)
+- handler / 型: [src/framework/discord/interactions/components/button/](../../../src/framework/discord/interactions/components/button/)
+- customId 設計: [src/constants/customIds.ts](../../../src/constants/customIds.ts)
+- pagination helper: [src/lib/discord/pagination.ts](../../../src/lib/discord/pagination.ts) (`/help` で使用)

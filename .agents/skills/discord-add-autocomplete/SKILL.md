@@ -70,7 +70,7 @@ export const echoAutocomplete = new Autocomplete("echo", async (interaction) => 
 
 ## 3. register に登録
 
-[src/events/interactionCreate/commands/autocomplete/autocompleteRegister.ts](src/events/interactionCreate/commands/autocomplete/autocompleteRegister.ts) の末尾に追加:
+[src/events/interactionCreate/commands/autocomplete/autocompleteRegister.ts](../../../src/events/interactionCreate/commands/autocomplete/autocompleteRegister.ts) の末尾に追加:
 
 ```ts
 import { echoAutocomplete } from "@/events/interactionCreate/commands/autocomplete/items/echoAutocomplete";
@@ -107,5 +107,5 @@ slash command を変えていなければ register は不要 (autocomplete handl
 
 ## 参考
 
-- 既存サンプル: [src/events/interactionCreate/commands/autocomplete/items/echoAutocomplete.ts](src/events/interactionCreate/commands/autocomplete/items/echoAutocomplete.ts)
-- handler / 型: [src/framework/discord/interactions/autocomplete/](src/framework/discord/interactions/autocomplete/)
+- 既存サンプル: [src/events/interactionCreate/commands/autocomplete/items/echoAutocomplete.ts](../../../src/events/interactionCreate/commands/autocomplete/items/echoAutocomplete.ts)
+- handler / 型: [src/framework/discord/interactions/autocomplete/](../../../src/framework/discord/interactions/autocomplete/)

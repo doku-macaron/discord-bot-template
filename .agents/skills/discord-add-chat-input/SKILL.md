@@ -101,7 +101,7 @@ adminCommand.register(roleGroup);
 
 ## 4. register に登録する
 
-[src/events/interactionCreate/commands/chatInput/commandRegister.ts](src/events/interactionCreate/commands/chatInput/commandRegister.ts) の末尾に追加:
+[src/events/interactionCreate/commands/chatInput/commandRegister.ts](../../../src/events/interactionCreate/commands/chatInput/commandRegister.ts) の末尾に追加:
 
 ```ts
 import { fooCommand } from "@/events/interactionCreate/commands/chatInput/items/foo";
@@ -134,6 +134,6 @@ bun register
 
 ## 参考
 
-- 既存サンプル: [src/events/interactionCreate/commands/chatInput/items/](src/events/interactionCreate/commands/chatInput/items/)
-- handler / 型: [src/framework/discord/interactions/chatInput/](src/framework/discord/interactions/chatInput/)
-- 規約全般: [CONTRIBUTING.md](CONTRIBUTING.md)
+- 既存サンプル: [src/events/interactionCreate/commands/chatInput/items/](../../../src/events/interactionCreate/commands/chatInput/items/)
+- handler / 型: [src/framework/discord/interactions/chatInput/](../../../src/framework/discord/interactions/chatInput/)
+- 規約全般: [CONTRIBUTING.md](../../../CONTRIBUTING.md)

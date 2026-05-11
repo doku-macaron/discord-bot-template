@@ -20,7 +20,7 @@ modal はユーザーから text 入力を取るフォーム。**button や sele
 
 ## 1. customId とフィールド ID を決める
 
-modal 自体の customId と、各 TextInput の customId の両方を [src/constants/customIds.ts](src/constants/customIds.ts) に登録:
+modal 自体の customId と、各 TextInput の customId の両方を [src/constants/customIds.ts](../../../src/constants/customIds.ts) に登録:
 
 ```ts
 CUSTOM_ID.MODAL.FOO = "foo:modal";
@@ -89,7 +89,7 @@ export const fooModal = new Modal(
 
 ## 3. register に登録
 
-[src/events/interactionCreate/components/modal/modalRegister.ts](src/events/interactionCreate/components/modal/modalRegister.ts) の末尾に追加:
+[src/events/interactionCreate/components/modal/modalRegister.ts](../../../src/events/interactionCreate/components/modal/modalRegister.ts) の末尾に追加:
 
 ```ts
 import { fooModal } from "@/events/interactionCreate/components/modal/items/fooModal";
@@ -130,6 +130,6 @@ slash command から直接開くのも可能。**deferReply はしない**。
 
 ## 参考
 
-- 既存サンプル: [src/events/interactionCreate/components/modal/items/](src/events/interactionCreate/components/modal/items/)
-- handler / 型: [src/framework/discord/interactions/components/modal/](src/framework/discord/interactions/components/modal/)
-- customId 設計: [src/constants/customIds.ts](src/constants/customIds.ts)
+- 既存サンプル: [src/events/interactionCreate/components/modal/items/](../../../src/events/interactionCreate/components/modal/items/)
+- handler / 型: [src/framework/discord/interactions/components/modal/](../../../src/framework/discord/interactions/components/modal/)
+- customId 設計: [src/constants/customIds.ts](../../../src/constants/customIds.ts)

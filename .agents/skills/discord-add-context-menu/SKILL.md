@@ -75,7 +75,7 @@ export const reportMessageContextMenu = new ContextMenuCommand(
 
 ## 3. register に登録
 
-[src/events/interactionCreate/commands/contextMenu/contextMenuRegister.ts](src/events/interactionCreate/commands/contextMenu/contextMenuRegister.ts) の末尾に追加:
+[src/events/interactionCreate/commands/contextMenu/contextMenuRegister.ts](../../../src/events/interactionCreate/commands/contextMenu/contextMenuRegister.ts) の末尾に追加:
 
 ```ts
 import { getUserProfileContextMenu } from "@/events/interactionCreate/commands/contextMenu/items/getUserProfileContextMenu";
@@ -105,5 +105,5 @@ slash command と context menu は同じ `bun register` で一緒に Discord へ
 
 ## 参考
 
-- 既存サンプル: [src/events/interactionCreate/commands/contextMenu/items/](src/events/interactionCreate/commands/contextMenu/items/)
-- handler / 型: [src/framework/discord/interactions/contextMenu/](src/framework/discord/interactions/contextMenu/)
+- 既存サンプル: [src/events/interactionCreate/commands/contextMenu/items/](../../../src/events/interactionCreate/commands/contextMenu/items/)
+- handler / 型: [src/framework/discord/interactions/contextMenu/](../../../src/framework/discord/interactions/contextMenu/)
