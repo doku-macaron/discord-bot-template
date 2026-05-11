@@ -3,6 +3,10 @@ import { db } from "@/db";
 import { type InsertMember, members, type SelectMember, type UpdateMember } from "@/db/schema/members";
 import type { DbClient } from "@/db/transaction";
 
+// `commandCount` belongs to `incrementMemberCommandCount`, so it is excluded
+// from this function's input.
+export type GetOrCreateMemberInput = Pick<InsertMember, "guildId" | "userId" | "displayName">;
+
 /**
  * Only fields the caller actually provides are refreshed on conflict. Omitting
  * `displayName` leaves the existing row's displayName intact rather than
@@ -10,7 +14,7 @@ import type { DbClient } from "@/db/transaction";
  * saved a displayName via the profile modal that we don't want to wipe when
  * another caller forgets to pass one.
  */
-export async function getOrCreateMember(input: InsertMember, client: DbClient = db): Promise<SelectMember> {
+export async function getOrCreateMember(input: GetOrCreateMemberInput, client: DbClient = db): Promise<SelectMember> {
     const [row] =
         input.displayName === undefined
             ? await client.insert(members).values(input).onConflictDoNothing().returning()
