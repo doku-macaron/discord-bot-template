@@ -34,6 +34,27 @@ This repository is maintained through pull requests.
     gh pr create --draft --base main --head feat/my-change
     ```
 
+## Test placement
+
+Keep framework tests out of the everyday implementation surface.
+
+- Framework and routing tests live in the feature area's `__tests__/` directory.
+  - `src/events/interactionCreate/commands/chatInput/__tests__/`
+  - `src/events/interactionCreate/commands/autocomplete/__tests__/`
+  - `src/events/interactionCreate/commands/contextMenu/__tests__/`
+  - `src/events/interactionCreate/components/__tests__/`
+  - `src/jobs/__tests__/`
+- Small utility, Discord helper, and infrastructure tests stay next to the file they cover.
+  - `src/lib/util/result.ts` and `src/lib/util/result.test.ts`
+  - `src/lib/discord/pagination.ts` and `src/lib/discord/pagination.test.ts`
+  - `src/lib/infra/logger.ts` and related infrastructure tests
+- Database schema and transaction smoke tests stay close to the database code.
+  - `src/db/schema/schema.test.ts`
+  - `src/db/transaction.test.ts`
+- If a command/component/job item grows enough to need its own behavior test, prefer colocating that test with the item first. Move item tests into an `items/__tests__/` directory only if the `items/` directory becomes noisy.
+
+In short: `_core/` framework tests go to `__tests__/`; focused unit tests for small modules can stay beside the module.
+
 ## PR checklist
 
 - The change is scoped to one purpose.
