@@ -128,6 +128,24 @@ slash command から直接開くのも可能。**deferReply はしない**。
 - 失敗時は `handleResult` で統一
 - submit を受け取った時点で `interaction.deferReply` か `interaction.reply` のどちらかで返答する義務がある (3 秒以内)
 
+## Mention safety / ping opt-in
+
+modal は自由入力なので、ユーザーが `@everyone` や他人への mention を仕込みやすい。[src/client.ts](../../../src/client.ts) で `allowedMentions: { parse: [] }` を default にしているため、`reply` / `editReply` / `followUp` / `channel.send` で `content` に流したテキスト内の mention は **ping を発火しない** (描画はされる)。bot 権限を踏み台にした不意の broadcast を防ぐためのデフォルト。
+
+意図して ping したいときは send 側で明示的に opt-in する:
+
+```ts
+await channel.send({
+    content: `${userMention(user.id)} ⏰ ${userSuppliedMessage}`,
+    allowedMentions: { parse: [], users: [user.id] },
+});
+```
+
+- `users: [...]` / `roles: [...]` で具体的な ID を渡せばその対象だけ ping される
+- どうしても `@everyone` を出す必要があるときは `parse: ['everyone']` を明示 (本当に必要かを再考)
+- embed の field / description / TextDisplay (Components v2) 内の mention は元々 ping を発火しないので、それらの表示は default のままで問題ない
+- 既存サンプル: [src/events/interactionCreate/components/modal/items/timerModal.ts](../../../src/events/interactionCreate/components/modal/items/timerModal.ts) の `channel.send`
+
 ## 参考
 
 - 既存サンプル: [src/events/interactionCreate/components/modal/items/](../../../src/events/interactionCreate/components/modal/items/)
