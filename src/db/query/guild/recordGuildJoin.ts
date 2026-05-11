@@ -12,7 +12,7 @@ export type RecordGuildJoinInput = Pick<InsertGuild, "guildId" | "name">;
  * `joinedAt` only via the lazy `getOrCreateGuild` path (which doesn't touch
  * either column). `name` is refreshed only when the caller provides one.
  */
-export const recordGuildJoin = defineQuery<RecordGuildJoinInput, SelectGuild>(async (input, client) => {
+export const recordGuildJoin = defineQuery<[input: RecordGuildJoinInput], SelectGuild>(async (input, client) => {
     const now = new Date();
     const set: UpdateGuild = {
         joinedAt: now,

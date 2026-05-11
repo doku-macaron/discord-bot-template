@@ -7,7 +7,7 @@ export type IncrementMemberCommandCountInput = {
     userId: string;
 };
 
-export const incrementMemberCommandCount = defineQuery<IncrementMemberCommandCountInput, SelectMember>(async (input, client) => {
+export const incrementMemberCommandCount = defineQuery<[input: IncrementMemberCommandCountInput], SelectMember>(async (input, client) => {
     const [member] = await client
         .update(members)
         .set({

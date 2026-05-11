@@ -15,7 +15,7 @@ export type GetOrCreateGuildInput = Pick<InsertGuild, "guildId" | "name">;
  * `name` leaves the existing row's name intact rather than overwriting it with
  * the column default.
  */
-export const getOrCreateGuild = defineQuery<GetOrCreateGuildInput, SelectGuild>(async (input, client) => {
+export const getOrCreateGuild = defineQuery<[input: GetOrCreateGuildInput], SelectGuild>(async (input, client) => {
     const [row] =
         input.name === undefined
             ? await client.insert(guilds).values(input).onConflictDoNothing().returning()

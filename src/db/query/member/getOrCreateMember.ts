@@ -13,7 +13,7 @@ export type GetOrCreateMemberInput = Pick<InsertMember, "guildId" | "userId" | "
  * saved a displayName via the profile modal that we don't want to wipe when
  * another caller forgets to pass one.
  */
-export const getOrCreateMember = defineQuery<GetOrCreateMemberInput, SelectMember>(async (input, client) => {
+export const getOrCreateMember = defineQuery<[input: GetOrCreateMemberInput], SelectMember>(async (input, client) => {
     const [row] =
         input.displayName === undefined
             ? await client.insert(members).values(input).onConflictDoNothing().returning()
