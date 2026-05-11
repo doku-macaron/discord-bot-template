@@ -137,6 +137,7 @@ Environment variables are validated per use case by `getEnv` in `src/env.ts`.
 - `/profile view`: renders a profile with Container / Section / Thumbnail / Button accessory (Components v2 sample)
 - `/profile edit`: edits and saves a profile bio through a modal
 - `/showcase`: reference implementation for Components v2 (Container / Section + Thumbnail / Section + Button / MediaGallery / Separator / TextDisplay)
+- `/showcase-modal`: reference implementation for Modal v2 (Checkbox / RadioGroup / CheckboxGroup / FileUpload + Label + TextInput)
 - `/poll`: opens a modal to compose and post a Discord native Poll via `interaction.reply({ poll: ... })`
 - `/admin report-user-select`: pick a user and report them (User Select sample)
 - `/admin set-mod-role`: pick the mod role (Role Select sample)

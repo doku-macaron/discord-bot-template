@@ -6,6 +6,7 @@ export const CUSTOM_ID = {
     MODAL: {
         PROFILE_EDIT: "profile:edit-modal",
         POLL: "poll:modal",
+        SHOWCASE_MODAL_V2: "showcase:modal-v2",
     },
     INPUT: {
         PROFILE_BIO: "profile:bio",
@@ -13,6 +14,11 @@ export const CUSTOM_ID = {
         POLL_ANSWERS: "poll:answers",
         POLL_DURATION: "poll:duration",
         POLL_MULTISELECT: "poll:multiselect",
+        SHOWCASE_MODAL_V2_FEEDBACK: "showcase:modal-v2:feedback",
+        SHOWCASE_MODAL_V2_AGREE: "showcase:modal-v2:agree",
+        SHOWCASE_MODAL_V2_PRIORITY: "showcase:modal-v2:priority",
+        SHOWCASE_MODAL_V2_FEATURES: "showcase:modal-v2:features",
+        SHOWCASE_MODAL_V2_ATTACHMENT: "showcase:modal-v2:attachment",
     },
     SELECT_MENU: {
         HELP_SECTION: "help:section-select",

@@ -137,6 +137,7 @@ docker compose logs -f bot
 - `/profile view`: プロフィールを Container / Section / Thumbnail / Button accessory で組み立てるサンプル (Components v2)
 - `/profile edit`: モーダルでプロフィール bio を編集・保存するサンプル
 - `/showcase`: Components v2 (Container / Section + Thumbnail / Section + Button / MediaGallery / Separator / TextDisplay) のリファレンス実装
+- `/showcase-modal`: Modal v2 (Checkbox / RadioGroup / CheckboxGroup / FileUpload + Label + TextInput) のリファレンス実装
 - `/poll`: モーダルから Discord ネイティブ Poll を作成するサンプル (`interaction.reply({ poll: ... })`)
 - `/admin report-user-select`: ユーザーを選んで report するサンプル (User Select)
 - `/admin set-mod-role`: Mod ロールを選ぶサンプル (Role Select)

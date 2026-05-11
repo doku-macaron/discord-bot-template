@@ -5,6 +5,7 @@ import { pingCommand } from "@/events/interactionCreate/commands/chatInput/items
 import { pollCommand } from "@/events/interactionCreate/commands/chatInput/items/poll";
 import { profileCommand } from "@/events/interactionCreate/commands/chatInput/items/profile";
 import { showcaseCommand } from "@/events/interactionCreate/commands/chatInput/items/showcase";
+import { showcaseModalCommand } from "@/events/interactionCreate/commands/chatInput/items/showcaseModal";
 import { commandHandler } from "@/framework/discord/interactions/chatInput";
 
 commandHandler.clear();
@@ -14,4 +15,5 @@ commandHandler.register(echoCommand);
 commandHandler.register(helpCommand);
 commandHandler.register(adminCommand);
 commandHandler.register(showcaseCommand);
+commandHandler.register(showcaseModalCommand);
 commandHandler.register(pollCommand);
