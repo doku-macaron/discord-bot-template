@@ -1,5 +1,6 @@
 import {
     type Attachment,
+    bold,
     CheckboxBuilder,
     CheckboxGroupBuilder,
     type Collection,
@@ -12,6 +13,7 @@ import {
     type Snowflake,
     TextInputBuilder,
     TextInputStyle,
+    unorderedList,
 } from "discord.js";
 import { CUSTOM_ID } from "@/constants/customIds";
 import { Modal } from "@/framework/discord/interactions/components/modal";
@@ -79,12 +81,14 @@ export const showcaseModalV2 = new Modal(
         const attachmentSummary = attachments.size > 0 ? attachments.map((a) => a.name).join(", ") : "(none)";
 
         const summary = [
-            "**Modal v2 submission**",
-            `- Feedback: ${feedback}`,
-            `- Agreed to terms: ${agreed ? "✓" : "✗"}`,
-            `- Priority: ${priority ?? "(not selected)"}`,
-            `- Features: ${features.length > 0 ? features.join(", ") : "(none)"}`,
-            `- Attachments: ${attachmentSummary}`,
+            bold("Modal v2 submission"),
+            unorderedList([
+                `Feedback: ${feedback}`,
+                `Agreed to terms: ${agreed ? "✓" : "✗"}`,
+                `Priority: ${priority ?? "(not selected)"}`,
+                `Features: ${features.length > 0 ? features.join(", ") : "(none)"}`,
+                `Attachments: ${attachmentSummary}`,
+            ]),
         ].join("\n");
 
         await interaction.reply({
