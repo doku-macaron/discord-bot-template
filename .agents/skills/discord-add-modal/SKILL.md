@@ -16,7 +16,7 @@ modal はユーザーから text 入力を取るフォーム。**button や sele
 - ボタンだけ押させたい → `discord-add-button`
 - リストから選ばせたい → `discord-add-select-menu`
 
-注: discord の制約で **modal は `slashCommand.deferReply()` の後では出せない**。button click / slash command 直後など、**まだ deferReply していない interaction** からのみ `showModal(...)` できる。
+注: discord の制約で **modal は `interaction.deferReply()` の後では出せない**。button click / slash command 直後など、**まだ deferReply していない interaction** からのみ `showModal(...)` できる。
 
 ## 1. customId とフィールド ID を決める
 
