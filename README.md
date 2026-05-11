@@ -81,7 +81,7 @@ The template is centered on slash commands / context menus / component interacti
 
 ## Development
 
-In VSCode, you can use the recommended extensions in `.vscode/extensions.json` and the `.devcontainer/devcontainer.json`.
+In VSCode, you can use the recommended extensions in `.vscode/extensions.json`.
 
 ```sh
 bun generate:local
