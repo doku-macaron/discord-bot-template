@@ -1,13 +1,6 @@
 import type { ClientEvents, Events } from "discord.js";
-import { recordGuildJoin } from "@/db/query/guild/recordGuildJoin";
-import { logger } from "@/lib/infra/logger";
+import { recordGuildJoinUseCase } from "@/usecases/guild/recordGuildJoinUseCase";
 
-export const guildCreateEvent: (...args: ClientEvents[Events.GuildCreate]) => void = async (guild) => {
-    try {
-        await recordGuildJoin({ guildId: guild.id, name: guild.name });
-        logger.info("Bot", `Joined guild: ${guild.name} (${guild.id})`);
-    } catch (unknownError) {
-        const error = unknownError instanceof Error ? unknownError : new Error(String(unknownError));
-        logger.error("Database", error);
-    }
+export const guildCreateEvent: (...args: ClientEvents[Events.GuildCreate]) => void = (guild) => {
+    void recordGuildJoinUseCase({ guildId: guild.id, name: guild.name });
 };
