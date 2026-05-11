@@ -2,6 +2,7 @@ import {
     ApplicationIntegrationType,
     ButtonBuilder,
     ButtonStyle,
+    bold,
     ContainerBuilder,
     InteractionContextType,
     MediaGalleryBuilder,
@@ -52,14 +53,14 @@ export const showcaseCommand = new Command(
 
         const thumbnailSection = new SectionBuilder()
             .addTextDisplayComponents(
-                new TextDisplayBuilder().setContent("**Section + Thumbnail accessory**"),
+                new TextDisplayBuilder().setContent(bold("Section + Thumbnail accessory")),
                 new TextDisplayBuilder().setContent("テキストの右側にサムネイル画像を accessory として置けます。")
             )
             .setThumbnailAccessory(new ThumbnailBuilder().setURL(SHOWCASE_THUMBNAIL).setDescription("Discord default avatar"));
 
         const buttonSection = new SectionBuilder()
             .addTextDisplayComponents(
-                new TextDisplayBuilder().setContent("**Section + Button accessory**"),
+                new TextDisplayBuilder().setContent(bold("Section + Button accessory")),
                 new TextDisplayBuilder().setContent(
                     "section の accessory として interactive button を置けます。ボタンの customId は通常通り button handler でルーティングされます。"
                 )
