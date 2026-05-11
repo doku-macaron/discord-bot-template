@@ -7,7 +7,7 @@ import {
     StringSelectMenuBuilder,
 } from "discord.js";
 import { CUSTOM_ID } from "@/constants/customIds";
-import { Command } from "@/framework/discord/interactions/chatInput/commandHandler";
+import { Command } from "@/framework/discord/interactions/chatInput";
 import { infoEmbed } from "@/lib/discord/embed";
 import { buildPaginationRow } from "@/lib/discord/pagination";
 

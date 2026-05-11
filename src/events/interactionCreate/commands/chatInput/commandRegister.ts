@@ -4,7 +4,7 @@ import { helpCommand } from "@/events/interactionCreate/commands/chatInput/items
 import { pingCommand } from "@/events/interactionCreate/commands/chatInput/items/ping";
 import { profileCommand } from "@/events/interactionCreate/commands/chatInput/items/profile";
 import { showcaseCommand } from "@/events/interactionCreate/commands/chatInput/items/showcase";
-import { commandHandler } from "@/framework/discord/interactions/chatInput/commandHandlerInstance";
+import { commandHandler } from "@/framework/discord/interactions/chatInput";
 
 commandHandler.clear();
 commandHandler.register(pingCommand);
