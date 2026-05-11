@@ -7,6 +7,9 @@ import { guildDeleteEvent } from "@/events/guildDelete";
 import { interactionCreateEvent } from "@/events/interactionCreate";
 import { logger } from "@/lib/infra/logger";
 import { registerShutdownTask, runShutdown, SHUTDOWN_PRIORITY } from "@/lib/infra/shutdown";
+import { getEnv } from "./env";
+import { isProduction } from "./isProduction";
+import { i_clean, i_watch } from "./lib/import";
 
 export function setupProcessHandlers() {
     process.on("uncaughtException", (error) => {
@@ -53,4 +56,24 @@ export function initialize() {
     client.on(Events.InteractionCreate, interactionCreateEvent);
     client.on(Events.GuildCreate, guildCreateEvent);
     client.on(Events.GuildDelete, guildDeleteEvent);
+}
+
+if (!isProduction) {
+    if (!process.versions.bun) {
+        console.error("Use https://bun.sh/ to run in the developer environment");
+        process.exit(1);
+    }
+
+    const { createAutoExit } = await import("@/lib/util/autoExit");
+    const autoExit = createAutoExit();
+
+    i_watch("./", async () => {
+        autoExit.update();
+        i_clean();
+        client.removeAllListeners();
+        if (client.token !== getEnv("bot").TOKEN) {
+            client.token = getEnv("bot").TOKEN;
+        }
+        await initialize();
+    });
 }
