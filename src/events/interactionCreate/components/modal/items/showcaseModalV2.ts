@@ -1,16 +1,13 @@
 import {
-    type Attachment,
     bold,
     CheckboxBuilder,
     CheckboxGroupBuilder,
-    type Collection,
     ComponentType,
     FileUploadBuilder,
     LabelBuilder,
     MessageFlags,
     ModalBuilder,
     RadioGroupBuilder,
-    type Snowflake,
     TextInputBuilder,
     TextInputStyle,
     unorderedList,
@@ -77,8 +74,7 @@ export const showcaseModalV2 = new Modal(
         const features = interaction.fields.getCheckboxGroup(CUSTOM_ID.INPUT.SHOWCASE_MODAL_V2_FEATURES);
 
         const fileField = interaction.fields.getField(CUSTOM_ID.INPUT.SHOWCASE_MODAL_V2_ATTACHMENT, ComponentType.FileUpload);
-        const attachments = fileField.attachments as Collection<Snowflake, Attachment>;
-        const attachmentSummary = attachments.size > 0 ? attachments.map((a) => a.name).join(", ") : "(none)";
+        const attachmentSummary = fileField.attachments.size > 0 ? fileField.attachments.map((a) => a.name).join(", ") : "(none)";
 
         const summary = [
             bold("Modal v2 submission"),
