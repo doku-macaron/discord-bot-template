@@ -27,10 +27,10 @@ export const profileEditModal = new Modal(
 
         const displayName = interaction.fields.getTextInputValue(CUSTOM_ID.INPUT.PROFILE_DISPLAY_NAME).trim();
 
-        const { saveMemberProfile } = await import("@/db/query/member/saveMemberProfile");
+        const { saveMemberProfileUseCase } = await import("@/usecases/member/saveMemberProfileUseCase");
 
         const member = await handleResult(
-            await saveMemberProfile({
+            await saveMemberProfileUseCase({
                 guildId: interaction.guildId,
                 guildName: interaction.guild.name,
                 userId: interaction.user.id,
