@@ -1,4 +1,4 @@
-import { Autocomplete } from "@/events/interactionCreate/commands/autocomplete/_core/autocompleteHandler";
+import { Autocomplete } from "@/framework/discord/interactions/autocomplete/autocompleteHandler";
 
 const SUGGESTIONS = ["Hello!", "Hi there!", "Hey!", "Good morning!", "Good evening!", "Good night!"];
 

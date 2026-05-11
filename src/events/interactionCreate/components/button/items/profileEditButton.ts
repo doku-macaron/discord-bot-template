@@ -1,6 +1,6 @@
 import { CUSTOM_ID } from "@/constants/customIds";
-import { Button } from "@/events/interactionCreate/components/button/_core/buttonHandler";
 import { createProfileEditModal } from "@/events/interactionCreate/components/modal/items/profileEditModal";
+import { Button } from "@/framework/discord/interactions/components/button/buttonHandler";
 
 export const profileEditButton = new Button(
     () => CUSTOM_ID.BUTTON.PROFILE_EDIT,

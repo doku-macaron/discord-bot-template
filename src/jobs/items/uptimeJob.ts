@@ -1,4 +1,4 @@
-import type { Job } from "@/jobs/_core/job";
+import type { Job } from "@/framework/jobs/job";
 import { logger } from "@/lib/infra/logger";
 
 const start = Date.now();

@@ -153,7 +153,7 @@ interaction は種類ごとに handler/register を分けています。
 - `src/events/interactionCreate/components/selectMenu/items/`: select menu (string / user / role / channel / mentionable)
 
 各 handler は `<type>HandlerInstance.ts` (singleton) と `<type>Register.ts` (items の `register()` 呼び出し) に分かれており、`src/events/interactionCreate/setup.ts` がすべての register を side-effect import で読み込んで handler を再 export します。`index.ts` と `scripts/registerCommand.ts` はこの `setup.ts` 経由で handler を取得します。
-普段の開発では各種 `items/` に interaction 実装を追加し、対応する `*Register.ts` に登録してください。handler class、singleton、subcommand helper、shared customId router などの framework 側実装は各 `_core/` にあります。
+普段の開発では各種 `items/` に interaction 実装を追加し、対応する `*Register.ts` に登録してください。handler class、singleton、subcommand helper、shared customId router などの framework 側実装は `src/framework/discord/interactions/` にあります。
 
 `src/events/guildCreate/` と `src/events/guildDelete/` が bot の参加・退出に合わせて `guilds` テーブルを sync します。退出は物理削除ではなく `leftAt` に時刻を入れる soft-delete で、再入会時に `joinedAt` がリセット・`leftAt` が null に戻ります。lazy populate (コマンド実行時の `getOrCreateGuild` 呼び出し) も残っているため、event を取りこぼしても DB 整合性は保たれます。
 
@@ -259,10 +259,10 @@ rollback 方針は **forward-only** を推奨します。
 ## Scheduled jobs
 
 `src/jobs/jobsRegister.ts` で `Job` を配列に登録すると、`clientReady` 時に `startJobs` が `setInterval` で開始します。
-普段の開発では `src/jobs/items/` に job を追加し、`src/jobs/jobsRegister.ts` に登録してください。runner と `Job` 型は `src/jobs/_core/`、runner tests は `src/jobs/__tests__/` にあります。
+普段の開発では `src/jobs/items/` に job を追加し、`src/jobs/jobsRegister.ts` に登録してください。runner と `Job` 型、runner tests は `src/framework/jobs/` にあります。
 
 ```ts
-import type { Job } from "@/jobs/_core/job";
+import type { Job } from "@/framework/jobs/job";
 
 export const myJob: Job = {
     name: "my-job",
@@ -335,7 +335,7 @@ expect(replies).toEqual([]);
 - `createAutocompleteInteractionMock(commandName, recorder, options?)`: autocomplete interaction
 - `createKindInteractionMock(kind, overrides?)`: `interaction.isXxx()` ガードだけを切り替える最小 mock。`buildInteractionContext` の分岐テスト向け
 
-実例は `src/events/interactionCreate/commands/chatInput/__tests__/` / `src/events/interactionCreate/commands/contextMenu/__tests__/` / `src/events/interactionCreate/commands/autocomplete/__tests__/` / `src/events/interactionCreate/components/__tests__/` / `src/lib/{replyError,resultHandler,interactionContext,errorWebhook,embed}.test.ts` を参照してください。
+実例は `src/framework/discord/interactions/chatInput/__tests__/` / `src/framework/discord/interactions/contextMenu/__tests__/` / `src/framework/discord/interactions/autocomplete/__tests__/` / `src/framework/discord/interactions/components/__tests__/` / `src/lib/{replyError,resultHandler,interactionContext,errorWebhook,embed}.test.ts` を参照してください。
 
 ## Scripts
 

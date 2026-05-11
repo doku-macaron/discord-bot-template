@@ -1,6 +1,6 @@
 import { MessageFlags, userMention } from "discord.js";
 import { CUSTOM_ID } from "@/constants/customIds";
-import { Menu } from "@/events/interactionCreate/components/selectMenu/_core/menuHandler";
+import { Menu } from "@/framework/discord/interactions/components/selectMenu/menuHandler";
 import { infoEmbed } from "@/lib/discord/embed";
 
 export const reportUserSelectMenu = new Menu(

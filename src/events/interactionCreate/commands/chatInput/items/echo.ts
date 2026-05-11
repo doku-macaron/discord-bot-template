@@ -1,5 +1,5 @@
 import { ApplicationIntegrationType, InteractionContextType, PermissionFlagsBits } from "discord.js";
-import { Command } from "@/events/interactionCreate/commands/chatInput/_core/commandHandler";
+import { Command } from "@/framework/discord/interactions/chatInput/commandHandler";
 
 export const echoCommand = new Command(
     (builder) =>
