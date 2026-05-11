@@ -166,7 +166,12 @@ export const timerModal = new Modal(
                 try {
                     const channel = await client.channels.fetch(channelId);
                     if (channel?.isSendable()) {
-                        await channel.send(`${userMention(user.id)} ⏰ ${message}`);
+                        // @everyone / @here / role / 他ユーザーへの不意の ping を防ぐため、
+                        // タイマー設定者本人だけに絞った allowedMentions で送信する。
+                        await channel.send({
+                            content: `${userMention(user.id)} ⏰ ${message}`,
+                            allowedMentions: { parse: [], users: [user.id] },
+                        });
                     }
                     // Confirmation reply の relative timestamp が Discord 側で
                     // 更新され続けてしまうので、発火後は静的な文言に置き換える。
