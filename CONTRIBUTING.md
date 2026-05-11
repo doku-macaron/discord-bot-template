@@ -70,6 +70,19 @@ Do not pass discord.js objects (`Interaction`, `Guild`, `Message`, builders, …
 - A usecase returns plain data (DTOs, IDs, `Result` tags). The caller (the item) translates that back into a discord.js reply, builder, or component tree.
 - This keeps usecases testable without mocking discord.js and confines the Discord SDK surface to `src/events/` and `src/framework/`.
 
+## Naming conventions
+
+The framework directory uses small file-naming rules that show up in `src/framework/discord/interactions/` and `src/framework/jobs/`.
+
+- **Class file** uses the lowerCamelCase form of the class name. `commandHandler.ts` defines `CommandHandler` and the public interaction types (`Command`, `CommandWithSubCommand`, …).
+- **Singleton file** appends `Instance`. `commandHandlerInstance.ts` exports the single `commandHandler` value used at runtime. Keeping the class file and its instance file paired by stem makes them group together in directory listings.
+- **Singleton export name** matches the type name in lowerCamelCase (`commandHandler: CommandHandler`, `buttonHandler: ButtonHandler`, …).
+- **Barrel `index.ts`** in each interaction subdirectory re-exports both the class and the singleton, so consumers import from `@/framework/discord/interactions/<kind>` rather than from the deep files. See [src/framework/discord/interactions/chatInput/index.ts](src/framework/discord/interactions/chatInput/index.ts) for the pattern.
+- **`setup.ts`** at [src/events/interactionCreate/setup.ts](src/events/interactionCreate/setup.ts) is the interaction subsystem's composition root: it runs each `*Register.ts` for its side effects and composes `dispatchInteraction` from the framework. The generic name is intentional — the file is the wiring point, not just a registry.
+- **`*UseCase.ts`** under `src/usecases/` is the application behavior unit (e.g. [saveMemberProfileUseCase.ts](src/usecases/member/saveMemberProfileUseCase.ts)). The exported function shares the file stem (`saveMemberProfileUseCase`) so call sites read naturally.
+
+When in doubt, copy the closest existing pattern.
+
 ## Test placement
 
 Keep framework tests out of the everyday implementation surface.
