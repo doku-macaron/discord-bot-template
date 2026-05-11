@@ -45,6 +45,7 @@ export const HELP_PAGES: ReadonlyArray<HelpSection> = [
             { name: "/showcase", description: "Components v2 のリファレンス実装" },
             { name: "/showcase-modal", description: "Modal v2 (Checkbox / RadioGroup / CheckboxGroup / FileUpload) のリファレンス実装" },
             { name: "/poll", description: "モーダルから Discord ネイティブ Poll を作成します" },
+            { name: "/timer", description: "モーダルで経過時間 or 指定時刻のリマインダーをセットします" },
         ],
     },
     {
