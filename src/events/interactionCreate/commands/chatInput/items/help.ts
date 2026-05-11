@@ -27,13 +27,32 @@ export const HELP_PAGES: ReadonlyArray<HelpSection> = [
     {
         title: "Profile",
         entries: [
-            { name: "/profile view", description: "プロフィールを表示し実行回数を加算します" },
-            { name: "/profile edit", description: "モーダルで表示名を編集します" },
+            { name: "/profile view", description: "プロフィールを表示します (Components v2)" },
+            { name: "/profile edit", description: "モーダルで bio を編集・保存します" },
+        ],
+    },
+    {
+        title: "Admin",
+        entries: [
+            { name: "/admin set-mod-role", description: "Mod ロールを Role Select で選んで保存します" },
+            { name: "/admin set-archive-channel", description: "アーカイブ用 channel を Channel Select で保存します" },
+            { name: "/admin report-user-select", description: "User Select でユーザーを選んで report します" },
+        ],
+    },
+    {
+        title: "Showcase",
+        entries: [
+            { name: "/showcase", description: "Components v2 のリファレンス実装" },
+            { name: "/showcase-modal", description: "Modal v2 (Checkbox / RadioGroup / CheckboxGroup / FileUpload) のリファレンス実装" },
+            { name: "/poll", description: "モーダルから Discord ネイティブ Poll を作成します" },
         ],
     },
     {
         title: "Context menu",
-        entries: [{ name: "Get user profile", description: "ユーザーを右クリックしてプロフィールを表示します" }],
+        entries: [
+            { name: "Get user profile", description: "ユーザーを右クリックしてプロフィールを表示します" },
+            { name: "Report message", description: "メッセージを右クリックして report ID と URL を表示します" },
+        ],
     },
 ];
 
