@@ -81,7 +81,7 @@ https://discord.com/oauth2/authorize?client_id=<CLIENT_ID>&scope=bot%20applicati
 
 ## Development
 
-VSCode では `.vscode/extensions.json` の推奨拡張と `.devcontainer/devcontainer.json` を使えます。
+VSCode では `.vscode/extensions.json` の推奨拡張を使えます。
 
 ```sh
 bun generate:local
