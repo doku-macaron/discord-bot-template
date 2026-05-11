@@ -1,7 +1,6 @@
 import { eq } from "drizzle-orm";
-import { db } from "@/db";
+import { defineQuery } from "@/db/query/defineQuery";
 import { guilds, type InsertGuild, type SelectGuild, type UpdateGuild } from "@/db/schema/guilds";
-import type { DbClient } from "@/db/transaction";
 
 // Lifecycle columns (`joinedAt` / `leftAt`) belong to `recordGuildJoin` /
 // `markGuildLeft`, so they are excluded from this function's input.
@@ -16,7 +15,7 @@ export type GetOrCreateGuildInput = Pick<InsertGuild, "guildId" | "name">;
  * `name` leaves the existing row's name intact rather than overwriting it with
  * the column default.
  */
-export async function getOrCreateGuild(input: GetOrCreateGuildInput, client: DbClient = db): Promise<SelectGuild> {
+export const getOrCreateGuild = defineQuery<GetOrCreateGuildInput, SelectGuild>(async (input, client) => {
     const [row] =
         input.name === undefined
             ? await client.insert(guilds).values(input).onConflictDoNothing().returning()
@@ -41,4 +40,4 @@ export async function getOrCreateGuild(input: GetOrCreateGuildInput, client: DbC
     }
 
     return existing;
-}
+});

@@ -1,7 +1,6 @@
 import { and, eq } from "drizzle-orm";
-import { db } from "@/db";
+import { defineQuery } from "@/db/query/defineQuery";
 import { type InsertMember, members, type SelectMember, type UpdateMember } from "@/db/schema/members";
-import type { DbClient } from "@/db/transaction";
 
 // `commandCount` belongs to `incrementMemberCommandCount`, so it is excluded
 // from this function's input.
@@ -14,7 +13,7 @@ export type GetOrCreateMemberInput = Pick<InsertMember, "guildId" | "userId" | "
  * saved a displayName via the profile modal that we don't want to wipe when
  * another caller forgets to pass one.
  */
-export async function getOrCreateMember(input: GetOrCreateMemberInput, client: DbClient = db): Promise<SelectMember> {
+export const getOrCreateMember = defineQuery<GetOrCreateMemberInput, SelectMember>(async (input, client) => {
     const [row] =
         input.displayName === undefined
             ? await client.insert(members).values(input).onConflictDoNothing().returning()
@@ -43,4 +42,4 @@ export async function getOrCreateMember(input: GetOrCreateMemberInput, client: D
     }
 
     return existing;
-}
+});

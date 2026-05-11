@@ -1,18 +1,17 @@
 import { and, eq, sql } from "drizzle-orm";
-import { db } from "@/db";
+import { defineQuery } from "@/db/query/defineQuery";
 import { members, type SelectMember } from "@/db/schema/members";
 
-type IncrementMemberCommandCountInput = {
+export type IncrementMemberCommandCountInput = {
     guildId: string;
     userId: string;
 };
 
-export async function incrementMemberCommandCount(input: IncrementMemberCommandCountInput): Promise<SelectMember> {
-    const [member] = await db
+export const incrementMemberCommandCount = defineQuery<IncrementMemberCommandCountInput, SelectMember>(async (input, client) => {
+    const [member] = await client
         .update(members)
         .set({
-            commandCount: sql`${members.commandCount} + 1`,
-            updatedAt: new Date(),
+            commandCount: sql<number>`${members.commandCount} + 1`,
         })
         .where(and(eq(members.guildId, input.guildId), eq(members.userId, input.userId)))
         .returning();
@@ -22,4 +21,4 @@ export async function incrementMemberCommandCount(input: IncrementMemberCommandC
     }
 
     return member;
-}
+});

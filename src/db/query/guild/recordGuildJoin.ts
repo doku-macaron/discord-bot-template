@@ -1,6 +1,5 @@
-import { db } from "@/db";
+import { defineQuery } from "@/db/query/defineQuery";
 import { guilds, type InsertGuild, type SelectGuild, type UpdateGuild } from "@/db/schema/guilds";
-import type { DbClient } from "@/db/transaction";
 
 // `joinedAt` / `leftAt` are lifecycle columns this function owns, so callers
 // supply only the identity (`guildId`) and the refreshable label (`name`).
@@ -13,7 +12,7 @@ export type RecordGuildJoinInput = Pick<InsertGuild, "guildId" | "name">;
  * `joinedAt` only via the lazy `getOrCreateGuild` path (which doesn't touch
  * either column). `name` is refreshed only when the caller provides one.
  */
-export async function recordGuildJoin(input: RecordGuildJoinInput, client: DbClient = db): Promise<SelectGuild> {
+export const recordGuildJoin = defineQuery<RecordGuildJoinInput, SelectGuild>(async (input, client) => {
     const now = new Date();
     const set: UpdateGuild = {
         joinedAt: now,
@@ -34,4 +33,4 @@ export async function recordGuildJoin(input: RecordGuildJoinInput, client: DbCli
     }
 
     return row;
-}
+});
