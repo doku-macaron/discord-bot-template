@@ -6,6 +6,8 @@ import { commandHandler, contextMenuHandler } from "@/events/interactionCreate/s
 
 const env = getEnv("register");
 
+console.log("Starting command registration script.");
+
 const rest = new REST().setToken(env.TOKEN);
 
 const commands = [...commandHandler.restrictedCommands, ...contextMenuHandler.restrictedCommands];
@@ -21,7 +23,9 @@ async function registerForGuild(guildId: string, label: string) {
 }
 
 if (env.GUILD_ID) {
+    console.log(`Registering for single guild: ${env.GUILD_ID}.`);
     await registerForGuild(env.GUILD_ID, "dev guild");
+    console.log("Command registration complete.");
 } else {
     const guilds = (await rest.get(Routes.userGuilds())) as RESTGetAPICurrentUserGuildsResult;
     console.log(`Broadcasting to ${guilds.length} guild(s).`);
@@ -34,3 +38,8 @@ if (env.GUILD_ID) {
         }
     }
 }
+
+// @discordjs/rest keeps an undici keep-alive agent open after the PUT
+// completes, so the event loop does not drain on its own. Exit explicitly
+// so `bun register` (and any CI step that runs it) returns promptly.
+process.exit(0);
