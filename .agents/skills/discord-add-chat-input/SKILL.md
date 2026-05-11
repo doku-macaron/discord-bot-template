@@ -132,6 +132,23 @@ bun register
 - そこから usecase / DB query を呼ぶ場合は CONTRIBUTING.md の "discord.js stays at the boundary" に従って **discord.js オブジェクトを usecase に渡さない** (primitive で渡す)
 - DB 書き込みが Result を返すなら `handleResult(result, interaction, { category, errorMessage })` で失敗ハンドリングが定型化される
 
+## Mention safety / ping opt-in
+
+[src/client.ts](../../../src/client.ts) で `allowedMentions: { parse: [] }` を default にしているため、`reply` / `editReply` / `followUp` / `channel.send` で `content` に含まれた `@everyone` / `@here` / role / user mention は **ping を発火しない** (描画はされる)。`/echo <message>` のようにユーザー入力をそのまま流すコマンドで、bot 権限を踏み台にした不意の broadcast を防ぐためのデフォルト。
+
+意図して ping したいときは send 側で明示的に opt-in する:
+
+```ts
+await interaction.reply({
+    content: `${userMention(interaction.user.id)} 完了しました`,
+    allowedMentions: { parse: [], users: [interaction.user.id] },
+});
+```
+
+- `users: [...]` / `roles: [...]` で具体的な ID を渡せばその対象だけ ping される
+- どうしても `@everyone` を出す必要があるときは `parse: ['everyone']` を明示 (本当に必要かを再考)
+- embed の field / description / TextDisplay (Components v2) 内の mention は元々 ping を発火しないので、これらの表示は default のままで問題ない
+
 ## 参考
 
 - 既存サンプル: [src/events/interactionCreate/commands/chatInput/items/](../../../src/events/interactionCreate/commands/chatInput/items/)
