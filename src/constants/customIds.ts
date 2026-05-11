@@ -5,9 +5,14 @@ export const CUSTOM_ID = {
     },
     MODAL: {
         PROFILE_EDIT: "profile:edit-modal",
+        POLL: "poll:modal",
     },
     INPUT: {
         PROFILE_BIO: "profile:bio",
+        POLL_QUESTION: "poll:question",
+        POLL_ANSWERS: "poll:answers",
+        POLL_DURATION: "poll:duration",
+        POLL_MULTISELECT: "poll:multiselect",
     },
     SELECT_MENU: {
         HELP_SECTION: "help:section-select",
