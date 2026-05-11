@@ -51,7 +51,7 @@ export const getUserProfileContextMenu = new ContextMenuCommand(
 Message の例:
 
 ```ts
-import { ApplicationCommandType, ... } from "discord.js";
+import { ApplicationCommandType, ApplicationIntegrationType, InteractionContextType } from "discord.js";
 import { ContextMenuCommand } from "@/framework/discord/interactions/contextMenu";
 
 export const reportMessageContextMenu = new ContextMenuCommand(
