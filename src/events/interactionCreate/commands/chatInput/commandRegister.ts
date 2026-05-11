@@ -1,10 +1,10 @@
-import { commandHandler } from "@/events/interactionCreate/commands/chatInput/_core/commandHandlerInstance";
 import { adminCommand } from "@/events/interactionCreate/commands/chatInput/items/admin";
 import { echoCommand } from "@/events/interactionCreate/commands/chatInput/items/echo";
 import { helpCommand } from "@/events/interactionCreate/commands/chatInput/items/help";
 import { pingCommand } from "@/events/interactionCreate/commands/chatInput/items/ping";
 import { profileCommand } from "@/events/interactionCreate/commands/chatInput/items/profile";
 import { showcaseCommand } from "@/events/interactionCreate/commands/chatInput/items/showcase";
+import { commandHandler } from "@/framework/discord/interactions/chatInput/commandHandlerInstance";
 
 commandHandler.clear();
 commandHandler.register(pingCommand);

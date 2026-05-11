@@ -1,7 +1,7 @@
 import { MessageFlags } from "discord.js";
 import { CUSTOM_ID } from "@/constants/customIds";
 import { buildHelpPage, HELP_PAGES } from "@/events/interactionCreate/commands/chatInput/items/help";
-import { Menu } from "@/events/interactionCreate/components/selectMenu/_core/menuHandler";
+import { Menu } from "@/framework/discord/interactions/components/selectMenu/menuHandler";
 
 export const helpSectionSelectMenu = new Menu(
     () => CUSTOM_ID.SELECT_MENU.HELP_SECTION,

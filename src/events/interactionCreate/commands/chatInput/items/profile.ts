@@ -16,8 +16,8 @@ import { CUSTOM_ID } from "@/constants/customIds";
 import { getOrCreateGuild } from "@/db/query/guild/getOrCreateGuild";
 import { getOrCreateMember } from "@/db/query/member/getOrCreateMember";
 import { incrementMemberCommandCount } from "@/db/query/member/incrementMemberCommandCount";
-import { CommandWithSubCommand, SubCommand } from "@/events/interactionCreate/commands/chatInput/_core/commandHandler";
 import { createProfileEditModal } from "@/events/interactionCreate/components/modal/items/profileEditModal";
+import { CommandWithSubCommand, SubCommand } from "@/framework/discord/interactions/chatInput/commandHandler";
 import { EMBED_COLOR } from "@/lib/discord/embed";
 
 export const profileCommand = new CommandWithSubCommand((builder) =>

@@ -10,7 +10,7 @@ import {
     UserSelectMenuBuilder,
 } from "discord.js";
 import { CUSTOM_ID } from "@/constants/customIds";
-import { CommandWithSubCommand, SubCommand } from "@/events/interactionCreate/commands/chatInput/_core/commandHandler";
+import { CommandWithSubCommand, SubCommand } from "@/framework/discord/interactions/chatInput/commandHandler";
 
 export const adminCommand = new CommandWithSubCommand((builder) =>
     builder
