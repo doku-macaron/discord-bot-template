@@ -47,9 +47,8 @@ profileCommand.register(
 
             const headerSection = new SectionBuilder()
                 .addTextDisplayComponents(
-                    new TextDisplayBuilder().setContent("## Profile"),
+                    new TextDisplayBuilder().setContent(`## ${interaction.member.displayName}`),
                     new TextDisplayBuilder().setContent(`User: ${userMention(interaction.user.id)}`),
-                    new TextDisplayBuilder().setContent(`Display name: ${interaction.member.displayName}`),
                     new TextDisplayBuilder().setContent(`Bio: ${bio || "-"}`)
                 )
                 .setThumbnailAccessory(
