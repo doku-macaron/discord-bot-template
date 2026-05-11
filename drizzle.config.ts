@@ -2,7 +2,7 @@
 import type { Config } from "drizzle-kit";
 
 export default {
-    schema: ["src/db/schema/guilds.ts", "src/db/schema/members.ts", "src/db/schema/relations.ts"],
+    schema: ["src/db/schema/guilds.ts", "src/db/schema/guildSettings.ts", "src/db/schema/memberProfiles.ts", "src/db/schema/relations.ts"],
     out: "drizzle",
     dialect: "postgresql",
     dbCredentials: {

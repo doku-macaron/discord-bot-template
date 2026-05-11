@@ -4,20 +4,26 @@ erDiagram
     text guild_id PK "not null"
     timestamp created_at "not null"
     timestamp updated_at "not null"
-    text name "not null"
     timestamp joined_at "not null"
     timestamp left_at
   }
 
-  members {
-    integer id PK "not null"
+  guild_settings {
+    text guild_id PK "not null"
     timestamp created_at "not null"
     timestamp updated_at "not null"
-    text guild_id "not null"
-    text user_id "not null"
-    text display_name "not null"
-    integer command_count "not null"
+    text mod_role_id
+    text archive_channel_id
   }
 
-  members }o--|| guilds : "guild_id"
+  member_profiles {
+    text guild_id PK "not null"
+    text user_id PK "not null"
+    timestamp created_at "not null"
+    timestamp updated_at "not null"
+    text bio "not null"
+  }
+
+  guild_settings }o--|| guilds : "guild_id"
+  member_profiles }o--|| guilds : "guild_id"
 ```

@@ -1,4 +1,5 @@
 import { CUSTOM_ID } from "@/constants/customIds";
+import { findMemberProfile } from "@/db/query/member/findMemberProfile";
 import { createProfileEditModal } from "@/events/interactionCreate/components/modal/items/profileEditModal";
 import { Button } from "@/framework/discord/interactions/components/button";
 
@@ -10,6 +11,10 @@ export const profileEditButton = new Button(
             return;
         }
 
-        await interaction.showModal(createProfileEditModal(interaction.member.displayName));
+        const profile = await findMemberProfile({
+            guildId: interaction.guildId,
+            userId: interaction.user.id,
+        });
+        await interaction.showModal(createProfileEditModal(profile?.bio ?? ""));
     }
 );

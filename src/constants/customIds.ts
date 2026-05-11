@@ -7,7 +7,7 @@ export const CUSTOM_ID = {
         PROFILE_EDIT: "profile:edit-modal",
     },
     INPUT: {
-        PROFILE_DISPLAY_NAME: "profile:display-name",
+        PROFILE_BIO: "profile:bio",
     },
     SELECT_MENU: {
         HELP_SECTION: "help:section-select",
