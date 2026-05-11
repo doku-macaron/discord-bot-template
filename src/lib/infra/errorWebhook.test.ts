@@ -58,7 +58,7 @@ describe("sendErrorToWebhook", () => {
         expect(content).toContain("```ml");
     });
 
-    test("truncates content longer than the cap", async () => {
+    test("truncates content longer than the cap and keeps the code fence closed", async () => {
         const longMessage = "x".repeat(2_500);
         const error = new Error(longMessage);
         error.stack = `Error: ${longMessage}`;
@@ -67,7 +67,12 @@ describe("sendErrorToWebhook", () => {
 
         const content = sentMessages[0]?.content ?? "";
         expect(content.length).toBeLessThanOrEqual(1_950);
-        expect(content.endsWith("...truncated")).toBe(true);
+        // Truncation marker sits before the closing fence so the codeBlock
+        // is still well-formed.
+        expect(content).toContain("...truncated");
+        expect(content.endsWith("```")).toBe(true);
+        // ``` opens and closes once each.
+        expect(content.split("```").length - 1).toBe(2);
     });
 
     test("reuses the WebhookClient singleton across calls", async () => {

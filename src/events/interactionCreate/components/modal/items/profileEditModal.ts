@@ -1,4 +1,4 @@
-import { LabelBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
+import { LabelBuilder, MessageFlags, ModalBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
 import { CUSTOM_ID } from "@/constants/customIds";
 import { Modal } from "@/framework/discord/interactions/components/modal";
 import { handleResult } from "@/lib/discord/resultHandler";
@@ -50,7 +50,7 @@ export const profileEditModal = new Modal(
 
         await interaction.reply({
             content: profile.bio ? `自己紹介を更新しました。` : "自己紹介をクリアしました。",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
         });
     }
 );

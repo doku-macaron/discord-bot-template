@@ -17,13 +17,23 @@ function getWebhookClient(): WebhookClient | undefined {
     return webhookClient;
 }
 
-function truncateContent(content: string): string {
-    const maxLength = 1900;
-    if (content.length <= maxLength) {
-        return content;
+const MAX_CONTENT_LENGTH = 1900;
+const TRUNCATED_MARKER = "\n...truncated";
+const HEADER = `${bold("Discord Bot Error")}\n`;
+// The code fence wraps the body; truncation must happen *inside* the fence
+// so the closing ``` is preserved.
+const FENCE_OPEN = "```ml\n";
+const FENCE_CLOSE = "\n```";
+
+function buildContent(body: string): string {
+    const wrapperLength = HEADER.length + FENCE_OPEN.length + FENCE_CLOSE.length;
+    if (HEADER.length + codeBlock("ml", body).length <= MAX_CONTENT_LENGTH) {
+        return `${HEADER}${codeBlock("ml", body)}`;
     }
 
-    return `${content.slice(0, maxLength)}\n...truncated`;
+    const bodyBudget = MAX_CONTENT_LENGTH - wrapperLength - TRUNCATED_MARKER.length;
+    const truncatedBody = body.slice(0, Math.max(0, bodyBudget));
+    return `${HEADER}${FENCE_OPEN}${truncatedBody}${TRUNCATED_MARKER}${FENCE_CLOSE}`;
 }
 
 export async function sendErrorToWebhook(category: string, error: Error, context?: InteractionContext) {
@@ -41,6 +51,6 @@ export async function sendErrorToWebhook(category: string, error: Error, context
         .join("\n");
 
     await client.send({
-        content: truncateContent(`${bold("Discord Bot Error")}\n${codeBlock("ml", body)}`),
+        content: buildContent(body),
     });
 }
