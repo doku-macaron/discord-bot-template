@@ -2,40 +2,56 @@ import type { Job } from "@/framework/jobs/job";
 import { logger } from "@/lib/infra/logger";
 import { registerShutdownTask, SHUTDOWN_PRIORITY } from "@/lib/infra/shutdown";
 
-const intervals = new Map<string, ReturnType<typeof setInterval>>();
-const runningJobs = new Set<string>();
-let started = false;
-let shutdownRegistered = false;
+type JobRunnerState = {
+    intervals: Map<string, ReturnType<typeof setInterval>>;
+    runningJobs: Set<string>;
+    started: boolean;
+    shutdownRegistered: boolean;
+};
+
+const JOB_RUNNER_STATE = Symbol.for("discord-bot-template.jobRunner");
+const globalStore = globalThis as Record<PropertyKey, unknown>;
+
+if (!globalStore[JOB_RUNNER_STATE]) {
+    globalStore[JOB_RUNNER_STATE] = {
+        intervals: new Map<string, ReturnType<typeof setInterval>>(),
+        runningJobs: new Set<string>(),
+        started: false,
+        shutdownRegistered: false,
+    };
+}
+
+const state = globalStore[JOB_RUNNER_STATE] as JobRunnerState;
 
 function isValidIntervalMs(intervalMs: number): boolean {
     return Number.isFinite(intervalMs) && intervalMs > 0;
 }
 
 async function runJob(job: Job): Promise<void> {
-    if (runningJobs.has(job.name)) {
+    if (state.runningJobs.has(job.name)) {
         logger.warn("Core", `Job '${job.name}' is still running from the previous tick. Skipping this run.`);
         return;
     }
-    runningJobs.add(job.name);
+    state.runningJobs.add(job.name);
     try {
         await job.run();
     } catch (error) {
         const jobError = error instanceof Error ? error : new Error(String(error));
         logger.error("Core", new Error(`Job '${job.name}' failed`, { cause: jobError }));
     } finally {
-        runningJobs.delete(job.name);
+        state.runningJobs.delete(job.name);
     }
 }
 
 export function startJobs(jobs: ReadonlyArray<Job>): void {
-    if (started) {
+    if (state.started) {
         logger.warn("Core", "startJobs called more than once. Ignoring subsequent calls.");
         return;
     }
-    started = true;
+    state.started = true;
 
     for (const job of jobs) {
-        if (intervals.has(job.name)) {
+        if (state.intervals.has(job.name)) {
             logger.warn("Core", `Job '${job.name}' is already registered. Skipping.`);
             continue;
         }
@@ -49,7 +65,7 @@ export function startJobs(jobs: ReadonlyArray<Job>): void {
             void runJob(job);
         }
 
-        intervals.set(
+        state.intervals.set(
             job.name,
             setInterval(() => {
                 void runJob(job);
@@ -57,10 +73,10 @@ export function startJobs(jobs: ReadonlyArray<Job>): void {
         );
     }
 
-    logger.info("Core", `Started ${intervals.size} scheduled jobs`);
+    logger.info("Core", `Started ${state.intervals.size} scheduled jobs`);
 
-    if (!shutdownRegistered) {
-        shutdownRegistered = true;
+    if (!state.shutdownRegistered) {
+        state.shutdownRegistered = true;
         registerShutdownTask({
             name: "scheduled-jobs",
             priority: SHUTDOWN_PRIORITY.JOBS,
@@ -72,21 +88,21 @@ export function startJobs(jobs: ReadonlyArray<Job>): void {
 }
 
 export function stopJobs(): void {
-    for (const timer of intervals.values()) {
+    for (const timer of state.intervals.values()) {
         clearInterval(timer);
     }
-    intervals.clear();
-    runningJobs.clear();
-    started = false;
+    state.intervals.clear();
+    state.runningJobs.clear();
+    state.started = false;
 }
 
 export function resetJobsForTesting(): void {
     stopJobs();
-    shutdownRegistered = false;
+    state.shutdownRegistered = false;
 }
 
 export function getScheduledJobNamesForTesting(): ReadonlyArray<string> {
-    return Array.from(intervals.keys());
+    return Array.from(state.intervals.keys());
 }
 
 export function runJobForTesting(job: Job): Promise<void> {

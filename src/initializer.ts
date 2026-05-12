@@ -1,15 +1,22 @@
 import { Events } from "discord.js";
 import { client } from "@/client";
 import { closeDatabase } from "@/db";
-import { clientReadyEvent } from "@/events/clientReady";
-import { guildCreateEvent } from "@/events/guildCreate";
-import { guildDeleteEvent } from "@/events/guildDelete";
-import { interactionCreateEvent } from "@/events/interactionCreate";
+import type * as ClientReadyModule from "@/events/clientReady";
+import type * as GuildCreateModule from "@/events/guildCreate";
+import type * as GuildDeleteModule from "@/events/guildDelete";
+import type * as InteractionCreateModule from "@/events/interactionCreate";
+import { stopJobs } from "@/framework/jobs/jobRunner";
 import { logger } from "@/lib/infra/logger";
 import { registerShutdownTask, runShutdown, SHUTDOWN_PRIORITY } from "@/lib/infra/shutdown";
-import { getEnv } from "./env";
 import { isProduction } from "./isProduction";
-import { i_clean, i_watch } from "./lib/import";
+import { i_clean, i_import, i_watch } from "./lib/import";
+
+function removeClientEventHandlers() {
+    client.removeAllListeners(Events.ClientReady);
+    client.removeAllListeners(Events.InteractionCreate);
+    client.removeAllListeners(Events.GuildCreate);
+    client.removeAllListeners(Events.GuildDelete);
+}
 
 export function setupProcessHandlers() {
     process.on("uncaughtException", (error) => {
@@ -51,14 +58,28 @@ export function setupProcessHandlers() {
     process.on("SIGTERM", shutdown);
 }
 
-export function initialize() {
+export async function initialize() {
+    const { clientReadyEvent } = await i_import<typeof ClientReadyModule>("@/events/clientReady");
+    const { interactionCreateEvent } = await i_import<typeof InteractionCreateModule>("@/events/interactionCreate");
+    const { guildCreateEvent } = await i_import<typeof GuildCreateModule>("@/events/guildCreate");
+    const { guildDeleteEvent } = await i_import<typeof GuildDeleteModule>("@/events/guildDelete");
+
+    removeClientEventHandlers();
     client.once(Events.ClientReady, clientReadyEvent);
     client.on(Events.InteractionCreate, interactionCreateEvent);
     client.on(Events.GuildCreate, guildCreateEvent);
     client.on(Events.GuildDelete, guildDeleteEvent);
+
+    if (client.isReady()) {
+        await clientReadyEvent(client);
+    }
 }
 
-if (!isProduction) {
+export async function setupDevHotReload() {
+    if (isProduction) {
+        return;
+    }
+
     if (!process.versions.bun) {
         console.error("Use https://bun.sh/ to run in the developer environment");
         process.exit(1);
@@ -67,13 +88,10 @@ if (!isProduction) {
     const { createAutoExit } = await import("@/lib/util/autoExit");
     const autoExit = createAutoExit();
 
-    i_watch("./", async () => {
+    i_watch("src", async () => {
         autoExit.update();
+        stopJobs();
         i_clean();
-        client.removeAllListeners();
-        if (client.token !== getEnv("bot").TOKEN) {
-            client.token = getEnv("bot").TOKEN;
-        }
         await initialize();
     });
 }
