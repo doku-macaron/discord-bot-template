@@ -9,7 +9,7 @@ const env = getEnv("bot");
 setupProcessHandlers();
 
 if (process.env.NODE_ENV !== "production" && typeof Bun === "undefined") {
-  throw new Error("Development mode must be run with Bun.");
+    throw new Error("Development mode must be run with Bun.");
 }
 
 await initialize();

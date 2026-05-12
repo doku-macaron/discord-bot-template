@@ -88,7 +88,7 @@ export async function setupDevHotReload() {
     const { createAutoExit } = await import("@/lib/util/autoExit");
     const autoExit = createAutoExit();
 
-    i_watch("src", async () => {
+    i_watch("./", async () => {
         autoExit.update();
         stopJobs();
         i_clean();
