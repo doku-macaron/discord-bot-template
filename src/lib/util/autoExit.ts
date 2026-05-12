@@ -1,7 +1,7 @@
 export function createAutoExit(
     terminateTime = 5 * 60 * 1000,
     onExit: () => void = () => {
-        console.info("Auto close because there was no operation for a certain period of time");
+        console.info("Auto-closing due to inactivity");
         process.exit(0);
     }
 ) {

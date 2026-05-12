@@ -87,11 +87,30 @@ export async function setupDevHotReload() {
 
     const { createAutoExit } = await import("@/lib/util/autoExit");
     const autoExit = createAutoExit();
+    let reloadPromise: Promise<void> | null = null;
+    let reloadQueued = false;
+
+    const runReload = async () => {
+        do {
+            reloadQueued = false;
+            stopJobs();
+            i_clean();
+            await initialize();
+        } while (reloadQueued);
+    };
 
     i_watch("./", async () => {
         autoExit.update();
-        stopJobs();
-        i_clean();
-        await initialize();
+
+        if (reloadPromise) {
+            reloadQueued = true;
+            await reloadPromise;
+            return;
+        }
+
+        reloadPromise = runReload().finally(() => {
+            reloadPromise = null;
+        });
+        await reloadPromise;
     });
 }

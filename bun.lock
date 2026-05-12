@@ -8,7 +8,7 @@
         "@electric-sql/pglite": "0.4.5",
         "discord.js": "14.26.4",
         "drizzle-orm": "1.0.0-rc.2",
-        "es-module-lexer": "^2.1.0",
+        "es-module-lexer": "2.1.0",
         "postgres": "3.4.9",
         "zod": "4.4.3",
       },
