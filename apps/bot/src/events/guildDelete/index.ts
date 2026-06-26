@@ -1,8 +1,9 @@
-import type { ClientEvents, Events } from "discord.js";
+import { Events } from "discord.js";
+import { defineClientEvent } from "@/framework/discord/clientEvents";
 import { logger } from "@/lib/infra/logger";
 import { markGuildLeftUseCase } from "@/usecases/guild/markGuildLeftUseCase";
 
-export const guildDeleteEvent: (...args: ClientEvents[Events.GuildDelete]) => void = (guild) => {
+export const guildDeleteEvent = defineClientEvent(Events.GuildDelete, (guild) => {
     // `guild.available` is false when Discord experiences an outage, not when the bot was removed.
     // Skip the soft-delete in that case so we don't mark guilds as left during transient downtime.
     if (!guild.available) {
@@ -10,4 +11,4 @@ export const guildDeleteEvent: (...args: ClientEvents[Events.GuildDelete]) => vo
         return;
     }
     void markGuildLeftUseCase({ guildId: guild.id, name: guild.name });
-};
+});

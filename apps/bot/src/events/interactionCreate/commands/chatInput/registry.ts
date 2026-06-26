@@ -7,9 +7,11 @@ import { profileCommand } from "@/events/interactionCreate/commands/chatInput/it
 import { showcaseCommand } from "@/events/interactionCreate/commands/chatInput/items/showcase";
 import { showcaseModalCommand } from "@/events/interactionCreate/commands/chatInput/items/showcaseModal";
 import { timerCommand } from "@/events/interactionCreate/commands/chatInput/items/timer";
-import { commandHandler } from "@/framework/discord/interactions/chatInput";
+import { CommandHandler } from "@/framework/discord/interactions/chatInput";
 
-commandHandler.clear();
+// One handler per interaction kind, built fresh from its items. To add a command,
+// create it under `items/` and add one `.register(...)` line here.
+export const commandHandler = new CommandHandler();
 commandHandler.register(pingCommand);
 commandHandler.register(profileCommand);
 commandHandler.register(echoCommand);

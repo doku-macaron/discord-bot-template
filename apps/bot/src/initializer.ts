@@ -1,22 +1,15 @@
 import { closeDatabase } from "@repo/db";
 import { Events } from "discord.js";
 import { client } from "@/client";
-import type * as ClientReadyModule from "@/events/clientReady";
-import type * as GuildCreateModule from "@/events/guildCreate";
-import type * as GuildDeleteModule from "@/events/guildDelete";
-import type * as InteractionCreateModule from "@/events/interactionCreate";
+import type * as ClientEventRegisterModule from "@/events/clientEventRegister";
+import { createClientEventRegistryReloader } from "@/framework/discord/clientEvents";
 import { stopJobs } from "@/framework/jobs/jobRunner";
 import { logger } from "@/lib/infra/logger";
 import { registerShutdownTask, runShutdown, SHUTDOWN_PRIORITY } from "@/lib/infra/shutdown";
 import { isProduction } from "./isProduction";
 import { i_clean, i_import, i_watch } from "./lib/import";
 
-function removeClientEventHandlers() {
-    client.removeAllListeners(Events.ClientReady);
-    client.removeAllListeners(Events.InteractionCreate);
-    client.removeAllListeners(Events.GuildCreate);
-    client.removeAllListeners(Events.GuildDelete);
-}
+const reloadClientEventRegistry = createClientEventRegistryReloader(client);
 
 export function setupProcessHandlers() {
     process.on("uncaughtException", (error) => {
@@ -59,19 +52,19 @@ export function setupProcessHandlers() {
 }
 
 export async function initialize() {
-    const { clientReadyEvent } = await i_import<typeof ClientReadyModule>("@/events/clientReady");
-    const { interactionCreateEvent } = await i_import<typeof InteractionCreateModule>("@/events/interactionCreate");
-    const { guildCreateEvent } = await i_import<typeof GuildCreateModule>("@/events/guildCreate");
-    const { guildDeleteEvent } = await i_import<typeof GuildDeleteModule>("@/events/guildDelete");
+    // Re-import the event registry and let the reloader swap listeners atomically:
+    // the previous attachment is disposed before the freshly imported one is applied,
+    // so a hot reload never leaves duplicate handlers attached to the client.
+    const clientEventEntries = await reloadClientEventRegistry.reload(async () => {
+        const module = await i_import<typeof ClientEventRegisterModule>("@/events/clientEventRegister");
+        return module.clientEventEntries;
+    });
 
-    removeClientEventHandlers();
-    client.once(Events.ClientReady, clientReadyEvent);
-    client.on(Events.InteractionCreate, interactionCreateEvent);
-    client.on(Events.GuildCreate, guildCreateEvent);
-    client.on(Events.GuildDelete, guildDeleteEvent);
-
+    // When the client is already logged in (i.e. this is a hot reload, not first boot),
+    // the `once` ClientReady listener will never fire again — invoke it manually so
+    // reload-time setup (jobs, etc.) runs against the live client.
     if (client.isReady()) {
-        await clientReadyEvent(client);
+        await clientEventEntries.emit(Events.ClientReady, client);
     }
 }
 

@@ -1,6 +1,7 @@
-import type { ClientEvents, Events } from "discord.js";
+import { Events } from "discord.js";
 import { dispatchInteraction } from "@/events/interactionCreate/setup";
+import { defineClientEvent } from "@/framework/discord/clientEvents";
 
-export const interactionCreateEvent: (...args: ClientEvents[Events.InteractionCreate]) => void = (interaction) => {
+export const interactionCreateEvent = defineClientEvent(Events.InteractionCreate, (interaction) => {
     dispatchInteraction(interaction);
-};
+});
