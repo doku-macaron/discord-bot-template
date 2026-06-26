@@ -1,0 +1,26 @@
+{
+    "name": "@repo/bot",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "start": "NODE_ENV=production bun --env-file=../../.env run src/index.ts",
+        "dev": "NODE_ENV=development bun --env-file=../../.env run src/index.ts",
+        "register": "NODE_ENV=register bun --env-file=../../.env run scripts/registerCommand.ts",
+        "clean": "bun run scripts/clean.ts",
+        "test": "bun test src",
+        "check:tsc": "bunx tsc --noEmit"
+    },
+    "dependencies": {
+        "@repo/db": "workspace:*",
+        "@repo/scheduler": "workspace:*",
+        "@repo/shared": "workspace:*",
+        "discord.js": "14.26.4",
+        "es-module-lexer": "2.1.0",
+        "hono": "catalog:",
+        "zod": "catalog:"
+    },
+    "devDependencies": {
+        "@types/bun": "catalog:",
+        "typescript": "catalog:"
+    }
+}

@@ -3,6 +3,7 @@
 .vscode
 
 node_modules
+**/node_modules
 coverage
 dist
 out
@@ -11,6 +12,8 @@ logs
 *.tgz
 *.tsbuildinfo
 .cache
+.turbo
+**/.turbo
 
 .env
 .env.local

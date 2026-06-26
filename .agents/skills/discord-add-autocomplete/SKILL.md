@@ -1,6 +1,6 @@
 ---
 name: discord-add-autocomplete
-description: このテンプレで slash command の option に autocomplete を付けるときのワークフロー。slash command 側で `.setAutocomplete(true)` を設定し、`Autocomplete` クラスで候補生成 handler を `autocompleteRegister.ts` に登録するまで。Use when adding an autocomplete handler for a slash command option under `src/events/interactionCreate/commands/autocomplete/items/`. slash command 自体を追加したい場合は discord-add-chat-input を先に使う。
+description: このテンプレで slash command の option に autocomplete を付けるときのワークフロー。slash command 側で `.setAutocomplete(true)` を設定し、`Autocomplete` クラスで候補生成 handler を `autocomplete/registry.ts` に `.register(...)` で登録するまで。Use when adding an autocomplete handler for a slash command option under `apps/bot/src/events/interactionCreate/commands/autocomplete/items/`. slash command 自体を追加したい場合は discord-add-chat-input を先に使う。
 ---
 
 # Discord: add autocomplete for a slash command option
@@ -41,7 +41,7 @@ autocomplete を立てた option には `.addChoices(...)` は併用できない
 
 ## 2. Autocomplete handler ファイルを作る
 
-`src/events/interactionCreate/commands/autocomplete/items/<name>Autocomplete.ts`
+`apps/bot/src/events/interactionCreate/commands/autocomplete/items/<name>Autocomplete.ts`
 
 ```ts
 import { Autocomplete } from "@/framework/discord/interactions/autocomplete";
@@ -68,15 +68,17 @@ export const echoAutocomplete = new Autocomplete("echo", async (interaction) => 
 - name は UI に表示される文字列、value は実際に送信される値 (異なる文字列にできる)
 - subcommand 内 option を補完したい場合: `interaction.options.getSubcommand()` で分岐する
 
-## 3. register に登録
+## 3. registry に登録
 
-[src/events/interactionCreate/commands/autocomplete/autocompleteRegister.ts](../../../src/events/interactionCreate/commands/autocomplete/autocompleteRegister.ts) の末尾に追加:
+種別ごとの [apps/bot/src/events/interactionCreate/commands/autocomplete/registry.ts](../../../apps/bot/src/events/interactionCreate/commands/autocomplete/registry.ts) に **import 1 行 + `.register(...)` 1 行** を足すだけ:
 
 ```ts
 import { echoAutocomplete } from "@/events/interactionCreate/commands/autocomplete/items/echoAutocomplete";
 // ...
 autocompleteHandler.register(echoAutocomplete);
 ```
+
+旧テンプレの `autocompleteRegister.ts` / singleton / `.clear()` は無い。`setup.ts` がこの `autocompleteHandler` を集めて dispatcher を組む (触らない)。
 
 ## 4. Discord に送信
 
@@ -107,5 +109,5 @@ slash command を変えていなければ register は不要 (autocomplete handl
 
 ## 参考
 
-- 既存サンプル: [src/events/interactionCreate/commands/autocomplete/items/echoAutocomplete.ts](../../../src/events/interactionCreate/commands/autocomplete/items/echoAutocomplete.ts)
-- handler / 型: [src/framework/discord/interactions/autocomplete/](../../../src/framework/discord/interactions/autocomplete/)
+- 既存サンプル: [apps/bot/src/events/interactionCreate/commands/autocomplete/items/echoAutocomplete.ts](../../../apps/bot/src/events/interactionCreate/commands/autocomplete/items/echoAutocomplete.ts)
+- handler / 型: [apps/bot/src/framework/discord/interactions/autocomplete/](../../../apps/bot/src/framework/discord/interactions/autocomplete/)

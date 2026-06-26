@@ -1,6 +1,6 @@
 ---
 name: discord-add-button
-description: このテンプレで button component を 1 つ追加するときのワークフロー。`customId` 設計、`Button` クラス、`buttonRegister.ts` への登録、メッセージへの貼り付け方まで。Use when adding a clickable button component under `src/events/interactionCreate/components/button/items/`. modal を出したい / select を出したい場合はそれぞれ別の skill を使う。
+description: このテンプレで button component を 1 つ追加するときのワークフロー。`customId` 設計、`Button` クラス、`button/registry.ts` への `.register(...)` 1 行追加、メッセージへの貼り付け方まで。Use when adding a clickable button component under `apps/bot/src/events/interactionCreate/components/button/items/`. modal を出したい / select を出したい場合はそれぞれ別の skill を使う。
 ---
 
 # Discord: add a button component
@@ -24,7 +24,7 @@ routing キーは `customId`。テンプレの推奨フォーマット:
 - 固定 ID: `feature:action` (例: `profile:edit-button`)
 - 動的 ID 付き: `feature:action:<id>` (例: `help:pagination:next:3`)
 
-固定 ID は [src/constants/customIds.ts](../../../src/constants/customIds.ts) の `CUSTOM_ID` に追加。動的 ID は同ファイルの `CUSTOM_ID_PATTERN` に正規表現を追加して、handler 側で `parse` する。
+固定 ID は [apps/bot/src/constants/customIds.ts](../../../apps/bot/src/constants/customIds.ts) の `CUSTOM_ID` に追加。動的 ID は同ファイルの `CUSTOM_ID_PATTERN` に正規表現を追加して、handler 側で `parse` する。
 
 ```ts
 // 固定
@@ -36,7 +36,7 @@ CUSTOM_ID_PATTERN.BUTTON.PROFILE_EDIT_WITH_USER_ID = /^profile:edit-button:\d+$/
 
 ## 2. ファイルを作る
 
-`src/events/interactionCreate/components/button/items/<name>.ts`
+`apps/bot/src/events/interactionCreate/components/button/items/<name>.ts`
 
 固定 ID の例:
 
@@ -75,15 +75,17 @@ export const fooPaginationButton = new Button(
 - `interaction.customId` は string なので、動的 ID なら手動で split / regex.exec する
 - guild 内限定 component は `if (!interaction.inCachedGuild()) return` ガードを冒頭に置く (`interaction.guildId` を null-safe に扱える)
 
-## 3. register に登録
+## 3. registry に登録
 
-[src/events/interactionCreate/components/button/buttonRegister.ts](../../../src/events/interactionCreate/components/button/buttonRegister.ts) の末尾に追加:
+種別ごとの [apps/bot/src/events/interactionCreate/components/button/registry.ts](../../../apps/bot/src/events/interactionCreate/components/button/registry.ts) に **import 1 行 + `.register(...)` 1 行** を足すだけ:
 
 ```ts
 import { fooButton } from "@/events/interactionCreate/components/button/items/fooButton";
 // ...
 buttonHandler.register(fooButton);
 ```
+
+旧テンプレの `buttonRegister.ts` / singleton / `.clear()` は無い。`setup.ts` がこの `buttonHandler` を集めて dispatcher を組む (触らない)。
 
 ## 4. メッセージに button を貼る
 
@@ -132,7 +134,7 @@ const section = new SectionBuilder()
 
 ## 参考
 
-- 既存サンプル: [src/events/interactionCreate/components/button/items/](../../../src/events/interactionCreate/components/button/items/)
-- handler / 型: [src/framework/discord/interactions/components/button/](../../../src/framework/discord/interactions/components/button/)
-- customId 設計: [src/constants/customIds.ts](../../../src/constants/customIds.ts)
-- pagination helper: [src/lib/discord/pagination.ts](../../../src/lib/discord/pagination.ts) (`/help` で使用)
+- 既存サンプル: [apps/bot/src/events/interactionCreate/components/button/items/](../../../apps/bot/src/events/interactionCreate/components/button/items/)
+- handler / 型: [apps/bot/src/framework/discord/interactions/components/button/](../../../apps/bot/src/framework/discord/interactions/components/button/)
+- customId 設計: [apps/bot/src/constants/customIds.ts](../../../apps/bot/src/constants/customIds.ts)
+- pagination helper: [apps/bot/src/lib/discord/pagination.ts](../../../apps/bot/src/lib/discord/pagination.ts) (`/help` で使用)

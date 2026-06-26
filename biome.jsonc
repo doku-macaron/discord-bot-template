@@ -7,7 +7,18 @@
     },
     "files": {
         "ignoreUnknown": false,
-        "includes": ["**", "!**/*.md", "!**/node_modules/*", "!**/drizzle/*", "!**/.git/*", "!**/dist/*", "!**/.pglite/*"]
+        "includes": [
+            "**",
+            "!**/*.md",
+            "!**/*.css",
+            "!**/node_modules/*",
+            "!**/drizzle/*",
+            "!**/.git/*",
+            "!**/dist/*",
+            "!**/.pglite/*",
+            "!**/.next/*",
+            "!**/.turbo/*"
+        ]
     },
     "formatter": {
         "enabled": true,

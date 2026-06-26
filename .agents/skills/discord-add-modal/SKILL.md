@@ -1,6 +1,6 @@
 ---
 name: discord-add-modal
-description: このテンプレで modal (text input フォーム) を 1 つ追加するときのワークフロー。modal builder の作成、`Modal` クラスで submit handler を登録、呼び出し元から `interaction.showModal(...)` で開くまで。Use when adding a modal under `src/events/interactionCreate/components/modal/items/`. button を足したい場合は discord-add-button を使う。
+description: このテンプレで modal (text input フォーム) を 1 つ追加するときのワークフロー。modal builder の作成、`Modal` クラスで submit handler を登録、呼び出し元から `interaction.showModal(...)` で開くまで。Use when adding a modal under `apps/bot/src/events/interactionCreate/components/modal/items/`. button を足したい場合は discord-add-button を使う。
 ---
 
 # Discord: add a modal
@@ -20,7 +20,7 @@ modal はユーザーから text 入力を取るフォーム。**button や sele
 
 ## 1. customId とフィールド ID を決める
 
-modal 自体の customId と、各 TextInput の customId の両方を [src/constants/customIds.ts](../../../src/constants/customIds.ts) に登録:
+modal 自体の customId と、各 TextInput の customId の両方を [apps/bot/src/constants/customIds.ts](../../../apps/bot/src/constants/customIds.ts) に登録:
 
 ```ts
 CUSTOM_ID.MODAL.FOO = "foo:modal";
@@ -29,7 +29,7 @@ CUSTOM_ID.INPUT.FOO_FIELD = "foo:field";
 
 ## 2. modal builder ファクトリと submit handler を 1 ファイルに
 
-`src/events/interactionCreate/components/modal/items/<name>.ts`
+`apps/bot/src/events/interactionCreate/components/modal/items/<name>.ts`
 
 ```ts
 import { LabelBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
@@ -87,15 +87,17 @@ export const fooModal = new Modal(
 - submit handler は `interaction.fields.getTextInputValue(<input-customId>)` で値を取得
 - usecase は `await import("...")` の dynamic import 推奨 (DB module を modal 起動まで遅延ロードする既存パターン)
 
-## 3. register に登録
+## 3. registry に登録
 
-[src/events/interactionCreate/components/modal/modalRegister.ts](../../../src/events/interactionCreate/components/modal/modalRegister.ts) の末尾に追加:
+種別ごとの [apps/bot/src/events/interactionCreate/components/modal/registry.ts](../../../apps/bot/src/events/interactionCreate/components/modal/registry.ts) に **import 1 行 + `.register(...)` 1 行** を足すだけ:
 
 ```ts
 import { fooModal } from "@/events/interactionCreate/components/modal/items/fooModal";
 // ...
 modalHandler.register(fooModal);
 ```
+
+旧テンプレの `modalRegister.ts` / singleton / `.clear()` は無い。`setup.ts` がこの `modalHandler` を集めて dispatcher を組む (触らない)。
 
 ## 4. modal を開く側 (呼び出し元)
 
@@ -130,7 +132,7 @@ slash command から直接開くのも可能。**deferReply はしない**。
 
 ## Mention safety / ping opt-in
 
-modal は自由入力なので、ユーザーが `@everyone` や他人への mention を仕込みやすい。[src/client.ts](../../../src/client.ts) で `allowedMentions: { parse: [] }` を default にしているため、`reply` / `editReply` / `followUp` / `channel.send` で `content` に流したテキスト内の mention は **ping を発火しない** (描画はされる)。bot 権限を踏み台にした不意の broadcast を防ぐためのデフォルト。
+modal は自由入力なので、ユーザーが `@everyone` や他人への mention を仕込みやすい。[apps/bot/src/client.ts](../../../apps/bot/src/client.ts) で `allowedMentions: { parse: [] }` を default にしているため、`reply` / `editReply` / `followUp` / `channel.send` で `content` に流したテキスト内の mention は **ping を発火しない** (描画はされる)。bot 権限を踏み台にした不意の broadcast を防ぐためのデフォルト。
 
 意図して ping したいときは send 側で明示的に opt-in する:
 
@@ -144,10 +146,10 @@ await channel.send({
 - `users: [...]` / `roles: [...]` で具体的な ID を渡せばその対象だけ ping される
 - どうしても `@everyone` を出す必要があるときは `parse: ['everyone']` を明示 (本当に必要かを再考)
 - embed の field / description / TextDisplay (Components v2) 内の mention は元々 ping を発火しないので、それらの表示は default のままで問題ない
-- 既存サンプル: [src/events/interactionCreate/components/modal/items/timerModal.ts](../../../src/events/interactionCreate/components/modal/items/timerModal.ts) の `channel.send`
+- 既存サンプル: [apps/bot/src/events/interactionCreate/components/modal/items/timerModal.ts](../../../apps/bot/src/events/interactionCreate/components/modal/items/timerModal.ts) の `channel.send`
 
 ## 参考
 
-- 既存サンプル: [src/events/interactionCreate/components/modal/items/](../../../src/events/interactionCreate/components/modal/items/)
-- handler / 型: [src/framework/discord/interactions/components/modal/](../../../src/framework/discord/interactions/components/modal/)
-- customId 設計: [src/constants/customIds.ts](../../../src/constants/customIds.ts)
+- 既存サンプル: [apps/bot/src/events/interactionCreate/components/modal/items/](../../../apps/bot/src/events/interactionCreate/components/modal/items/)
+- handler / 型: [apps/bot/src/framework/discord/interactions/components/modal/](../../../apps/bot/src/framework/discord/interactions/components/modal/)
+- customId 設計: [apps/bot/src/constants/customIds.ts](../../../apps/bot/src/constants/customIds.ts)

@@ -1,0 +1,11 @@
+import { pollModal } from "@/events/interactionCreate/components/modal/items/pollModal";
+import { profileEditModal } from "@/events/interactionCreate/components/modal/items/profileEditModal";
+import { showcaseModalV2 } from "@/events/interactionCreate/components/modal/items/showcaseModalV2";
+import { timerModal } from "@/events/interactionCreate/components/modal/items/timerModal";
+import { ModalHandler } from "@/framework/discord/interactions/components/modal";
+
+export const modalHandler = new ModalHandler();
+modalHandler.register(profileEditModal);
+modalHandler.register(showcaseModalV2);
+modalHandler.register(pollModal);
+modalHandler.register(timerModal);

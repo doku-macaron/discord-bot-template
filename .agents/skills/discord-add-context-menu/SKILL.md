@@ -1,6 +1,6 @@
 ---
 name: discord-add-context-menu
-description: このテンプレで context menu command (User / Message 右クリック) を 1 つ追加するときのワークフロー。`ContextMenuCommand` クラスを使い、`contextMenuRegister.ts` に登録するまで。Use when adding a right-click User or Message context menu command under `src/events/interactionCreate/commands/contextMenu/items/`. slash command を足したい場合は discord-add-chat-input を使う。
+description: このテンプレで context menu command (User / Message 右クリック) を 1 つ追加するときのワークフロー。`ContextMenuCommand` クラスを使い、`contextMenu/registry.ts` に `.register(...)` を 1 行足すまで。Use when adding a right-click User or Message context menu command under `apps/bot/src/events/interactionCreate/commands/contextMenu/items/`. slash command を足したい場合は discord-add-chat-input を使う。
 ---
 
 # Discord: add a context menu command
@@ -24,7 +24,7 @@ description: このテンプレで context menu command (User / Message 右ク�
 
 ## 2. ファイルを作る
 
-`src/events/interactionCreate/commands/contextMenu/items/<name>.ts`
+`apps/bot/src/events/interactionCreate/commands/contextMenu/items/<name>.ts`
 
 User の例:
 
@@ -73,9 +73,9 @@ export const reportMessageContextMenu = new ContextMenuCommand(
 - `setName` の文字列は Discord UI 上のラベル。`/` で始める必要は無く、空白可
 - `setType` を必ず指定 (省略すると slash と被るので)
 
-## 3. register に登録
+## 3. registry に登録
 
-[src/events/interactionCreate/commands/contextMenu/contextMenuRegister.ts](../../../src/events/interactionCreate/commands/contextMenu/contextMenuRegister.ts) の末尾に追加:
+種別ごとの [apps/bot/src/events/interactionCreate/commands/contextMenu/registry.ts](../../../apps/bot/src/events/interactionCreate/commands/contextMenu/registry.ts) に **import 1 行 + `.register(...)` 1 行** を足すだけ:
 
 ```ts
 import { getUserProfileContextMenu } from "@/events/interactionCreate/commands/contextMenu/items/getUserProfileContextMenu";
@@ -83,13 +83,17 @@ import { getUserProfileContextMenu } from "@/events/interactionCreate/commands/c
 contextMenuHandler.register(getUserProfileContextMenu);
 ```
 
+旧テンプレの `contextMenuRegister.ts` / singleton / `.clear()` は無い。`setup.ts` がこの `contextMenuHandler` を集めて dispatcher を組む (触らない)。
+
 ## 4. Discord に送信
+
+リポジトリルートから:
 
 ```bash
 bun register
 ```
 
-slash command と context menu は同じ `bun register` で一緒に Discord へ PUT される。
+slash command と context menu は同じ `bun register` で一緒に Discord へ PUT される (root script が `@repo/bot` の `scripts/registerCommand.ts` に委譲する)。
 
 ## 5. 動作確認
 
@@ -105,5 +109,5 @@ slash command と context menu は同じ `bun register` で一緒に Discord へ
 
 ## 参考
 
-- 既存サンプル: [src/events/interactionCreate/commands/contextMenu/items/](../../../src/events/interactionCreate/commands/contextMenu/items/)
-- handler / 型: [src/framework/discord/interactions/contextMenu/](../../../src/framework/discord/interactions/contextMenu/)
+- 既存サンプル: [apps/bot/src/events/interactionCreate/commands/contextMenu/items/](../../../apps/bot/src/events/interactionCreate/commands/contextMenu/items/)
+- handler / 型: [apps/bot/src/framework/discord/interactions/contextMenu/](../../../apps/bot/src/framework/discord/interactions/contextMenu/)

@@ -1,6 +1,6 @@
 ---
 name: discord-add-select-menu
-description: このテンプレで select menu (String / User / Role / Channel / Mentionable) を 1 つ追加するときのワークフロー。`Menu` クラス、`isXxxSelectMenu()` での narrow、`menuRegister.ts` への登録まで。Use when adding a select menu under `src/events/interactionCreate/components/selectMenu/items/`. button や modal は別の skill を使う。
+description: このテンプレで select menu (String / User / Role / Channel / Mentionable) を 1 つ追加するときのワークフロー。`Menu` クラス、`isXxxSelectMenu()` での narrow、`selectMenu/registry.ts` への `.register(...)` 1 行追加まで。Use when adding a select menu under `apps/bot/src/events/interactionCreate/components/selectMenu/items/`. button や modal は別の skill を使う。
 ---
 
 # Discord: add a select menu component
@@ -19,7 +19,7 @@ description: このテンプレで select menu (String / User / Role / Channel /
 
 ## 1. customId を決める
 
-[src/constants/customIds.ts](../../../src/constants/customIds.ts) の `CUSTOM_ID.SELECT_MENU.<NAME>` に追加:
+[apps/bot/src/constants/customIds.ts](../../../apps/bot/src/constants/customIds.ts) の `CUSTOM_ID.SELECT_MENU.<NAME>` に追加:
 
 ```ts
 CUSTOM_ID.SELECT_MENU.FOO = "foo:select";
@@ -27,7 +27,7 @@ CUSTOM_ID.SELECT_MENU.FOO = "foo:select";
 
 ## 2. ファイルを作る
 
-`src/events/interactionCreate/components/selectMenu/items/<name>.ts`
+`apps/bot/src/events/interactionCreate/components/selectMenu/items/<name>.ts`
 
 User select の例:
 
@@ -74,15 +74,17 @@ handler 冒頭でやる narrow を kind に合わせる:
 
 `interaction.values` は単一選択でも配列で返る。`values[0]` を取り出してから undefined チェックする。
 
-## 4. register に登録
+## 4. registry に登録
 
-[src/events/interactionCreate/components/selectMenu/menuRegister.ts](../../../src/events/interactionCreate/components/selectMenu/menuRegister.ts) の末尾に追加:
+種別ごとの [apps/bot/src/events/interactionCreate/components/selectMenu/registry.ts](../../../apps/bot/src/events/interactionCreate/components/selectMenu/registry.ts) に **import 1 行 + `.register(...)` 1 行** を足すだけ:
 
 ```ts
 import { fooSelectMenu } from "@/events/interactionCreate/components/selectMenu/items/fooSelectMenu";
 // ...
 menuHandler.register(fooSelectMenu);
 ```
+
+旧テンプレの `menuRegister.ts` / singleton / `.clear()` は無い。`setup.ts` がこの `menuHandler` を集めて dispatcher を組む (触らない)。
 
 ## 5. メッセージに乗せる側 (builder)
 
@@ -131,9 +133,9 @@ new ChannelSelectMenuBuilder()
 
 ## 参考
 
-- 既存サンプル (5 種類): [src/events/interactionCreate/components/selectMenu/items/](../../../src/events/interactionCreate/components/selectMenu/items/)
+- 既存サンプル (5 種類): [apps/bot/src/events/interactionCreate/components/selectMenu/items/](../../../apps/bot/src/events/interactionCreate/components/selectMenu/items/)
   - `helpSectionSelectMenu` (String)
   - `reportUserSelectMenu` (User)
   - `modRoleSelectMenu` (Role)
   - `archiveChannelSelectMenu` (Channel, GuildText フィルタ付き)
-- handler / 型: [src/framework/discord/interactions/components/selectMenu/](../../../src/framework/discord/interactions/components/selectMenu/)
+- handler / 型: [apps/bot/src/framework/discord/interactions/components/selectMenu/](../../../apps/bot/src/framework/discord/interactions/components/selectMenu/)
