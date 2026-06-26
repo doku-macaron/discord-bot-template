@@ -88,7 +88,7 @@ describe("saveMemberProfileUseCase", () => {
         expect(bioCalls[0]?.client).toBe(fakeTx);
     });
 
-    test("returns err Result when a query throws", async () => {
+    test("wraps a query throw into an unexpected AppError carrying the original cause", async () => {
         const boom = new Error("bio write failed");
         bioShouldThrow = boom;
 
@@ -96,11 +96,12 @@ describe("saveMemberProfileUseCase", () => {
 
         expect(result.success).toBe(false);
         if (!result.success) {
-            expect(result.error).toBe(boom);
+            expect(result.error.kind).toBe("unexpected");
+            expect(result.error.cause).toBe(boom);
         }
     });
 
-    test("returns err Result when withTransaction itself throws", async () => {
+    test("wraps a withTransaction throw into an unexpected AppError and runs no queries", async () => {
         const boom = new Error("transaction open failed");
         transactionShouldThrow = boom;
 
@@ -108,10 +109,22 @@ describe("saveMemberProfileUseCase", () => {
 
         expect(result.success).toBe(false);
         if (!result.success) {
-            expect(result.error).toBe(boom);
+            expect(result.error.kind).toBe("unexpected");
+            expect(result.error.cause).toBe(boom);
         }
         expect(guildClients).toEqual([]);
         expect(profileClients).toEqual([]);
+        expect(bioCalls).toEqual([]);
+    });
+
+    test("returns a validation AppError (and opens no transaction) when the bio is too long", async () => {
+        const result = await saveMemberProfileUseCase({ ...baseInput, bio: "a".repeat(201) });
+
+        expect(result.success).toBe(false);
+        if (!result.success) {
+            expect(result.error.kind).toBe("validation");
+            expect(result.error.userMessage).toBeDefined();
+        }
         expect(bioCalls).toEqual([]);
     });
 });

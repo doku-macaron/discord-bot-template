@@ -7,12 +7,11 @@ import {
     TextInputStyle,
     TimestampStyles,
     time,
-    userMention,
 } from "discord.js";
 import { CUSTOM_ID } from "@/constants/customIds";
 import { Modal } from "@/framework/discord/interactions/components/modal";
-import { logger } from "@/lib/infra/logger";
 import { parseDuration, parseTargetTime } from "@/lib/util/parseTime";
+import { scheduleTimer } from "@/service/timer/timerService";
 
 const MESSAGE_MAX_LENGTH = 200;
 const MAX_DELAY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -117,26 +116,22 @@ export const timerModal = new Modal(
             return;
         }
 
-        // In-memory timer. Bot 再起動で失われる sample 実装。本番運用なら
-        // DB に積んで clientReady で復元するか、外部スケジューラを使う。
-        setTimeout(() => {
-            void (async () => {
-                try {
-                    const channel = await client.channels.fetch(channelId);
-                    if (channel?.isSendable()) {
-                        await channel.send(`${userMention(user.id)} ⏰ ${message}`);
-                    }
-                    // Confirmation reply の relative timestamp が Discord 側で
-                    // 更新され続けてしまうので、発火後は静的な文言に置き換える。
-                    await interaction.editReply({
-                        content: `タイマーが発火しました (${time(fireAt, TimestampStyles.FullDateShortTime)})`,
-                    });
-                } catch (unknownError) {
-                    const error = unknownError instanceof Error ? unknownError : new Error(String(unknownError));
-                    logger.error("Bot", error);
-                }
-            })();
-        }, delayMs);
+        // Hand off to the timer service (state pinned to globalThis, so reminders
+        // survive dev hot reloads). See service/timer/timerService.ts.
+        scheduleTimer({
+            client,
+            channelId,
+            userId: user.id,
+            message,
+            fireAt,
+            onFire: async () => {
+                // The confirmation reply's relative timestamp keeps ticking on
+                // Discord's side, so replace it with a static line once fired.
+                await interaction.editReply({
+                    content: `タイマーが発火しました (${time(fireAt, TimestampStyles.FullDateShortTime)})`,
+                });
+            },
+        });
 
         await interaction.reply({
             content: `タイマーをセットしました: ${time(fireAt, TimestampStyles.RelativeTime)} (${time(fireAt, TimestampStyles.FullDateShortTime)})`,
