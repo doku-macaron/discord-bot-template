@@ -36,7 +36,7 @@ jobs:
       DATABASE_URL_TEST: postgres://discord_bot:discord_bot@localhost:5432/discord_bot_test
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -60,7 +60,7 @@ jobs:
     name: Docker
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Compose config
         env:
