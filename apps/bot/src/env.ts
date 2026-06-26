@@ -40,6 +40,11 @@ export const envVariables = {
         BOT_API_PORT: z.coerce.number().int().positive().default(8080),
         BOT_API_TOKEN: z.string().default(""),
     }),
+    // Optional durable scheduler (packages/scheduler + bot worker). Off by default;
+    // requires Postgres (the dev DB from `bun db:up`).
+    scheduler: z.object({
+        SCHEDULER_ENABLED: boolString,
+    }),
 } as const;
 
 export type EnvName = keyof typeof envVariables;

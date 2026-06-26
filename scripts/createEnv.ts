@@ -34,6 +34,9 @@ const envText = [
     "# Required when BOT_API_ENABLED=true (bearer token for /api/*).",
     'BOT_API_TOKEN=""',
     "",
+    "# Durable scheduler (packages/scheduler + bot worker). Requires Postgres.",
+    'SCHEDULER_ENABLED="false"',
+    "",
 ].join("\n");
 
 await writeFile(envExamplePath, envText);

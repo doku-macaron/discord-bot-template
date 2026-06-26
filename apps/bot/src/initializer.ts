@@ -3,7 +3,7 @@ import { Events } from "discord.js";
 import { client } from "@/client";
 import type * as ClientEventRegisterModule from "@/events/clientEventRegister";
 import { createClientEventRegistryReloader } from "@/framework/discord/clientEvents";
-import { stopJobs } from "@/framework/jobs/jobRunner";
+import { stopSchedulerWorker } from "@/jobs/schedulerHost";
 import { logger } from "@/lib/infra/logger";
 import { registerShutdownTask, runShutdown, SHUTDOWN_PRIORITY } from "@/lib/infra/shutdown";
 import { isProduction } from "./isProduction";
@@ -86,7 +86,9 @@ export async function setupDevHotReload() {
     const runReload = async () => {
         do {
             reloadQueued = false;
-            stopJobs();
+            // Stop the worker before reload so the restarted clientReady picks up edited
+            // handlers (no-op when the scheduler is disabled / not started).
+            await stopSchedulerWorker();
             i_clean();
             await initialize();
         } while (reloadQueued);
