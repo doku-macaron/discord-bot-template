@@ -4,7 +4,6 @@
         "target": "ESNext",
         "module": "Preserve",
         "moduleDetection": "force",
-        "types": ["bun"],
         "moduleResolution": "bundler",
         "allowImportingTsExtensions": true,
         "verbatimModuleSyntax": true,
@@ -16,12 +15,6 @@
         "noImplicitOverride": true,
         "noUnusedLocals": false,
         "noUnusedParameters": false,
-        "noPropertyAccessFromIndexSignature": false,
-        "rootDir": ".",
-        "paths": {
-            "@/*": ["./src/*"]
-        }
-    },
-    "include": ["src", "scripts"],
-    "exclude": ["node_modules"]
+        "noPropertyAccessFromIndexSignature": false
+    }
 }
