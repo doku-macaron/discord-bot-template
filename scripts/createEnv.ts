@@ -25,6 +25,15 @@ const envText = [
     "# Optional Discord webhook URL for error reports.",
     'WEBHOOK_URL=""',
     "",
+    "# ===== Optional features (off by default) =====",
+    "",
+    "# Internal HTTP API (server/): /health, /ready, and a bearer-authed /api/ping.",
+    'BOT_API_ENABLED="false"',
+    'BOT_API_HOST="0.0.0.0"',
+    'BOT_API_PORT="8080"',
+    "# Required when BOT_API_ENABLED=true (bearer token for /api/*).",
+    'BOT_API_TOKEN=""',
+    "",
 ].join("\n");
 
 await writeFile(envExamplePath, envText);

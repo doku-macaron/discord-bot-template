@@ -9,6 +9,7 @@ export type ShutdownTask = {
 
 export const SHUTDOWN_PRIORITY = {
     JOBS: 10,
+    BOT_API_SERVER: 90,
     DISCORD_CLIENT: 100,
     DATABASE: 200,
 } as const;
