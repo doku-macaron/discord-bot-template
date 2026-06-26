@@ -6,9 +6,18 @@
 [![Bun](https://img.shields.io/badge/Bun-1.3.11-black?logo=bun)](https://bun.sh/)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 
-Bun + discord.js + Drizzle ORM + PostgreSQL/PGlite の Discord Bot テンプレートです。
+Bun + discord.js + Drizzle ORM + PostgreSQL の Discord Bot テンプレートです。**Bun + Turborepo モノレポ**構成。
 
-ローカル開発では PGlite を使うため、PostgreSQL サーバーを立てずに DB つき Bot を動かせます。本番では `DATABASE_URL` に PostgreSQL の接続文字列を指定します。
+## Structure
+
+```
+apps/bot          @repo/bot        — discord.js bot 本体
+packages/db       @repo/db         — drizzle schema / query / migration (Postgres)
+packages/shared   @repo/shared     — Result<T,E> + kind 判別の AppError
+packages/scheduler @repo/scheduler — Discord/DB 非依存の durable scheduler core
+```
+
+すべてリポジトリルートから実行します。Bot がコアで、**内部 HTTP API** (`server/`) と **durable scheduler** は opt-in (env フラグ、既定 off) です — [Optional features](#optional-features) 参照。
 
 ## Use this template
 
@@ -26,7 +35,7 @@ bun install
 - `README.md` の Bot 名・説明・コマンド一覧
 - `LICENSE` の `Copyright` 行（Apache-2.0 のままにする場合）
 - `.github/CODEOWNERS` のオーナー
-- 不要なサンプル (`src/events/interactionCreate/commands/chatInput/items/`, `src/events/interactionCreate/commands/contextMenu/items/`, `src/events/interactionCreate/components/*/items/`)
+- 不要なサンプル (`apps/bot/src/events/interactionCreate/commands/chatInput/items/`, `apps/bot/src/events/interactionCreate/commands/contextMenu/items/`, `apps/bot/src/events/interactionCreate/components/*/items/`)
 - `.github/workflows/ci.yml` / `compose.yml` の image 名や repository 名（必要な場合）
 - `.env.example` のコメントや既定値（本番DB、webhook、運用方針に合わせる）
 
@@ -36,16 +45,17 @@ bun install
 
 - [Bun](https://bun.sh/)
 - Discord Bot application
-- PostgreSQL compatible database for production
+- Docker (ローカル開発用の Postgres) — もしくは `DATABASE_URL` を向ける任意の PostgreSQL
 
 ## Setup
 
 ```sh
-bun install
-cp .env.example .env
+bun install            # postinstall で .env を .env.example から生成
+bun db:up              # 開発用 Postgres を起動 (Docker)
+bun db:migrate:local   # migration 適用
 ```
 
-`.env` に Discord Bot の値を設定してください。
+`.env` は install 時に生成されます。Discord の値を埋めてください。
 
 ```env
 # Discord bot token from the Developer Portal.
@@ -57,15 +67,14 @@ CLIENT_ID="Discord application client ID"
 # Optional development guild ID. When empty, bun register broadcasts to all bot guilds.
 GUILD_ID="Optional: development guild ID"
 
-# Production PostgreSQL connection URL. Required for NODE_ENV=production and Docker.
-DATABASE_URL="Production PostgreSQL URL"
-
-# Local PGlite database path for NODE_ENV=development.
-DATABASE_URL_DEV="./.pglite"
+# PostgreSQL connection URL (runtime). `bun db:up` の Docker DB が既定。
+DATABASE_URL="postgres://discord_bot:discord_bot@localhost:5432/discord_bot"
 
 # Optional Discord webhook URL for error reports.
 WEBHOOK_URL="Optional: Discord webhook URL for error reports"
 ```
+
+opt-in 機能 (`BOT_API_*`, `SCHEDULER_ENABLED`) は [Optional features](#optional-features) を参照（既定 off）。
 
 ## Invite
 
@@ -77,18 +86,20 @@ https://discord.com/oauth2/authorize?client_id=<CLIENT_ID>&scope=bot%20applicati
 
 このテンプレートは slash command / context menu / component interaction を中心にしているため、最小構成では `applications.commands` scope が重要です。通常のメッセージ送信や管理操作を追加する場合は、その機能に必要な bot permissions を Developer Portal で加えてください。
 
-`src/client.ts` は `Guilds` と `GuildMembers` intent を要求します。Discord Developer Portal の Bot settings で **Server Members Intent** を有効にしてください。メンバー情報を使わない bot にする場合は、`GuildMembers` intent と `interaction.member.displayName` に依存しているサンプル処理を削っても構いません。
+`apps/bot/src/client.ts` は `Guilds` と `GuildMembers` intent を要求します。Discord Developer Portal の Bot settings で **Server Members Intent** を有効にしてください。メンバー情報を使わない bot にする場合は、`GuildMembers` intent と `interaction.member.displayName` に依存しているサンプル処理を削っても構いません。
 
 ## Development
 
 VSCode では `.vscode/extensions.json` の推奨拡張を使えます。
 
 ```sh
-bun generate:local
-bun migrate:local
-bun register
-bun dev
+bun db:up              # 開発用 Postgres を起動 (初回のみ)
+bun db:migrate:local   # migration 適用
+bun register           # slash command を Discord に登録
+bun dev                # hot reload つきで Bot を起動
 ```
+
+`bun dev` はファイル変更を再起動なしで hot reload します (event registry を再 import して listener を張り替える)。`items/` や usecase の編集はそのまま反映されます。
 
 `GUILD_ID` を設定している場合、`bun register` はそのサーバーにだけコマンドを登録します (dev guild 即時反映)。未設定の場合は **Discord REST `/users/@me/guilds` から bot 参加中の全 guild を取得して、それぞれに guild scope で broadcast 登録** します。
 
@@ -98,13 +109,12 @@ bun dev
 
 ## Docker
 
-Docker は optional です。ローカル開発は PGlite のままでも進められますが、PostgreSQL 付きで本番に近い起動を試したい場合は `compose.yml` を使えます。
+`compose.yml` は Postgres + Bot を起動します。`Dockerfile` は multi-stage (`bot` / `tools` ターゲット) で、compose がサービスごとに target を選びます。
 
 ```sh
-cp .env.example .env
 docker compose build
-docker compose run --rm migrate
-docker compose run --rm register
+docker compose --profile tools run --rm migrate    # migration 適用
+docker compose --profile tools run --rm register   # slash command 登録
 docker compose up -d bot
 docker compose logs -f bot
 ```
@@ -114,20 +124,22 @@ docker compose logs -f bot
 本番運用では、Bot 起動前に migration を完了させます。
 
 - Docker image は `Dockerfile` から build し、`DATABASE_URL` / `TOKEN` / `CLIENT_ID` は secret として渡す
-- deploy 前に同じ image で `bun migrate` を実行する
+- deploy 前に同じ image で `bun db:migrate` を実行する
 - `NODE_ENV=production` のログは JSON line 形式なので、コンテナログ基盤へそのまま流せる
 - `docker stop` / rolling deploy では `SIGTERM` を受けて graceful shutdown が走る
 - `compose.yml` はローカル検証用。production では DB password、volume、restart policy、network を環境に合わせて調整する
 
 ## Environment
 
-環境変数は `src/env.ts` の `getEnv` で用途別に検証します。
+環境変数は `apps/bot/src/env.ts` の `getEnv` で用途別に検証します。
 
 - `getEnv("bot")`: Bot起動に必要な `TOKEN`
 - `getEnv("register")`: コマンド登録に必要な `TOKEN` / `CLIENT_ID` / optional `GUILD_ID`
-- `getEnv("postgres")`: 本番DB接続に必要な `DATABASE_URL`
-- `getEnv("pglite")`: ローカルDB用の `DATABASE_URL_DEV`
+- `getEnv("botApi")`: `BOT_API_ENABLED` / `BOT_API_HOST` / `BOT_API_PORT` / `BOT_API_TOKEN` (opt-in HTTP API)
+- `getEnv("scheduler")`: `SCHEDULER_ENABLED` (opt-in durable scheduler)
 - `getEnv("webhook")`: optional `WEBHOOK_URL`
+
+`DATABASE_URL` (+ optional `DATABASE_URL_MIGRATOR` / `DATABASE_URL_TEST`) は `@repo/db` が環境から直接読みます。
 
 ## Commands
 
@@ -139,7 +151,7 @@ docker compose logs -f bot
 - `/showcase`: Components v2 (Container / Section + Thumbnail / Section + Button / MediaGallery / Separator / TextDisplay) のリファレンス実装
 - `/showcase-modal`: Modal v2 (Checkbox / RadioGroup / CheckboxGroup / FileUpload + Label + TextInput) のリファレンス実装
 - `/poll`: モーダルから Discord ネイティブ Poll を作成するサンプル (`interaction.reply({ poll: ... })`)
-- `/timer`: モーダルで「経過時間後」or「指定時刻」を設定するリマインダー サンプル (in-memory setTimeout、再起動で失効)
+- `/timer`: モーダルで「経過時間後」or「指定時刻」を設定するリマインダー サンプル（`globalThis` pin の timer **service** に委譲。hot reload は生き残るがプロセス再起動で失効）
 - `/admin report-user-select`: ユーザーを選んで report するサンプル (User Select)
 - `/admin set-mod-role`: Mod ロールを選ぶサンプル (Role Select)
 - `/admin set-archive-channel`: アーカイブ用 text channel を選ぶサンプル (Channel Select)
@@ -148,51 +160,60 @@ docker compose logs -f bot
 
 ## Interaction Structure
 
-interaction は種類ごとに handler/register を分けています。
+interaction は種類ごとに `apps/bot/src/events/interactionCreate/` 配下で分けています。
 
-- `src/events/interactionCreate/commands/chatInput/items/`: slash command
-- `src/events/interactionCreate/commands/contextMenu/items/`: user / message context menu
-- `src/events/interactionCreate/commands/autocomplete/items/`: autocomplete
-- `src/events/interactionCreate/components/button/items/`: button
-- `src/events/interactionCreate/components/modal/items/`: modal
-- `src/events/interactionCreate/components/selectMenu/items/`: select menu (string / user / role / channel / mentionable)
+- `commands/chatInput/items/`: slash command
+- `commands/contextMenu/items/`: user / message context menu
+- `commands/autocomplete/items/`: autocomplete
+- `components/button/items/`: button
+- `components/modal/items/`: modal
+- `components/selectMenu/items/`: select menu (string / user / role / channel / mentionable)
 
-利用者側のコードは `@/framework/discord/interactions/<kind>` の barrel 経由でだけ framework に触ります。各 handler は `<type>Handler.ts` (class) と `<type>HandlerInstance.ts` (singleton) のペアで、barrel が両方を再 export します。`<type>Register.ts` が `items/` の各 interaction を handler に登録し、`src/events/interactionCreate/setup.ts` がすべての register を side-effect import で読み込んだうえで dispatcher を composition root として組み立てて `dispatchInteraction` を export します。`src/events/interactionCreate/index.ts` はこの `dispatchInteraction` を呼ぶだけの thin adapter、`scripts/registerCommand.ts` も `setup.ts` 経由で handler を取得します。
-普段の開発では各種 `items/` に interaction 実装を追加し、対応する `*Register.ts` に登録してください。handler class、dispatcher、subcommand helper、shared customId router などの framework 側実装は `src/framework/discord/interactions/` にあります。
+各種類は `registry.ts` を持ち、その `items/` から handler を毎回新規に組み立てます。
 
-`src/events/guildCreate/` と `src/events/guildDelete/` が bot の参加・退出に合わせて `guilds` テーブルを sync します。退出は物理削除ではなく `leftAt` に時刻を入れる soft-delete で、再入会時に `joinedAt` がリセット・`leftAt` が null に戻ります。lazy populate (コマンド実行時の `getOrCreateGuild` 呼び出し) も残っているため、event を取りこぼしても DB 整合性は保たれます。
+```ts
+// commands/chatInput/registry.ts
+export const commandHandler = new CommandHandler();
+commandHandler.register(pingCommand);
+commandHandler.register(profileCommand);
+// ここに 1 行ずつ追加していく
+```
 
-`src/lib/discord/interactionContext.ts` と `src/lib/infra/logger.ts` で、エラー時に command/customId/user/guild/channel/interactionId/ageMs をログへ出します。
+`setup.ts` が 6 種の handler を dispatcher (`dispatchInteraction`) に組み立て、`index.ts` はそれを呼ぶだけの thin adapter、`scripts/registerCommand.ts` が registry からコマンドペイロードを読みます。`*Register.ts` / `*HandlerInstance.ts` singleton / `.clear()` は廃止しました。普段の開発では `items/` に実装を追加し、その種類の `registry.ts` に `.register(...)` を 1 行足すだけです。handler class・dispatcher・subcommand helper・customId router・client-event reloader などの framework 実装は `apps/bot/src/framework/discord/` にあります。
+
+`apps/bot/src/events/guildCreate/` と `apps/bot/src/events/guildDelete/` が bot の参加・退出に合わせて `guilds` テーブルを sync します。退出は物理削除ではなく `leftAt` に時刻を入れる soft-delete で、再入会時に `joinedAt` がリセット・`leftAt` が null に戻ります。lazy populate (コマンド実行時の `getOrCreateGuild` 呼び出し) も残っているため、event を取りこぼしても DB 整合性は保たれます。
+
+`apps/bot/src/lib/discord/interactionContext.ts` と `apps/bot/src/lib/infra/logger.ts` で、エラー時に command/customId/user/guild/channel/interactionId/ageMs をログへ出します。
 `NODE_ENV=production` では JSON line 形式、development では人間が読みやすい形式で出力します。
 `WEBHOOK_URL` を設定している場合だけ、同じ内容を Discord webhook にも通知します。
 
 `customId` は `feature:action` または `feature:action:id` の形式を推奨します。
 固定IDは `CUSTOM_ID`、動的IDに対応する正規表現は `CUSTOM_ID_PATTERN` にまとめます。
-単一プロセスの cooldown / rate-limit には `src/lib/util/cooldown.ts` の `CooldownStore` と `createCooldownKey` を使えます。
+単一プロセスの cooldown / rate-limit には `apps/bot/src/lib/util/cooldown.ts` の `CooldownStore` と `createCooldownKey` を使えます。
 
 ### Embed helpers
 
-`src/lib/discord/embed.ts` の `successEmbed` / `errorEmbed` / `infoEmbed` / `warnEmbed` で色を統一した `EmbedBuilder` を作れます。
+`apps/bot/src/lib/discord/embed.ts` の `successEmbed` / `errorEmbed` / `infoEmbed` / `warnEmbed` で色を統一した `EmbedBuilder` を作れます。
 
 ### Pagination
 
-`src/lib/discord/pagination.ts` の `buildPaginationRow` で前/次ボタン付きの行を作り、`parsePaginationCustomId` + `nextPage` で button handler から新しいページに更新します。サンプルは `/help` コマンド (`src/events/interactionCreate/commands/chatInput/items/help.ts`) と `helpPaginationButton` を参照してください。
+`apps/bot/src/lib/discord/pagination.ts` の `buildPaginationRow` で前/次ボタン付きの行を作り、`parsePaginationCustomId` + `nextPage` で button handler から新しいページに更新します。サンプルは `/help` コマンド (`apps/bot/src/events/interactionCreate/commands/chatInput/items/help.ts`) と `helpPaginationButton` を参照してください。
 
 ### Autocomplete
 
-`/echo` コマンドが autocomplete のサンプルです。option に `.setAutocomplete(true)` を付け、`src/events/interactionCreate/commands/autocomplete/items/` 配下に `new Autocomplete(commandName, execute)` を定義して `autocompleteRegister.ts` で登録します。
+`/echo` コマンドが autocomplete のサンプルです。option に `.setAutocomplete(true)` を付け、`apps/bot/src/events/interactionCreate/commands/autocomplete/items/` 配下に `new Autocomplete(commandName, execute)` を定義して `autocomplete/registry.ts` で登録します。
 
 ### Context menu
 
-`src/events/interactionCreate/commands/contextMenu/items/` に User / Message context menu を置きます。`new ContextMenuCommand(build, execute)` を `contextMenuRegister.ts` で登録すると、`bun register` 時に slash command と一緒に Discord へ送られます。
+`apps/bot/src/events/interactionCreate/commands/contextMenu/items/` に User / Message context menu を置きます。`new ContextMenuCommand(build, execute)` を `contextMenu/registry.ts` で登録すると、`bun register` 時に slash command と一緒に Discord へ送られます。
 
 ### Components v2
 
-`/showcase` ([src/events/interactionCreate/commands/chatInput/items/showcase.ts](src/events/interactionCreate/commands/chatInput/items/showcase.ts)) と `/profile view` ([items/profile.ts](src/events/interactionCreate/commands/chatInput/items/profile.ts)) が Components v2 のリファレンス実装です。
+`/showcase` ([apps/bot/src/events/interactionCreate/commands/chatInput/items/showcase.ts](apps/bot/src/events/interactionCreate/commands/chatInput/items/showcase.ts)) と `/profile view` ([items/profile.ts](apps/bot/src/events/interactionCreate/commands/chatInput/items/profile.ts)) が Components v2 のリファレンス実装です。
 
 - 送信時に `flags: MessageFlags.IsComponentsV2` を立てる必要があります。`content` / `embeds` とは併用できません
 - root は `ContainerBuilder` を使うと accent color + 子コンポーネントをまとめられます
-- `SectionBuilder.setThumbnailAccessory(...)` で右側にサムネイル、`SectionBuilder.setButtonAccessory(...)` で interactive button を置けます。button の customId は通常通り `buttonRegister.ts` の handler でルーティングされます
+- `SectionBuilder.setThumbnailAccessory(...)` で右側にサムネイル、`SectionBuilder.setButtonAccessory(...)` で interactive button を置けます。button の customId は通常通り `button/registry.ts` の handler でルーティングされます
 - `MediaGalleryBuilder.addItems(...)` で URL ベースの画像 gallery、`SeparatorBuilder` で divider と spacing を制御します
 - file component (`FileBuilder`) は attachment を伴いますが、Components v2 と一緒に送る場合も `flags: MessageFlags.IsComponentsV2` は必要です。必要な場合は `interaction.reply({ flags: MessageFlags.IsComponentsV2, files: [...], components: [container] })` の形で送ります
 
@@ -212,7 +233,7 @@ await interaction.editReply({ flags: MessageFlags.IsComponentsV2, components: [c
 
 ### Select menus
 
-`src/events/interactionCreate/components/selectMenu/items/` 配下に String / User / Role / Channel / Mentionable の select menu を置けます。`new Menu(() => customId, execute)` で定義し、`menuRegister.ts` で `menuHandler.register(...)` を呼びます。`MenuHandler` は内部で `CustomIdHandler<AnySelectMenuInteraction>` を使うため、execute の中で `interaction.isStringSelectMenu()` などで narrow して値を取り出します。
+`apps/bot/src/events/interactionCreate/components/selectMenu/items/` 配下に String / User / Role / Channel / Mentionable の select menu を置けます。`new Menu(() => customId, execute)` で定義し、`selectMenu/registry.ts` で `menuHandler.register(...)` を呼びます。`MenuHandler` は内部で `CustomIdHandler<AnySelectMenuInteraction>` を使うため、execute の中で `interaction.isStringSelectMenu()` などで narrow して値を取り出します。
 
 サンプルとして 4 種類を同梱しています:
 
@@ -225,70 +246,62 @@ Mentionable select は `MentionableSelectMenuBuilder` を使って同じ `Menu` 
 
 ## Database
 
-スキーマは `src/db/schema/` にあります (`guilds` / `guild_settings` / `member_profiles` の 3 テーブル + relations)。
-個別 query は `src/db/query/` 配下に置き、ヘルパー `defineQuery` ([src/db/query/defineQuery.ts](src/db/query/defineQuery.ts)) で wrap します。defineQuery が global `db` を注入してくれるので、各 query 本体は `client: DbClient` を受け取って書き、global を直掴みしません。`withTransaction` 内では同じ `tx` を各 query に渡せます。
-DB query が失敗しうる処理では `src/lib/util/result.ts` の `Result` 型と `src/lib/discord/resultHandler.ts` の `handleResult` を使うと、ログ出力・webhook通知・ユーザーへのエラー返信をまとめて扱えます。
-複数のDB操作をまとめる場合は `src/db/transaction.ts` の `withTransaction` を使うと、transaction失敗を `Result` として扱えます。usecase 層 (`src/usecases/`) はこのパターンで composite flow を組みます。
+DB 層は `packages/db` (`@repo/db`)、Postgres 専用です。
+
+スキーマは `packages/db/src/schema/<name>.schema.ts` (`guilds` / `guild_settings` / `member_profiles` + `relations.ts`)。`Bun.Glob` の barrel が**自動収集**するため、テーブル追加は `*.schema.ts` を足すだけ（barrel や drizzle config の手編集不要）。query は `packages/db/src/query/<domain>/` に置き `defineQuery` で wrap します。defineQuery が global `db` を注入するので、各 query 本体は `client: DbClient` を受け取り global を直掴みしません。`withTransaction` 内では同じ `tx` が各 query に流れます。（package 内のファイルは `@/` でなく相対 import を使います。）
+
+usecase は `Result<T, AppError>` (`@repo/shared`) を返し、呼び出し側は `handleResult` (`@/lib/discord/resultHandler`) が AppError の `kind` で分岐してログ・返信します。`withTransaction` (`@repo/db/transaction`) は transaction 失敗を `Result` に包みます。
 
 ```sh
-bun generate:local   # ローカル PGlite 用 migration 作成
-bun migrate:local    # ローカル PGlite へ migration 適用
-bun db:seed:local    # ローカル PGlite にサンプル guild/member を投入
-bun db:reset:local   # ローカル PGlite の app tables を空にする
-bun studio:local     # ローカル DB を Drizzle Studio で確認
+bun db:up            # 開発用 Postgres を起動 (Docker)
+bun db:generate      # schema から migration 生成
+bun db:migrate:local # 開発DBへ migration 適用
+bun db:seed:local    # サンプル guild/member を投入
+bun db:reset:local   # app tables を空にする
+bun db:studio        # Drizzle Studio を開く
 ```
 
-本番DB向けには以下を使います。
-
-```sh
-bun generate
-bun migrate
-bun studio
-```
-
-ER 図は `bun generateERdiagram` で `docs/schema_diagram.md` に生成できます。
+ER 図は `bun generateERdiagram` で `packages/db/docs/schema_diagram.md` に生成できます。
 
 ### Production migration
 
-本番環境では PR にスキーマ変更を含めるたびに `bun generate` で migration ファイルをコミットし、デプロイ前に `bun migrate` を流します。
+本番環境では PR にスキーマ変更を含めるたびに `bun db:generate` で migration をコミットし、デプロイ前に `bun db:migrate` を流します。
 
-- ローカルで `bun generate` → `drizzle/` の差分を必ずレビューする
-- デプロイ前に `DATABASE_URL` を本番に向けて `bun migrate` を実行する（CI から実行する場合は `migrate` ジョブをデプロイの直前に挟む）
+- ローカルで `bun db:generate` → `packages/db/drizzle/` の差分を必ずレビューする
+- デプロイ前に `DATABASE_URL` を本番に向けて `bun db:migrate` を実行する（CI ではデプロイ直前に migrate ジョブを挟む）
 - migration はアプリ起動より前に完了している前提。Bot は migration を自動実行しない
 
-rollback 方針は **forward-only** を推奨します。
+rollback 方針は **forward-only** を推奨します（`packages/db/drizzle/` を消して戻さず、戻す migration を新規に作る）。
 
-- `drizzle/` の migration を消して戻すことはしない
-- 戻したい変更があれば、戻すための新しい migration を作って前進する
-- スキーマ変更とコード変更の互換性は段階的に進める（例: カラム追加 → コードで書き込み開始 → コードで読み取りに切替 → 旧カラム削除）
+## Optional features
 
-## Scheduled jobs
+Bot がコアです。重めの 2 モジュールはテンプレに同梱しつつ env フラグで **opt-in**（既定 off）、それぞれ 1 行で起動します。
 
-`src/jobs/jobsRegister.ts` で `Job` を配列に登録すると、`clientReady` 時に `startJobs` が `setInterval` で開始します。
-普段の開発では `src/jobs/items/` に job を追加し、`src/jobs/jobsRegister.ts` に登録してください。runner と `Job` 型、runner tests は `src/framework/jobs/` にあります。
+### Internal HTTP API (`server/`)
 
-```ts
-import type { Job } from "@/framework/jobs/job";
+`apps/bot/src/server/` の最小 Hono サーバ。無認証の `/health` + `/ready` と、`deps.ts` DI seam の後ろに bearer 認証の `/api/ping`。死活監視やサービス間呼び出しに使えます。
 
-export const myJob: Job = {
-    name: "my-job",
-    intervalMs: 60_000,
-    runOnStart: true, // optional: クライアント起動直後に一度実行
-    run: async () => {
-        // periodic work
-    },
-};
+```env
+BOT_API_ENABLED="true"
+BOT_API_PORT="8080"
+BOT_API_TOKEN="a-secret-token"   # 有効時は必須
 ```
 
-shutdown task として interval が clear されるため、`registerShutdownTask` を別途呼ぶ必要はありません。サンプルは `src/jobs/items/uptimeJob.ts`。
+`/ready` は client が ready になるまで 503。shutdown では client 破棄の前に受付を止めます。削除するには `apps/bot/src/server/` と `index.ts` の `if (botApiEnv.BOT_API_ENABLED) ...` 行を消すだけです。
 
-- `intervalMs` は正の有限な数値である必要があります。0 / 負値 / `NaN` / `Infinity` の job は warn ログを出してスキップします
-- 同じ job の前回 tick がまだ走っている間は、新しい tick は skip されます（per-job overlap guard）。slow job が重複実行される事故を防ぐためです
-- 失敗時のログは `Job '<name>' failed` を message に、元のエラーを `cause` に含めます
+### Durable scheduler
+
+DB 永続スケジューラ。Discord/DB 非依存のコアは `packages/scheduler` (`@repo/scheduler`)、Bot 側 worker (`apps/bot/src/jobs/`) が due な job を `FOR UPDATE SKIP LOCKED` で claim → 実行 → finalize/再スケジュールします。実行履歴と lease (stale recovery 用) は `scheduled_jobs` / `job_runs` に持ちます。
+
+```env
+SCHEDULER_ENABLED="true"   # Postgres が必要
+```
+
+有効時、`clientReady` が built-in job を seed して worker を起動します。サンプルは `builtin:uptime`（30 分ごとに稼働時間をログ）。job 追加は `scheduler-add-job` skill 参照：`apps/bot/src/jobs/builtInJobs.ts` で定数を定義 → `jobs/handlers/` に `ScheduledJobHandler` → `botJobRegistry.ts` で登録 → `seedBuiltInJobs.ts` で seed。削除は `apps/bot/src/jobs/` + `packages/scheduler/` と `clientReady` の gate を消すだけです。
 
 ## Error reporting
 
-`src/lib/infra/errorReporter.ts` に外部エラートラッカー (Sentry など) の差し込み口があります。`logger.error` が呼ばれるたびに `captureException` が走り、既定では何もしません。
+`apps/bot/src/lib/infra/errorReporter.ts` に外部エラートラッカー (Sentry など) の差し込み口があります。`logger.error` が呼ばれるたびに `captureException` が走り、既定では何もしません。
 
 Sentry を使う場合は起動時に reporter を差し替えます。
 
@@ -306,22 +319,22 @@ setErrorReporter({
 
 reporter が throw / reject しても呼び出し元には伝搬しません（webhook 通知やログ出力との二重失敗を避けるため）。
 
-実プロジェクトでは `src/index.ts` から import される初期化ファイルを作り、その中で `Sentry.init(...)` と `setErrorReporter(...)` を呼ぶと、Bot 起動時に一度だけ reporter を差し替えられます。テンプレート本体には `SENTRY_DSN` を env schema に含めていないため、採用する tracker に合わせて `src/env.ts` へ追加してください。
+実プロジェクトでは `apps/bot/src/index.ts` から import される初期化ファイルを作り、その中で `Sentry.init(...)` と `setErrorReporter(...)` を呼ぶと、Bot 起動時に一度だけ reporter を差し替えられます。テンプレート本体には `SENTRY_DSN` を env schema に含めていないため、採用する tracker に合わせて `apps/bot/src/env.ts` へ追加してください。
 
 ## Graceful shutdown
 
-`SIGINT` / `SIGTERM` を受けると `src/lib/infra/shutdown.ts` の `runShutdown` が走り、進行中の interaction を待ってから Discord client と DB を順に close します。
+`SIGINT` / `SIGTERM` を受けると `apps/bot/src/lib/infra/shutdown.ts` の `runShutdown` が走り、進行中の interaction を待ってから Discord client と DB を順に close します。
 
 - 進行中 interaction の待機タイムアウト: 10 秒（既定）
 - 各タスクのタイムアウト: 5 秒（既定）
 - 追加の close 処理は `registerShutdownTask({ name, priority?, run })` で登録できます
-- task は `priority` 昇順で実行されます（既定 100）。プリセットは `SHUTDOWN_PRIORITY.JOBS` (10) → `DISCORD_CLIENT` (100) → `DATABASE` (200)。jobs を最初に止めて新規 interaction や interval を抑え、その後 client / DB を閉じる順を保証するためです
+- task は `priority` 昇順で実行されます（既定 100）。プリセットは `SHUTDOWN_PRIORITY.JOBS` (10) → `BOT_API_SERVER` (90) → `DISCORD_CLIENT` (100) → `DATABASE` (200)。scheduler worker → HTTP API → client / DB の順で閉じます
 
 PM2 reload や Docker stop のときに、処理中の interaction や DB transaction を取りこぼさないための仕組みです。
 
 ## Tests
 
-`bun test` で `*.test.ts` を実行します。Discord interaction を受け取る handler のテストは、`src/lib/testing/interactions.ts` の mock ヘルパで interaction を組み立てます。
+`bun run test` で全 package のテストを Turborepo 経由で実行します。既定の unit/structure テストは DB 不要。Postgres を使う usecase テストは `createTestDb` (`@repo/db/testing/testDb`、`DATABASE_URL_TEST` が必要) を使います。Discord interaction handler のテストは、`apps/bot/src/lib/testing/interactions.ts` の mock ヘルパで interaction を組み立てます。
 
 ```ts
 import { createCommandInteractionMock, type MockReplyPayload } from "@/lib/testing/interactions";
@@ -341,12 +354,15 @@ expect(replies).toEqual([]);
 - `createAutocompleteInteractionMock(commandName, recorder, options?)`: autocomplete interaction
 - `createKindInteractionMock(kind, overrides?)`: `interaction.isXxx()` ガードだけを切り替える最小 mock。`buildInteractionContext` の分岐テスト向け
 
-実例は `src/framework/discord/interactions/{chatInput,contextMenu,autocomplete,components}/__tests__/`、`src/lib/discord/{replyError,resultHandler,interactionContext,embed,pagination}.test.ts`、`src/lib/infra/{errorWebhook,errorReporter,shutdown}.test.ts`、`src/lib/util/{result,cooldown}.test.ts` を参照してください。
+実例は `apps/bot/src/framework/discord/interactions/{chatInput,contextMenu,autocomplete,components}/__tests__/`、`apps/bot/src/lib/discord/{replyError,resultHandler,interactionContext,embed,pagination}.test.ts`、`apps/bot/src/lib/infra/{errorWebhook,errorReporter,shutdown}.test.ts`、`apps/bot/src/lib/util/{result,cooldown}.test.ts` を参照してください。
 
 ## Scripts
 
-- `bun dev`: 開発起動
-- `bun start`: 本番起動
+- `bun dev`: Bot を開発起動 (hot reload)
+- `bun start`: Bot を本番起動
 - `bun register`: スラッシュコマンド登録
-- `bun check:no-save`: Biome check
-- `bun check:tsc`: TypeScript check
+- `bun db:up` / `bun db:down`: 開発用 Postgres の起動 / 停止 (Docker)
+- `bun db:generate` / `bun db:migrate:local` / `bun db:seed:local` / `bun db:reset:local` / `bun db:studio`: DB ワークフロー
+- `bun run check:no-save`: Biome check
+- `bun run check:tsc`: TypeScript check (全 package, Turborepo)
+- `bun run test`: テスト (全 package, Turborepo)

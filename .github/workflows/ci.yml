@@ -16,6 +16,24 @@ jobs:
           - "1.3.11"
           - latest
     name: Check Bun ${{ matrix.bun-version }}
+    services:
+      # Postgres for createTestDb-backed integration tests. The default unit/structure
+      # tests don't need it, but it's wired so adding integration tests "just works".
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: discord_bot_test
+          POSTGRES_USER: discord_bot
+          POSTGRES_PASSWORD: discord_bot
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd "pg_isready -U discord_bot -d discord_bot_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL_TEST: postgres://discord_bot:discord_bot@localhost:5432/discord_bot_test
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -35,7 +53,7 @@ jobs:
         run: bun run check:tsc
 
       - name: Test
-        run: bun test
+        run: bun run test
 
   docker:
     runs-on: ubuntu-latest
@@ -52,5 +70,5 @@ jobs:
           docker compose config
           docker compose --profile tools config
 
-      - name: Docker build
-        run: docker build -t discord-bot-template:ci .
+      - name: Docker build (bot)
+        run: docker build --target bot -t discord-bot-template:ci .

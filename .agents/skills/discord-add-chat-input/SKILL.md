@@ -1,6 +1,6 @@
 ---
 name: discord-add-chat-input
-description: このテンプレで slash command (chat input) を 1 つ追加するときのワークフロー。`Command` / `CommandWithSubCommand` / `SubCommand` クラスを使い、`commandRegister.ts` に登録するまで。Use when adding a new slash command under `src/events/interactionCreate/commands/chatInput/items/`. SubCommand 構造を含めて扱う。autocomplete を付けたい場合は discord-add-autocomplete を併せて使う。
+description: このテンプレで slash command (chat input) を 1 つ追加するときのワークフロー。`Command` / `CommandWithSubCommand` / `SubCommand` クラスを使い、その種別の `registry.ts` に `.register(...)` を 1 行足すまで。Use when adding a new slash command under `apps/bot/src/events/interactionCreate/commands/chatInput/items/`. SubCommand 構造を含めて扱う。autocomplete を付けたい場合は discord-add-autocomplete を併せて使う。
 ---
 
 # Discord: add a chat input (slash) command
@@ -29,7 +29,7 @@ description: このテンプレで slash command (chat input) を 1 つ追加す
 
 ## 2. ファイルを作る
 
-`src/events/interactionCreate/commands/chatInput/items/<name>.ts`
+`apps/bot/src/events/interactionCreate/commands/chatInput/items/<name>.ts`
 
 ```ts
 import { ApplicationIntegrationType, InteractionContextType, PermissionFlagsBits } from "discord.js";
@@ -99,9 +99,9 @@ roleGroup.register(
 adminCommand.register(roleGroup);
 ```
 
-## 4. register に登録する
+## 4. registry に登録する
 
-[src/events/interactionCreate/commands/chatInput/commandRegister.ts](../../../src/events/interactionCreate/commands/chatInput/commandRegister.ts) の末尾に追加:
+種別ごとに `registry.ts` が 1 個あり、その種別の handler を 1 つ生成して各 item を `.register(...)` で登録している。slash command を足すには [apps/bot/src/events/interactionCreate/commands/chatInput/registry.ts](../../../apps/bot/src/events/interactionCreate/commands/chatInput/registry.ts) に **import 1 行 + `.register(...)` 1 行** を足すだけ:
 
 ```ts
 import { fooCommand } from "@/events/interactionCreate/commands/chatInput/items/foo";
@@ -109,14 +109,19 @@ import { fooCommand } from "@/events/interactionCreate/commands/chatInput/items/
 commandHandler.register(fooCommand);
 ```
 
-import 順は biome の organizeImports が並べ替える。
+- 旧テンプレの `*Register.ts` / `*HandlerInstance.ts` / `.clear()` は無い。種別ごとの `registry.ts` が単一の登録先
+- `setup.ts` が 6 種別の handler (`commandHandler` / `contextMenuHandler` / `buttonHandler` / `modalHandler` / `menuHandler` / `autocompleteHandler`) を集めて dispatcher を組む。ここは触らない
+- import 順は biome の organizeImports が並べ替える
 
 ## 5. Discord に送信
+
+リポジトリルートから:
 
 ```bash
 bun register
 ```
 
+- root の `register` script が `@repo/bot` の `scripts/registerCommand.ts` に委譲する (`commandHandler` / `contextMenuHandler` を読んで Discord に PUT)
 - `GUILD_ID` が設定されていれば dev guild に即時反映
 - 未設定なら bot 参加中の全 guild に PUT (テンプレでは小〜中規模 bot を想定)
 
@@ -130,11 +135,12 @@ bun register
 
 - discord.js 値 (`interaction.user.id`, `interaction.options.getString(...)` 等) を **primitive に取り出す** のは items の責務
 - そこから usecase / DB query を呼ぶ場合は CONTRIBUTING.md の "discord.js stays at the boundary" に従って **discord.js オブジェクトを usecase に渡さない** (primitive で渡す)
-- DB 書き込みが Result を返すなら `handleResult(result, interaction, { category, errorMessage })` で失敗ハンドリングが定型化される
+- usecase / query は `@repo/db` パッケージ越し (`@repo/db/query/...`) に呼ぶ。`@repo/db` import は DB module を起動するので、必要な item でだけ import する
+- DB 書き込みが `Result<T, AppError>` を返すなら `handleResult(result, interaction, { category, errorMessage })` で失敗ハンドリングが定型化される (`AppError` の kind を見て user 向けメッセージを出し分ける)
 
 ## Mention safety / ping opt-in
 
-[src/client.ts](../../../src/client.ts) で `allowedMentions: { parse: [] }` を default にしているため、`reply` / `editReply` / `followUp` / `channel.send` で `content` に含まれた `@everyone` / `@here` / role / user mention は **ping を発火しない** (描画はされる)。`/echo <message>` のようにユーザー入力をそのまま流すコマンドで、bot 権限を踏み台にした不意の broadcast を防ぐためのデフォルト。
+[apps/bot/src/client.ts](../../../apps/bot/src/client.ts) で `allowedMentions: { parse: [] }` を default にしているため、`reply` / `editReply` / `followUp` / `channel.send` で `content` に含まれた `@everyone` / `@here` / role / user mention は **ping を発火しない** (描画はされる)。`/echo <message>` のようにユーザー入力をそのまま流すコマンドで、bot 権限を踏み台にした不意の broadcast を防ぐためのデフォルト。
 
 意図して ping したいときは send 側で明示的に opt-in する:
 
@@ -151,6 +157,7 @@ await interaction.reply({
 
 ## 参考
 
-- 既存サンプル: [src/events/interactionCreate/commands/chatInput/items/](../../../src/events/interactionCreate/commands/chatInput/items/)
-- handler / 型: [src/framework/discord/interactions/chatInput/](../../../src/framework/discord/interactions/chatInput/)
+- 既存サンプル: [apps/bot/src/events/interactionCreate/commands/chatInput/items/](../../../apps/bot/src/events/interactionCreate/commands/chatInput/items/) (`ping.ts` = 単一、`profile.ts` = SubCommand + DB)
+- registry: [apps/bot/src/events/interactionCreate/commands/chatInput/registry.ts](../../../apps/bot/src/events/interactionCreate/commands/chatInput/registry.ts)
+- handler / 型: [apps/bot/src/framework/discord/interactions/chatInput/](../../../apps/bot/src/framework/discord/interactions/chatInput/)
 - 規約全般: [CONTRIBUTING.md](../../../CONTRIBUTING.md)

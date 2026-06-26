@@ -10,6 +10,15 @@ This repository provides codified workflows ("skills") for AI coding agents work
 
 When adding a new skill: write it under `.agents/skills/<name>/SKILL.md`, then `ln -s ../../.agents/skills/<name> .claude/skills/<name>` so Claude Code picks it up.
 
+## Monorepo
+
+Bun workspaces + Turborepo, run from the repo root:
+
+- `apps/bot` (`@repo/bot`) — the discord.js bot (`@/*` = `apps/bot/src/*`).
+- `packages/db` (`@repo/db`), `packages/shared` (`@repo/shared`), `packages/scheduler` (`@repo/scheduler`).
+
+Inside a package, files use **relative** imports (not `@/`) so cross-package consumers can resolve them.
+
 ## Available skills
 
 | Skill | Use when |
@@ -22,6 +31,9 @@ When adding a new skill: write it under `.agents/skills/<name>/SKILL.md`, then `
 | `discord-add-modal` | modal フォームを追加する |
 | `discord-add-select-menu` | select menu (string / user / role / channel / mentionable) を追加する |
 | `discord-add-autocomplete` | slash command option に autocomplete を付ける |
+| `usecase-add` | アプリケーションロジック (discord.js 非依存、`Result<T, AppError>`) を追加する |
+| `service-add` | discord.js を使う状態持ちサービス (`globalThis` pin、hot-reload 安全) を追加する |
+| `scheduler-add-job` | 永続スケジューラに定期 / 単発ジョブを追加する |
 
 ## Project conventions
 
@@ -29,11 +41,12 @@ Layer responsibilities, naming, and the discord.js boundary rule are in [CONTRIB
 
 Key rules in short:
 
-- **Layers**: `events/` → `usecases/` → `db/query/` → drizzle. `framework/` is reusable primitives. `lib/` is cross-cutting helpers.
-- **No discord.js in `usecases/`** — events extract primitives before calling usecases.
-- **All queries go through `defineQuery`** at `src/db/query/defineQuery.ts`. The body never imports `db` directly.
-- **Multi-query writes use `withTransaction`** at `src/db/transaction.ts` and pass `tx` to each query.
-- **Tests**: framework / routing under `src/framework/**/__tests__/`, small unit tests beside the module they cover, see CONTRIBUTING.md for the full policy.
+- **Layers**: `events/` → `service/` or `usecases/` → `@repo/db` queries. `framework/` is reusable primitives; `lib/` is cross-cutting helpers; `server/` (Hono API) and the scheduler are opt-in.
+- **No discord.js in `usecases/`** — events extract primitives before calling usecases. Services *may* take a `Client` (passed as a parameter, never imported).
+- **All queries go through `defineQuery`** at `packages/db/src/query/defineQuery.ts`. The body never imports `db` directly.
+- **Multi-query writes use `withTransaction`** (`@repo/db/transaction`) and pass `tx` to each query; usecases return `Result<T, AppError>`.
+- **Interaction items** are registered by adding one `.register(item)` line to the kind's `registry.ts` under `apps/bot/src/events/interactionCreate/`.
+- **Tests**: framework / routing under `apps/bot/src/framework/**/__tests__/`, small unit tests beside the module they cover, Postgres-backed usecase tests via `createTestDb`. See CONTRIBUTING.md for the full policy.
 
 ## Agent-specific notes
 

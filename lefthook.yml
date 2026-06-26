@@ -9,8 +9,12 @@ pre-commit:
   commands:
     01-create-env:
       run: NODE_ENV=setup bun run scripts/createEnv.ts
-    02-check:
+    # Regenerate the ER diagram from the latest schema snapshot and stage it so
+    # packages/db/docs/ stays in sync.
+    02-generate-er-diagram:
+      run: bun run generateERdiagram && git add packages/db/docs/schema_diagram.md
+    03-check:
       run: bun check
       stage_fixed: true
-    03-check-tsc:
+    04-check-tsc:
       run: bun check:tsc
