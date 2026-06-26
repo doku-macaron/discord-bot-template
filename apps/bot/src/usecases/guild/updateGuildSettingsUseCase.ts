@@ -1,9 +1,9 @@
+import type { Result } from "@repo/shared";
 import { getOrCreateGuild } from "@/db/query/guild/getOrCreateGuild";
 import { getOrCreateGuildSettings } from "@/db/query/guild/getOrCreateGuildSettings";
 import { updateGuildSettings } from "@/db/query/guild/updateGuildSettings";
 import type { SelectGuildSettings, UpdateGuildSettings } from "@/db/schema/guildSettings";
 import { withTransaction } from "@/db/transaction";
-import type { Result } from "@/lib/util/result";
 
 export type UpdateGuildSettingsUseCaseInput = {
     guildId: string;

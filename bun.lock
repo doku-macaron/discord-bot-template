@@ -16,6 +16,7 @@
       "name": "@repo/bot",
       "dependencies": {
         "@electric-sql/pglite": "0.4.5",
+        "@repo/shared": "workspace:*",
         "discord.js": "14.26.4",
         "drizzle-orm": "catalog:",
         "es-module-lexer": "2.1.0",
@@ -25,6 +26,13 @@
       "devDependencies": {
         "@types/bun": "catalog:",
         "drizzle-kit": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/shared": {
+      "name": "@repo/shared",
+      "devDependencies": {
+        "@types/bun": "catalog:",
         "typescript": "catalog:",
       },
     },
@@ -133,6 +141,8 @@
     "@js-temporal/polyfill": ["@js-temporal/polyfill@0.5.1", "", { "dependencies": { "jsbi": "^4.3.0" } }, "sha512-hloP58zRVCRSpgDxmqCWJNlizAlUgJFqG2ypq79DCvyv9tHjRYMDOcPFjzfl/A1/YxDvRCZz8wvZvmapQnKwFQ=="],
 
     "@repo/bot": ["@repo/bot@workspace:apps/bot"],
+
+    "@repo/shared": ["@repo/shared@workspace:packages/shared"],
 
     "@sapphire/async-queue": ["@sapphire/async-queue@1.5.5", "", {}, "sha512-cvGzxbba6sav2zZkH8GPf2oGk9yYoD5qrNWdu9fRehifgnFZJMV+nuy2nON2roRO4yQQ+v7MK/Pktl/HgfsUXg=="],
 

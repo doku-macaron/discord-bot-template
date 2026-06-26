@@ -21,6 +21,7 @@
     },
     "dependencies": {
         "@electric-sql/pglite": "0.4.5",
+        "@repo/shared": "workspace:*",
         "discord.js": "14.26.4",
         "drizzle-orm": "catalog:",
         "es-module-lexer": "2.1.0",

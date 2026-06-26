@@ -1,8 +1,8 @@
+import type { Result } from "@repo/shared";
 import type { RepliableInteraction } from "discord.js";
 import { buildInteractionContext } from "@/lib/discord/interactionContext";
 import { replyError } from "@/lib/discord/replyError";
 import { logger } from "@/lib/infra/logger";
-import type { Result } from "@/lib/util/result";
 
 type LogCategory = Parameters<typeof logger.error>[0];
 

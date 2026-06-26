@@ -1,9 +1,9 @@
+import type { Result } from "@repo/shared";
 import { getOrCreateGuild } from "@/db/query/guild/getOrCreateGuild";
 import { getOrCreateMemberProfile } from "@/db/query/member/getOrCreateMemberProfile";
 import { updateMemberProfileBio } from "@/db/query/member/updateMemberProfileBio";
 import type { SelectMemberProfile } from "@/db/schema/memberProfiles";
 import { withTransaction } from "@/db/transaction";
-import type { Result } from "@/lib/util/result";
 
 export type SaveMemberProfileInput = {
     guildId: string;
