@@ -9,7 +9,6 @@ export const envVariables = {
         CLIENT_ID: z.string().default(""),
         GUILD_ID: optionalString,
         DATABASE_URL: optionalString,
-        DATABASE_URL_DEV: z.string().default("./.pglite"),
         WEBHOOK_URL: optionalUrl,
     }),
     bot: z.object({
@@ -20,14 +19,6 @@ export const envVariables = {
         TOKEN: z.string().min(1, "TOKEN is required to register commands."),
         CLIENT_ID: z.string().min(1, "CLIENT_ID is required to register commands."),
         GUILD_ID: optionalString,
-        WEBHOOK_URL: optionalUrl,
-    }),
-    postgres: z.object({
-        DATABASE_URL: z.string().min(1, "DATABASE_URL is required for PostgreSQL."),
-        WEBHOOK_URL: optionalUrl,
-    }),
-    pglite: z.object({
-        DATABASE_URL_DEV: z.string().default("./.pglite"),
         WEBHOOK_URL: optionalUrl,
     }),
     webhook: z.object({

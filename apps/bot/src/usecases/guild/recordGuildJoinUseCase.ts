@@ -1,4 +1,4 @@
-import { recordGuildJoin } from "@/db/query/guild/recordGuildJoin";
+import { recordGuildJoin } from "@repo/db/query/guild/recordGuildJoin";
 import { logger } from "@/lib/infra/logger";
 
 export type RecordGuildJoinInput = {

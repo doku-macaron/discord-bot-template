@@ -6,31 +6,19 @@
         "start": "NODE_ENV=production bun --env-file=../../.env run src/index.ts",
         "dev": "NODE_ENV=development bun --env-file=../../.env run src/index.ts",
         "register": "NODE_ENV=register bun --env-file=../../.env run scripts/registerCommand.ts",
-        "generate": "drizzle-kit generate",
-        "generate:local": "drizzle-kit generate --config=drizzle-dev.config.ts",
-        "migrate": "drizzle-kit migrate",
-        "migrate:local": "NODE_ENV=development bun --env-file=../../.env run scripts/migrate.ts",
-        "db:seed:local": "NODE_ENV=development bun --env-file=../../.env run scripts/seedLocalDb.ts",
-        "db:reset:local": "NODE_ENV=development bun --env-file=../../.env run scripts/resetLocalDb.ts",
-        "studio": "drizzle-kit studio",
-        "studio:local": "drizzle-kit studio --config=drizzle-dev.config.ts",
-        "generateERdiagram": "bun run scripts/generateERdiagram.ts",
         "clean": "bun run scripts/clean.ts",
         "test": "bun test src",
         "check:tsc": "bunx tsc --noEmit"
     },
     "dependencies": {
-        "@electric-sql/pglite": "0.4.5",
+        "@repo/db": "workspace:*",
         "@repo/shared": "workspace:*",
         "discord.js": "14.26.4",
-        "drizzle-orm": "catalog:",
         "es-module-lexer": "2.1.0",
-        "postgres": "3.4.9",
         "zod": "catalog:"
     },
     "devDependencies": {
         "@types/bun": "catalog:",
-        "drizzle-kit": "catalog:",
         "typescript": "catalog:"
     }
 }

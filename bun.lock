@@ -15,11 +15,22 @@
     "apps/bot": {
       "name": "@repo/bot",
       "dependencies": {
-        "@electric-sql/pglite": "0.4.5",
+        "@repo/db": "workspace:*",
         "@repo/shared": "workspace:*",
         "discord.js": "14.26.4",
-        "drizzle-orm": "catalog:",
         "es-module-lexer": "2.1.0",
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/db": {
+      "name": "@repo/db",
+      "dependencies": {
+        "@repo/shared": "workspace:*",
+        "drizzle-orm": "catalog:",
         "postgres": "3.4.9",
         "zod": "catalog:",
       },
@@ -141,6 +152,8 @@
     "@js-temporal/polyfill": ["@js-temporal/polyfill@0.5.1", "", { "dependencies": { "jsbi": "^4.3.0" } }, "sha512-hloP58zRVCRSpgDxmqCWJNlizAlUgJFqG2ypq79DCvyv9tHjRYMDOcPFjzfl/A1/YxDvRCZz8wvZvmapQnKwFQ=="],
 
     "@repo/bot": ["@repo/bot@workspace:apps/bot"],
+
+    "@repo/db": ["@repo/db@workspace:packages/db"],
 
     "@repo/shared": ["@repo/shared@workspace:packages/shared"],
 

@@ -1,4 +1,4 @@
-import { markGuildLeft } from "@/db/query/guild/markGuildLeft";
+import { markGuildLeft } from "@repo/db/query/guild/markGuildLeft";
 import { logger } from "@/lib/infra/logger";
 
 export type MarkGuildLeftInput = {

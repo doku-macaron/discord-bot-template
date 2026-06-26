@@ -1,0 +1,36 @@
+{
+    "name": "@repo/db",
+    "type": "module",
+    "private": true,
+    "exports": {
+        ".": "./src/index.ts",
+        "./transaction": "./src/transaction.ts",
+        "./postgres": "./src/postgres.ts",
+        "./schema": "./src/schema/index.ts",
+        "./schema/*": "./src/schema/*.ts",
+        "./query/*": "./src/query/*.ts",
+        "./testing/testDb": "./src/testing/testDb.ts"
+    },
+    "scripts": {
+        "generate": "bunx drizzle-kit generate",
+        "migrate": "bun --env-file=../../.env run scripts/migratePostgres.ts",
+        "migrate:local": "NODE_ENV=development bun --env-file=../../.env run scripts/migratePostgres.ts",
+        "seed:local": "NODE_ENV=development bun --env-file=../../.env run scripts/seedLocalDb.ts",
+        "reset:local": "NODE_ENV=development bun --env-file=../../.env run scripts/resetLocalDb.ts",
+        "studio": "bunx drizzle-kit studio",
+        "generateERdiagram": "bun run scripts/generateERdiagram.ts",
+        "test": "bun --env-file=../../.env test",
+        "check:tsc": "bunx tsc --noEmit"
+    },
+    "dependencies": {
+        "@repo/shared": "workspace:*",
+        "drizzle-orm": "catalog:",
+        "postgres": "3.4.9",
+        "zod": "catalog:"
+    },
+    "devDependencies": {
+        "@types/bun": "catalog:",
+        "drizzle-kit": "catalog:",
+        "typescript": "catalog:"
+    }
+}

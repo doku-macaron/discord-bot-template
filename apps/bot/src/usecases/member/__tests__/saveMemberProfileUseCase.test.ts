@@ -6,20 +6,25 @@ const fakeTx = { __tag: "fake-tx" } as const;
 
 let transactionShouldThrow: Error | undefined;
 
-mock.module("@/db", () => ({
-    db: {
-        transaction: async <T>(callback: (tx: unknown) => Promise<T>): Promise<T> => {
+// Mock the transaction boundary directly: replicate `withTransaction`'s contract
+// (run the callback with a sentinel tx, return a Result, convert throws to err).
+mock.module("@repo/db/transaction", () => ({
+    withTransaction: async <T>(callback: (tx: unknown) => Promise<T>) => {
+        try {
             if (transactionShouldThrow) {
                 throw transactionShouldThrow;
             }
-            return callback(fakeTx);
-        },
+            const data = await callback(fakeTx);
+            return { success: true, data };
+        } catch (error) {
+            return { success: false, error: error instanceof Error ? error : new Error(String(error)) };
+        }
     },
 }));
 
 const guildClients: Array<unknown> = [];
 
-mock.module("@/db/query/guild/getOrCreateGuild", () => ({
+mock.module("@repo/db/query/guild/getOrCreateGuild", () => ({
     getOrCreateGuild: async (_input: unknown, client: unknown) => {
         guildClients.push(client);
         return { guildId: "g1" };
@@ -28,7 +33,7 @@ mock.module("@/db/query/guild/getOrCreateGuild", () => ({
 
 const profileClients: Array<unknown> = [];
 
-mock.module("@/db/query/member/getOrCreateMemberProfile", () => ({
+mock.module("@repo/db/query/member/getOrCreateMemberProfile", () => ({
     getOrCreateMemberProfile: async (_input: unknown, client: unknown) => {
         profileClients.push(client);
         return { guildId: "g1", userId: "u1", bio: "" };
@@ -38,7 +43,7 @@ mock.module("@/db/query/member/getOrCreateMemberProfile", () => ({
 const bioCalls: Array<{ input: unknown; client: unknown }> = [];
 let bioShouldThrow: Error | undefined;
 
-mock.module("@/db/query/member/updateMemberProfileBio", () => ({
+mock.module("@repo/db/query/member/updateMemberProfileBio", () => ({
     updateMemberProfileBio: async (input: unknown, client: unknown) => {
         bioCalls.push({ input, client });
         if (bioShouldThrow) {

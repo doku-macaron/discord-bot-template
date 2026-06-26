@@ -1,3 +1,4 @@
+import { findMemberProfile } from "@repo/db/query/member/findMemberProfile";
 import {
     ApplicationIntegrationType,
     ButtonBuilder,
@@ -13,7 +14,6 @@ import {
     userMention,
 } from "discord.js";
 import { CUSTOM_ID } from "@/constants/customIds";
-import { findMemberProfile } from "@/db/query/member/findMemberProfile";
 import { createProfileEditModal } from "@/events/interactionCreate/components/modal/items/profileEditModal";
 import { CommandWithSubCommand, SubCommand } from "@/framework/discord/interactions/chatInput";
 import { EMBED_COLOR } from "@/lib/discord/embed";

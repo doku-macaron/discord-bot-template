@@ -1,5 +1,5 @@
+import { findMemberProfile } from "@repo/db/query/member/findMemberProfile";
 import { CUSTOM_ID } from "@/constants/customIds";
-import { findMemberProfile } from "@/db/query/member/findMemberProfile";
 import { createProfileEditModal } from "@/events/interactionCreate/components/modal/items/profileEditModal";
 import { Button } from "@/framework/discord/interactions/components/button";
 

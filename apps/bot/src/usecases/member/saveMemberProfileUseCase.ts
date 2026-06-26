@@ -1,9 +1,9 @@
+import { getOrCreateGuild } from "@repo/db/query/guild/getOrCreateGuild";
+import { getOrCreateMemberProfile } from "@repo/db/query/member/getOrCreateMemberProfile";
+import { updateMemberProfileBio } from "@repo/db/query/member/updateMemberProfileBio";
+import type { SelectMemberProfile } from "@repo/db/schema/memberProfiles.schema";
+import { withTransaction } from "@repo/db/transaction";
 import type { Result } from "@repo/shared";
-import { getOrCreateGuild } from "@/db/query/guild/getOrCreateGuild";
-import { getOrCreateMemberProfile } from "@/db/query/member/getOrCreateMemberProfile";
-import { updateMemberProfileBio } from "@/db/query/member/updateMemberProfileBio";
-import type { SelectMemberProfile } from "@/db/schema/memberProfiles";
-import { withTransaction } from "@/db/transaction";
 
 export type SaveMemberProfileInput = {
     guildId: string;

@@ -1,9 +1,9 @@
+import { getOrCreateGuild } from "@repo/db/query/guild/getOrCreateGuild";
+import { getOrCreateGuildSettings } from "@repo/db/query/guild/getOrCreateGuildSettings";
+import { updateGuildSettings } from "@repo/db/query/guild/updateGuildSettings";
+import type { SelectGuildSettings, UpdateGuildSettings } from "@repo/db/schema/guildSettings.schema";
+import { withTransaction } from "@repo/db/transaction";
 import type { Result } from "@repo/shared";
-import { getOrCreateGuild } from "@/db/query/guild/getOrCreateGuild";
-import { getOrCreateGuildSettings } from "@/db/query/guild/getOrCreateGuildSettings";
-import { updateGuildSettings } from "@/db/query/guild/updateGuildSettings";
-import type { SelectGuildSettings, UpdateGuildSettings } from "@/db/schema/guildSettings";
-import { withTransaction } from "@/db/transaction";
 
 export type UpdateGuildSettingsUseCaseInput = {
     guildId: string;

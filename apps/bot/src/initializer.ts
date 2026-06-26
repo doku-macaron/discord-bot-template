@@ -1,6 +1,6 @@
+import { closeDatabase } from "@repo/db";
 import { Events } from "discord.js";
 import { client } from "@/client";
-import { closeDatabase } from "@/db";
 import type * as ClientReadyModule from "@/events/clientReady";
 import type * as GuildCreateModule from "@/events/guildCreate";
 import type * as GuildDeleteModule from "@/events/guildDelete";
