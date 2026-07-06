@@ -48,7 +48,7 @@
         "@biomejs/biome": "catalog:",
         "@types/bun": "catalog:",
         "lefthook": "catalog:",
-        "turbo": "2.10.0",
+        "turbo": "2.10.3",
         "typescript": "catalog:"
     },
     "trustedDependencies": [
