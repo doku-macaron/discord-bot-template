@@ -15,7 +15,7 @@
         "@repo/scheduler": "workspace:*",
         "@repo/shared": "workspace:*",
         "discord.js": "14.26.4",
-        "es-module-lexer": "2.1.0",
+        "es-module-lexer": "2.3.1",
         "hono": "catalog:",
         "zod": "catalog:"
     },
